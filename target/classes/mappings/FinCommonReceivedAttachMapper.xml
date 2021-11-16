@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinCommonReceivedAttachDao">
+	
+	<resultMap id="finCommonReceivedAttachResult" type="finCommonReceivedAttach">
+		<id property="id" column="id" />
+		<result property="commonReceivedId" column="COMMON_RECEIVED_ID" />
+		<result property="projectManageId" column="PROJECT_MANAGE_ID" />
+		<result property="date" column="DATE" />
+		<result property="reason" column="REASON" />
+		<result property="money" column="MONEY" />
+		<result property="type" column="TYPE" />
+		<result property="deptId" column="DEPT_ID" />
+		<result property="payAccount" column="PAY_ACCOUNT" />
+		<result property="payCompany" column="PAY_COMPANY" />
+		<result property="costProperty" column="COST_PROPERTY" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="projectManage" column="PROJECT_MANAGE_ID" javaType="saleProjectManage" select="findProjectByProjectId" /> 
+	</resultMap>
+
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<resultMap id="singleDetail" type="com.reyzar.oa.domain.SingleDetail">
+		<id property="id" column="id" />
+		<id property="commonCollectionId" column="commonCollectionId" />
+		<result property="processInstanceId" column="processInstanceId"/>
+		<result property="userName" column="name"/>
+		<result property="date" column="create_date"/>
+		<result property="projectName" column="projectName"/>
+		<result property="reason" column="PURPOSE"/>
+		<result property="money" column="ACTUAL_PAY_MONEY"/>
+	</resultMap>
+
+	<select id="findProjectByProjectId" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id}
+	</select>
+	
+	<select id="findAll" resultMap="finCommonReceivedAttachResult">
+		SELECT * FROM fin_common_received_attach
+	</select>
+	
+	<select id="findById" resultMap="finCommonReceivedAttachResult">
+		SELECT * FROM fin_common_received_attach WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByReceivedId" resultMap="finCommonReceivedAttachResult">
+		SELECT * FROM fin_common_received_attach WHERE COMMON_RECEIVED_ID = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE fin_common_received_attach 
+			SET
+				COMMON_RECEIVED_ID=#{commonReceivedId},
+				PROJECT_MANAGE_ID=#{projectManageId},
+			  	DATE=#{date},
+			  	REASON=#{reason},
+			  	MONEY=#{money},
+			  	TYPE=#{type},
+			  	PAY_ACCOUNT=#{payAccount},
+			  	PAY_COMPANY=#{payCompany},
+			  	COST_PROPERTY=#{costProperty},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	IS_DELETED=#{isDeleted},
+			  	DEPT_ID=#{deptId}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="batchUpdate">
+		<foreach collection="list" item="commonReceivedAttach" index="index" open="" close="" separator=";">
+			UPDATE fin_common_received_attach 
+				SET
+					COMMON_RECEIVED_ID=#{commonReceivedAttach.commonReceivedId},
+					PROJECT_MANAGE_ID=#{commonReceivedAttach.projectManageId},
+				  	DATE=#{commonReceivedAttach.date},
+				  	REASON=#{commonReceivedAttach.reason},
+				  	MONEY=#{commonReceivedAttach.money},
+				  	TYPE=#{commonReceivedAttach.type},
+				  	PAY_ACCOUNT=#{commonReceivedAttach.payAccount},
+				  	PAY_COMPANY=#{commonReceivedAttach.payCompany},
+				  	COST_PROPERTY=#{commonReceivedAttach.costProperty},
+				  	CREATE_BY=#{commonReceivedAttach.createBy},
+				  	CREATE_DATE=#{commonReceivedAttach.createDate},
+				  	UPDATE_BY=#{commonReceivedAttach.updateBy},
+				  	UPDATE_DATE=#{commonReceivedAttach.updateDate},
+				  	IS_DELETED=#{commonReceivedAttach.isDeleted},
+				  	DEPT_ID=#{commonReceivedAttach.deptId}
+			WHERE ID = #{commonReceivedAttach.id}
+		</foreach>
+	</update>
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_common_received_attach(
+				COMMON_RECEIVED_ID,
+				PROJECT_MANAGE_ID,
+			  	DATE,
+			  	REASON,
+			  	MONEY,
+			  	TYPE,
+			  	PAY_ACCOUNT,
+			  	PAY_COMPANY,
+			  	COST_PROPERTY,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_DELETED,
+			  	DEPT_ID
+			) 
+			VALUES (
+				#{commonReceivedId},
+				#{projectManageId},
+			  	#{date},
+			  	#{reason},
+			  	#{money},
+			  	#{type},
+			  	#{payAccount},
+			  	#{payCompany},
+			  	#{costProperty},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isDeleted},
+			  	#{deptId}
+			)
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO fin_common_received_attach(
+				COMMON_RECEIVED_ID,
+				PROJECT_MANAGE_ID,
+			  	DATE,
+			  	REASON,
+			  	MONEY,
+			  	TYPE,
+			  	PAY_ACCOUNT,
+			  	PAY_COMPANY,
+			  	COST_PROPERTY,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_DELETED,
+			  	DEPT_ID
+			) 
+		VALUES 
+			<foreach item="commonReceivedAttachs" index="index" collection="list" separator=",">  
+				(
+					#{commonReceivedAttachs.commonReceivedId},
+					#{commonReceivedAttachs.projectManageId},
+				  	#{commonReceivedAttachs.date},
+				  	#{commonReceivedAttachs.reason},
+				  	#{commonReceivedAttachs.money},
+				  	#{commonReceivedAttachs.type},
+				  	#{commonReceivedAttachs.payAccount},
+				  	#{commonReceivedAttachs.payCompany},
+				  	#{commonReceivedAttachs.costProperty},
+				  	#{commonReceivedAttachs.createBy},
+				  	#{commonReceivedAttachs.createDate},
+				  	#{commonReceivedAttachs.updateBy},
+				  	#{commonReceivedAttachs.updateDate},
+				  	#{commonReceivedAttachs.isDeleted},
+				  	#{commonReceivedAttachs.deptId}
+				)
+			</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_common_received_attach WHERE ID = #{id}
+	</delete>
+
+	<delete id="deleteByCommonReceivedId">
+		DELETE FROM fin_common_received_attach WHERE COMMON_RECEIVED_ID =#{id}
+	</delete>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM fin_common_received_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="findByStatistics" resultMap="finCommonReceivedAttachResult">
+		SELECT 
+			attach.id,
+			attach.COST_PROPERTY,
+			attach.PROJECT_MANAGE_ID,
+			project.name,attach.MONEY 
+		FROM fin_common_received_attach AS attach
+		JOIN fin_common_received AS received ON attach.COMMON_RECEIVED_ID = received.id
+		JOIN sale_project_manage AS project ON attach.PROJECT_MANAGE_ID = project.id
+		WHERE 1=1 AND received.is_deleted IS NULL
+		AND attach.PROJECT_MANAGE_ID IS NOT NULL
+		<if test="projectId != null and projectId != ''">
+			AND attach.PROJECT_MANAGE_ID =#{projectId}
+		</if>
+		<if test="deptId !=null and deptId != ''">
+			AND attach.DEPT_ID =#{deptId}
+		</if>
+		<if test="costProperty != null and costProperty !=''">
+			AND attach.COST_PROPERTY = #{costProperty}
+		</if>
+		<if test="payCompany != null and payCompany !=''">
+			AND received.received_company = #{payCompany}
+		</if>
+		<if test="beginDate != null and beginDate != ''">
+			AND attach.DATE &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			AND attach.DATE &lt;= #{endDate}
+		</if>
+	</select>
+
+	<select id="findCommonReceivedByIdList" resultMap="singleDetail">
+		SELECT 
+			sysuser.name AS name,
+			received.id AS commonCollectionId,
+			attach.DATE AS date,
+			project.NAME AS projectName,
+			attach.MONEY AS ACTUAL_PAY_MONEY,
+			attach.reason AS PURPOSE
+		FROM fin_common_received_attach AS attach
+		JOIN fin_common_received AS received ON attach.COMMON_RECEIVED_ID = received.id
+		JOIN sys_user AS sysuser ON received.USER_ID = sysuser.id 
+		JOIN sale_project_manage AS project ON project.ID = attach.PROJECT_MANAGE_ID
+		WHERE attach.id IN
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+</mapper>

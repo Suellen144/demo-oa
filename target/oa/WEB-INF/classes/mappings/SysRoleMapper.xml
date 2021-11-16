@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysRoleDao">
+	
+	<resultMap id="roleResult" type="sysRole">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="enname" column="enname" />
+		<result property="enabled" column="enabled" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="deptId" column="dept_id" />
+		
+		<collection property="menuList" column="id" select="getMenuById" />
+		<collection property="permissionList" column="id" select="getPermissionById" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="roleResult">
+		SELECT ID, NAME, ENNAME, ENABLED, CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED ,dept_id
+			FROM sys_role WHERE ENABLED = 1 and (is_deleted is null OR is_deleted = '0')
+	</select>
+	
+	<select id="getSysRole" resultMap="roleResult">
+		SELECT ID, NAME, ENNAME, ENABLED, CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED ,dept_id
+			FROM sys_role WHERE dept_id is not null and  (is_deleted is null or is_deleted = 0)
+	</select>
+	
+	<select id="findByPage" resultMap="roleResult">
+		SELECT ID, NAME, ENNAME, ENABLED, CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED ,dept_id
+			FROM sys_role WHERE 1 = 1
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( `sys_role`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')) 
+		</if>
+	</select>
+	
+	<select id="findByDeptId" resultMap="roleResult">
+		SELECT * FROM sys_role where dept_id = #{deptId}  and (IS_DELETED = 0 or IS_DELETED is null or IS_DELETED=#{isDeleted})
+	</select>
+	
+	<select id="findByName" resultMap="roleResult">
+		SELECT * FROM sys_role where name = #{name} and id != #{id} and (is_deleted is null or is_deleted = 0)
+	</select>
+	
+	<select id="findById" resultMap="roleResult">
+		SELECT ID, NAME, ENNAME, ENABLED, CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED ,dept_id
+			FROM sys_role WHERE ID = #{id}
+	</select>
+	
+	<select id="findByRoleId" resultMap="roleResult">
+		select a.* from sys_role a  inner join sys_user_role b on a.id=b.role_id where b.user_id=#{id}
+	</select>
+	
+	<select id="getMenuById" resultType="sysMenu">
+		SELECT menu.* FROM sys_role `role`
+			JOIN sys_role_menu rm ON rm.ROLE_ID = `role`.ID
+			JOIN sys_menu menu ON rm.MENU_ID = menu.ID
+		WHERE `role`.ID = #{id}
+	</select>
+	<select id="getPermissionById" resultType="sysPermission">
+		SELECT p.* FROM sys_role `role`
+			JOIN sys_role_permission rp ON rp.ROLE_ID = `role`.ID
+			JOIN sys_permission p ON rp.PERMISSION_ID = p.ID
+		WHERE `role`.ID = #{id}
+	</select>
+	
+	<select id="findRoleMenu" resultType="Integer">
+		SELECT MENU_ID 
+			FROM sys_role_menu
+		WHERE ROLE_ID = #{roleId}
+		<if test="menuidList != null and menuidList.size > 0">
+			 AND MENU_ID IN 
+			<foreach item="menuId" index="index" collection="menuidList" open="(" separator="," close=")">  
+				#{menuId}
+			</foreach>
+		</if>
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sys_role(NAME, ENNAME, ENABLED, CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED,dept_id) 
+			VALUES(
+				#{name}, #{enname}, #{enabled},
+				#{createBy}, #{createDate}, #{updateBy}, #{updateDate}, #{remark}, #{isDeleted},#{deptId}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_role 
+			SET NAME=#{name}, ENNAME=#{enname}, ENABLED=#{enabled},
+				CREATE_BY=#{createBy}, CREATE_DATE=#{createDate}, UPDATE_BY=#{updateBy}, UPDATE_DATE=#{updateDate}, 
+				REMARK=#{remark}, IS_DELETED=#{isDeleted},dept_id=#{deptId}
+		WHERE ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM sys_role WHERE ID = #{id}
+	</delete>
+</mapper>

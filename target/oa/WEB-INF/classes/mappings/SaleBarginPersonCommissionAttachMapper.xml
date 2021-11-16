@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISaleBarginPersonCommissionAttachDao">
+	
+	<resultMap id="saleBarginPersonCommissionAttachResult" type="saleBarginPersonCommissionAttach">
+		<id property="id" column="id" />
+		<result property="commissionId" column="commission_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="deptName" column="dept_name" />
+		<result property="userId" column="user_id" />
+		<result property="userName" column="user_name" />
+		<result property="userCommissionPercent" column="user_commission_percent"/>
+		<result property="userCommission" column="user_commission" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="saleBarginPersonCommissionAttachResult">
+		SELECT * FROM sale_bargin_person_commission_attach
+	</select>
+	
+	<select id="findById" resultMap="saleBarginPersonCommissionAttachResult">
+		SELECT * FROM sale_bargin_person_commission_attach WHERE ID = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE sale_bargin_person_commission_attach 
+			SET
+			  	COMMISSION_ID=#{commissionId},
+			  	DEPT_ID=#{deptId},
+			  	USER_ID=#{userId},
+			  	USER_COMMISSION_PERCENT=#{userCommissionPercent},
+			  	USER_COMMISSION=#{userCommission}
+		WHERE ID = #{id}
+	</update>
+
+	<update id="updateList">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			UPDATE sale_bargin_person_commission_attach
+				SET
+					COMMISSION_ID=#{item.commissionId},
+					DEPT_ID=#{item.deptId},
+					DEPT_NAME=#{item.deptName},
+					USER_ID=#{item.userId},
+					USER_NAME=#{item.userName},
+					USER_COMMISSION_PERCENT=#{item.userCommissionPercent},
+					USER_COMMISSION=#{item.userCommission},
+					CREATE_BY=#{item.createBy},
+					CREATE_DATE=#{item.createDate},
+					UPDATE_BY=#{item.updateBy},
+					UPDATE_DATE=#{item.updateDate}
+			WHERE ID = #{item.id}
+		</foreach>
+	</update>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_bargin_person_commission_attach(
+			  	COMMISSION_ID,
+			  	DEPT_ID,
+			  	DEPT_NAME,
+			  	USER_ID,
+			  	USER_NAME,
+			  	USER_COMMISSION_PERCENT,
+			  	USER_COMMISSION,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{commissionId},
+			  	#{deptId},
+			  	#{deptName},
+			  	#{userId},
+			  	#{userName},
+			  	#{userCommissionPercent},
+			  	#{userCommission},
+			  	#{createBy},
+				#{createDate},
+				#{updateBy},
+				#{updateDate}
+			)
+	</insert>
+
+	<insert id="saveList" parameterType="java.util.List">
+		INSERT INTO sale_bargin_person_commission_attach(
+			COMMISSION_ID,
+			DEPT_ID,
+			DEPT_NAME,
+			USER_ID,
+			USER_NAME,
+			USER_COMMISSION_PERCENT,
+			USER_COMMISSION,
+			CREATE_BY,
+			CREATE_DATE,
+			UPDATE_BY,
+			UPDATE_DATE
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+				#{item.commissionId},
+				#{item.deptId},
+				#{item.deptName},
+				#{item.userId},
+				#{item.userName},
+				#{item.userCommissionPercent},
+				#{item.userCommission},
+				#{item.createBy},
+				#{item.createDate},
+				#{item.updateBy},
+				#{item.updateDate}
+			)
+		</foreach>
+	</insert>
+
+	<delete id="deleteById">
+		DELETE FROM sale_bargin_person_commission_attach WHERE ID = #{id}
+	</delete>
+
+	<select id="findByCommissionId" resultMap="saleBarginPersonCommissionAttachResult">
+		SELECT * FROM sale_bargin_person_commission_attach
+		WHERE commission_id = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinRevenueRecognitionDao">
+	
+	<resultMap id="finRevenueRecognitionResult" type="finRevenueRecognition">
+		<id property="id" column="id" />
+		<result property="confirmAmount" column="confirm_amount" />
+		<result property="confirmWay" column="confirm_way" />
+		<result property="shareStartDate" column="share_start_date" />
+		<result property="shareEndDate" column="share_end_date" />
+		<result property="isBeenConfirmed" column="is_been_confirmed" />
+		<result property="confirmDate" column="confirm_date" />
+		<result property="confirmPeople" column="confirm_people" />
+		<result property="saleBarginManageId" column="sale_bargin_manage_id" />
+		<result property="finInvoicedId" column="fin_invoiced_id" />
+		<result property="resultsContribution" column="results_contribution" />
+		<result property="isJob" column="is_job" />
+		
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_DATE" />
+		<result property="updateBy" column="UPDATE_BY" />
+		<result property="updateDate" column="UPDATE_DATE" />
+		
+		<association property="finInvoiced" column="fin_invoiced_id" javaType="finInvoiced" select="finInvoicedId" /> 
+		<collection property="saleBarginManage" column="sale_bargin_manage_id" select="saleBarginManageById" />  
+	</resultMap>
+	
+	<resultMap id="saleBarginManageResult" type="saleBarginManage">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="title" column="title" />
+		<result property="deptId" column="dept_id" />
+		<result property="userId" column="user_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="barginName" column="bargin_name" />
+		<result property="barginCode" column="bargin_code" />
+		<result property="barginType" column="bargin_type" />
+		<result property="barginDescribe" column="bargin_describe" />
+		<result property="company" column="company" />
+		<result property="totalMoney" column="total_money" />
+		<result property="receivedMoney" column="received_money" />
+		<result property="unreceivedMoney" column="unreceived_money" />
+		<!-- <result property="receivedInvoice" column="received_invoice" />
+		<result property="unreceivedInvoice" column="unreceived_invoice" /> -->
+		<result property="payReceivedInvoice" column="pay_received_invoice" />
+		<result property="payUnreceivedInvoice" column="pay_unreceived_invoice" />
+		<result property="invoiceMoney" column="invoice_Money" />
+		<result property="advancesReceived" column="advances_Received" />
+		<result property="accountReceived" column="account_Received" />
+		<result property="payMoney" column="PAY_MONEY" />
+		<result property="unpayMoney" column="UNPAY_MONEY" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="attachName" column="attach_name" />
+		<result property="attachments" column="attachments" />
+		<result property="status" column="status" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<!-- 项目管理模块添加 -->
+		<result property="isNewProject" column="is_new_project" />
+		<result property="channelExpense" column="channel_expense" />
+		<result property="contribution" column="contribution" />
+		<result property="commissionAmount" column="commission_amount" />
+		
+	</resultMap>
+	
+	<select id="findAll" resultMap="finRevenueRecognitionResult">
+		SELECT * FROM fin_revenue_recognition
+	</select>
+	
+	<select id="findById" resultMap="finRevenueRecognitionResult">
+		SELECT * FROM fin_revenue_recognition WHERE ID = #{id}
+	</select> 
+	
+	<select id="finInvoicedId" resultType="finInvoiced">
+		SELECT * FROM fin_invoiced WHERE ID = #{id}
+	</select> 
+	
+	<select id="saleBarginManageById" resultMap="saleBarginManageResult">
+		SELECT * FROM sale_bargin_manage WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="finRevenueRecognitionResult">
+		SELECT confirm_date,confirm_way,confirm_amount,results_contribution,confirm_people,sale_bargin_manage_id,is_been_confirmed FROM fin_revenue_recognition  WHERE sale_bargin_manage_id = #{barginManageId}
+		 AND CONFIRM_WAY = 1
+		UNION ALL 
+		select  share_Date as confirm_date,'2' as confirm_way,confirm_amount,results_Amount as  results_contribution,confirm_people,sale_bargin_manage_id,'1' as is_been_confirmed from fin_results_recognition WHERE sale_bargin_manage_id = #{barginManageId}
+		AND IS_SHOWN = 1
+	</select>
+	
+	<select id="findByFinInvoicedId" resultMap="finRevenueRecognitionResult">
+		SELECT * FROM fin_revenue_recognition WHERE fin_invoiced_id = #{finInvoicedId}
+	</select>
+	
+	<select id="findByConfirmWay" resultMap="finRevenueRecognitionResult">
+		select a.* from fin_revenue_recognition a inner join fin_invoiced b on a.fin_invoiced_id=b.id where b.`STATUS` = 6
+		and a.confirm_way = 2 and a.is_job = 0
+	</select>
+	
+	<select id="findBybarginIds" resultMap="finRevenueRecognitionResult">
+		SELECT * FROM fin_revenue_recognition
+		WHERE is_been_confirmed = '1'
+		AND sale_bargin_manage_id IN
+		<foreach collection="barginId" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<update id="update">
+		UPDATE fin_revenue_recognition 
+			SET
+			  	confirm_amount=#{confirmAmount},
+			  	confirm_way=#{confirmWay},
+			  	share_start_date=#{shareStartDate},
+			  	share_end_date=#{shareEndDate},
+			  	is_been_confirmed=#{isBeenConfirmed},
+			  	sale_bargin_manage_id=#{saleBarginManageId},
+			  	fin_invoiced_id=#{finInvoicedId},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	confirm_date=#{confirmDate},
+			  	confirm_people=#{confirmPeople},
+			  	results_contribution=#{resultsContribution},
+			  	is_job=#{isJob}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_revenue_recognition(
+			  	confirm_amount,
+			  	confirm_way,
+			  	share_start_date,
+			  	share_end_date,
+			  	is_been_confirmed,
+			  	sale_bargin_manage_id,
+			  	fin_invoiced_id,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	confirm_date,
+			  	confirm_people,
+			  	results_contribution,
+			  	is_job
+			) 
+			VALUES (
+			  	#{confirmAmount},
+			  	#{confirmWay},
+			  	#{shareStartDate},
+			  	#{shareEndDate},
+			  	#{isBeenConfirmed},
+			  	#{saleBarginManageId},
+			  	#{finInvoicedId},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{confirmDate},
+			  	#{confirmPeople},
+			  	#{resultsContribution},
+			  	#{isJob}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_revenue_recognition WHERE ID = #{id}
+	</delete>
+	
+</mapper>

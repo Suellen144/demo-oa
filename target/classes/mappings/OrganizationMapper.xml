@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IOrganizationDao">
+
+	<resultMap id="organizationResult" type="organization">
+		<id property="id" column="id" />
+		<result property="parentId" column="parent_id" />
+		<result property="name" column="name" />
+		<result property="code" column="code" />
+		<result property="sort" column="sort" />
+		<result property="clrq" column="clrq" />
+		<result property="zczb" column="zczb" />
+		<result property="frdb" column="frdb" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="shxydm" column="shxydm" />
+		<result property="gswz" column="gswz" />
+		<result property="lxdh" column="lxdh" />
+		<result property="gsdz" column="gsdz" />
+		<result property="gszh" column="gszh" />
+		<result property="zhmc" column="zhmc" />
+		<result property="khyh" column="khyh" />
+		<result property="khhdz" column="khhdz" />
+		<result property="sjdw" column="sjdw" />
+		<result property="sjcgbl" column="sjcgbl" />
+		<result property="zxrq" column="zxrq" />
+		<result property="scrq" column="scrq" />
+		<result property="jyfw" column="jyfw" />
+		<result property="zjl" column="zjl" />
+		<result property="cwzj" column="cwzj" />
+		<result property="jshzxjs" column="jshzxjs" />
+		<result property="dszzxds" column="dszzxds" />
+		<result property="bgrq" column="bgrq" />
+		<result property="bgxm" column="bgxm" />
+		<result property="bgq" column="bgq" />
+		<result property="bgh" column="bgh" />
+		<result property="value" column="value" />
+		<result property="generateKpi" column="generate_kpi" />
+		<result property="nodeLinks" column="NODE_LINKS" />
+		<collection property="children" column="id" select="getChildrenById" />
+	</resultMap>
+
+    <resultMap id="organizationResult2" type="organization">
+        <id property="id" column="id" />
+        <result property="parentId" column="parent_id" />
+        <result property="name" column="name" />
+        <result property="code" column="code" />
+        <result property="sort" column="sort" />
+        <result property="clrq" column="clrq" />
+        <result property="zczb" column="zczb" />
+        <result property="frdb" column="frdb" />
+        <result property="createBy" column="create_by" />
+        <result property="createDate" column="create_date" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateDate" column="update_date" />
+        <result property="isDeleted" column="is_deleted" />
+        <result property="shxydm" column="shxydm" />
+        <result property="gswz" column="gswz" />
+        <result property="lxdh" column="lxdh" />
+        <result property="gsdz" column="gsdz" />
+        <result property="gszh" column="gszh" />
+        <result property="zhmc" column="zhmc" />
+        <result property="khyh" column="khyh" />
+        <result property="khhdz" column="khhdz" />
+        <result property="sjdw" column="sjdw" />
+        <result property="sjcgbl" column="sjcgbl" />
+        <result property="zxrq" column="zxrq" />
+        <result property="scrq" column="scrq" />
+        <result property="jyfw" column="jyfw" />
+        <result property="zjl" column="zjl" />
+        <result property="cwzj" column="cwzj" />
+        <result property="jshzxjs" column="jshzxjs" />
+        <result property="dszzxds" column="dszzxds" />
+        <result property="bgrq" column="bgrq" />
+        <result property="bgxm" column="bgxm" />
+        <result property="bgq" column="bgq" />
+        <result property="bgh" column="bgh" />
+        <result property="value" column="value" />
+        <result property="generateKpi" column="generate_kpi" />
+        <result property="nodeLinks" column="NODE_LINKS" />
+        <collection property="children" column="id" select="getChildrenById2" />
+    </resultMap>
+
+	<resultMap id="organizationResult3" type="organization">
+		<id property="id" column="id" />
+		<result property="parentId" column="parent_id" />
+		<result property="name" column="name" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="generateKpi" column="generate_kpi" />
+		<collection property="children" column="id" select="selectChildrenByDeptData" />
+	</resultMap>
+
+	<resultMap id="organizationResult4" type="organization">
+		<id property="id" column="id" />
+		<result property="parentId" column="parent_id" />
+		<result property="name" column="name" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="generateKpi" column="generate_kpi" />
+		<collection property="children" column="id" select="selectChildrenByDeptData2" />
+	</resultMap>
+
+	<delete id="delOrganizationById" parameterType="java.util.Map">
+		delete from t_organization where id = #{id};
+	</delete>
+
+    <update id="updateNodeLinksById" parameterType="java.util.Map">
+		update t_organization set node_links = #{nodeLinks} where id = #{currenId};
+	</update>
+
+    <select id="selectByDateAndGenerateKpi" resultType="organization">
+        select * from t_organization where 1 = 1 order by create_date desc LIMIT 1
+    </select>
+
+	<select id="selectOrgByDeptData2" resultMap="organizationResult4">
+		select id,PARENT_ID,name,IS_DELETED,generate_kpi from sys_dept where parent_id = #{id} and is_according = 2
+		 and (is_company is null OR is_company = '0') and generate_kpi = 1  order by SORT desc;
+	</select>
+
+	<select id="selectOrgByDeptData" resultMap="organizationResult3">
+		select id,PARENT_ID,name,IS_DELETED,generate_kpi from sys_dept where parent_id = #{id} and is_according = 2 and generate_kpi = 1
+		 and (is_company is null OR is_company = '0') AND (is_deleted is null OR is_deleted = '0') order by SORT desc;
+	</select>
+
+	<select id="selectChildrenByDeptData" resultMap="organizationResult3">
+		select id,PARENT_ID,name,IS_DELETED,generate_kpi from sys_dept where parent_id = #{id}
+		 and (is_company is null OR is_company = '0') AND (is_deleted is null OR is_deleted = '0')
+		 order by sort desc;
+	</select>
+
+	<select id="selectChildrenByDeptData2" resultMap="organizationResult4">
+		select id,PARENT_ID,name,IS_DELETED,generate_kpi from sys_dept where parent_id = #{id}
+		and (is_company is null OR is_company = '0')  order by sort desc;
+	</select>
+
+    <insert id="save" >
+		INSERT INTO t_organization( PARENT_ID, NAME,CREATE_BY, CREATE_DATE,is_deleted,generate_kpi)
+			VALUES(
+				#{parentId}, #{name},#{createBy}, #{createDate},#{isDeleted},#{generateKpi})
+	</insert>
+
+    <update id="recoveryOrganizationById">
+        update t_organization set is_deleted = 0 where id = #{id};
+    </update>
+
+    <select id="findByparentIdAndDelete" resultMap="organizationResult">
+        SELECT * FROM t_organization WHERE PARENT_ID = #{id} AND (is_deleted is null OR is_deleted = '0');
+    </select>
+
+    <select id="findById" resultMap="organizationResult">
+        SELECT * FROM t_organization WHERE id = #{id};
+    </select>
+
+    <insert id="saveData">
+        INSERT INTO t_organization (
+        PARENT_ID,
+        name,
+        CREATE_DATE,
+        generate_kpi
+        )
+        VALUES
+        (
+          #{parentId},
+          #{name},
+          now(),
+          #{generateKpi}
+        )
+    </insert>
+
+    <update id="updateData2">
+        update t_organization set name = #{name} , generate_kpi = #{generateKpi} where id = #{id};
+    </update>
+
+    <select id="findByNameAndId" resultMap="organizationResult">
+        SELECT * FROM t_organization WHERE name = #{name} and  id != #{id};
+    </select>
+
+    <select id="findChangeHByIdAndchangeXM" resultType="String">
+        SELECT bgh FROM t_organization_change_info WHERE id = #{id} and  bgxm = #{xm};
+    </select>
+
+	<select id="findByParentid" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT * FROM t_organization WHERE PARENT_ID = #{parentId} and  ( is_deleted = '0' or is_deleted is null) ORDER BY SORT DESC ,clrq ASC
+	</select>
+
+    <select id="findByParentid2" parameterType="java.util.Map" resultMap="organizationResult2">
+		SELECT * FROM t_organization WHERE PARENT_ID = #{parentId} ORDER BY SORT DESC ,clrq ASC
+	</select>
+
+    <select id="getChildrenById" resultMap="organizationResult">
+		<!-- SELECT * FROM t_organization WHERE PARENT_ID = #{id} and  (is_deleted = '0' or is_deleted is null) ORDER BY SORT DESC ,clrq ASC -->
+
+		select * from (SELECT * FROM t_organization WHERE PARENT_ID = #{id} and  (is_deleted = '0' or is_deleted is null) ORDER BY SORT DESC ,clrq ASC) a
+        UNION all
+        select * from (SELECT id,PARENT_ID,name,'' as code,'' as dszzxds,'' as zjl,'' as cwzj ,'' as hshzxjs,NODE_LINKS,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE,
+        '' as sort ,IS_DELETED ,'' as clrq,'' as zczb,'' as frdb,'' as ognid,'' as shxydm,'' as gswz,'' as lxdh,'' as gsdz,
+        '' as gszh,'' as gsmc,'' as khyh,'' as khhdz,'' as sjcgbl,'' as zxrq,'' as scrq,'' as jyfw, '' as zhmc ,generate_kpi FROM sys_dept WHERE PARENT_ID = #{id} and  (is_deleted = '0' or is_deleted is null) and is_company = 1 )b
+	</select>
+
+    <select id="getChildrenById2" resultMap="organizationResult2">
+		<!-- SELECT * FROM t_organization WHERE PARENT_ID = #{id} ORDER BY SORT DESC ,clrq ASC -->
+
+        select * from (SELECT * FROM t_organization WHERE PARENT_ID = #{id} ORDER BY SORT DESC ,clrq ASC) a
+        UNION all
+        select * from (SELECT id,PARENT_ID,name,'' as code,'' as dszzxds,'' as zjl,'' as cwzj ,'' as hshzxjs,NODE_LINKS,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE,
+        '' as sort ,IS_DELETED ,'' as clrq,'' as zczb,'' as frdb,'' as ognid,'' as shxydm,'' as gswz,'' as lxdh,'' as gsdz,
+        '' as gszh,'' as gsmc,'' as khyh,'' as khhdz,'' as sjcgbl,'' as zxrq,'' as scrq,'' as jyfw, '' as zhmc ,generate_kpi FROM sys_dept WHERE PARENT_ID = #{id}  and is_company = 1 )b
+	</select>
+
+		<select id="findAll" resultType="organization">
+		SELECT * FROM t_organization WHERE  is_deleted = '0' or is_deleted is null  ORDER BY SORT DESC ,clrq ASC
+	</select>
+
+	<!-- =================================================================================================== -->
+	<select id="queryOrganizationById" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT
+			j.id,
+			j.PARENT_ID AS parentId,
+			j.ognid,
+			j.`name`,
+			j.shxydm,
+			j.clrq,
+			j.zczb,
+			j.frdb,
+			j.dszzxds,
+			j.zjl,
+			j.cwzj,
+			j.jshzxjs,
+			j.gswz,
+			j.lxdh,
+			j.gsdz,
+			j.gszh,
+			j.zhmc,
+			j.khyh,
+			j.khhdz,
+			j.sjcgbl,
+			j.zxrq,
+			j.scrq,
+			j.jyfw,
+			j.SHXYDM,
+			j.generate_kpi,
+			(SELECT `NAME` FROM t_organization t WHERE t.ID=j.PARENT_ID) as sjdw
+		  FROM t_organization j
+		WHERE j.ID=#{id}
+	</select>
+	<select id="queryOrganizationInfoById" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT * FROM t_organization j WHERE j.ID=#{id}
+	</select>
+
+	<select id="queryOrganizationByParentId" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT * FROM t_organization j WHERE j.PARENT_ID=#{id}
+	</select>
+
+	<insert id="saveOrganization" parameterType="java.util.Map">
+		INSERT INTO t_organization (
+			<!-- ID, -->
+			PARENT_ID,
+			`NAME`,
+			<if test="clrq !=null and clrq !=''">
+			CLRQ,
+			</if>
+			ZCZB,
+			FRDB,
+			DSZZXDS,
+			ZJL,
+			CWZJ,
+			JSHZXJS,
+			CREATE_BY,
+			CREATE_DATE,
+			UPDATE_BY,
+			UPDATE_DATE,
+			GSWZ,
+			LXDH,
+			GSDZ,
+			GSZH,
+			ZHMC,
+			KHYH,
+			KHHDZ,
+			SJCGBL,
+			ZXRQ,
+			SCRQ,
+			JYFW,
+			SHXYDM,
+			OGNID
+		)
+		VALUES
+			(
+            <!-- #{id}, -->
+				#{sjdw},
+				#{gsmc},
+				<if test="clrq !=null and clrq !=''">
+				#{clrq},
+				</if>
+				#{zczb},
+				#{frdb},
+				#{dszzxds},
+				#{zjl},
+				#{cwzj},
+				#{jshzxjs},
+				#{createby},
+				#{createdate},
+				#{updateby},
+				#{updatedate},
+				#{gswz},
+				#{lxdh},
+				#{gsdz},
+				#{gszh},
+				#{zhmc},
+				#{khyh},
+				#{khhdz},
+				#{sjcgbl},
+				#{zxrq},
+				#{scrq},
+				#{jyfw},
+				#{shxydm},
+				#{ognid}
+			)
+	</insert>
+
+	<update id="updateOrganization" parameterType="java.util.Map">
+		UPDATE t_organization
+			SET t_organization.`name`=#{gsmc},
+				PARENT_ID=#{sjdw},
+				clrq =#{clrq},
+				zczb =#{zczb},
+				frdb =#{frdb},
+				dszzxds =#{dszzxds},
+				zjl = #{zjl},
+				cwzj =#{cwzj},
+				jshzxjs =#{jshzxjs},
+				create_by =#{createby},
+				update_by =#{updateby},
+				update_date =#{updatedate},
+				GSWZ=#{gswz},
+				LXDH=#{lxdh},
+				GSDZ=#{gsdz},
+				GSZH=#{gszh},
+				ZHMC=#{zhmc},
+				KHYH=#{khyh},
+				KHHDZ=#{khhdz},
+				SJCGBL=#{sjcgbl},
+				ZXRQ=#{zxrq},
+				SCRQ=#{scrq},
+				JYFW=#{jyfw},
+				SHXYDM=#{shxydm}
+		WHERE
+			id = #{id}
+	</update>
+
+	<update id="revokeOrganizationById" parameterType="java.util.Map">
+		<!-- DELETE t FROM t_organization t WHERE t.id=#{id} -->
+		update t_organization t set t.IS_DELETED = 1 where t.id=#{id}
+	</update>
+
+	<update id="delOrganizationByParentId" parameterType="java.util.Map">
+		<!--DELETE t FROM t_organization t WHERE t.PARENT_ID=#{parentId}-->
+		update t_organization t set t.IS_DELETED = 1 where t.PARENT_ID=#{parentId}
+	</update>
+
+	<select id="selectOgnList" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT t.id,t.`NAME` FROM t_organization t WHERE t.ID !="0"
+	</select>
+
+	<insert id="saveOrganizationChangeInfo" parameterType="java.util.Map">
+		INSERT INTO t_organization_change_info (id, bgrq, bgxm, bgq, bgh, ognid)
+			VALUES
+				(
+					#{changeUUID},
+					#{changeBGRQ},
+					#{changeXM},
+					#{changeQ},
+					#{changeH},
+					#{ognid}
+				)
+	</insert>
+
+	<select id="queryOrganizationChangeInfoListByOgnId" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT
+			t.`NAME`,
+			t.SHXYDM,
+			t.CLRQ,
+			j.ID,
+			j.BGRQ,
+			j.BGXM,
+			j.BGQ,
+			j.BGH,
+			j.CREATETIME
+		FROM
+			t_organization t,
+			t_organization_change_info j
+		WHERE
+			t.OGNID = j.OGNID
+		AND j.OGNID=#{ognid}
+		ORDER BY j.CREATETIME ASC
+	</select>
+
+	<delete id="delOrganizationChangeInfoByOgnid" parameterType="java.util.Map">
+		DELETE t FROM t_organization_change_info t WHERE t.ognid=#{ognid}
+	</delete>
+
+	<select id="organizationChangeBGXMSelect" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT t.`value`,t.`name` FROM t_change_select_info t ORDER BY `value` ASC
+	</select>
+	<select id="queryOrganizationChangeInfoById" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT t.OGNID FROM t_organization_change_info t WHERE t.ID=#{uuid}
+	</select>
+
+	<update id="updateOrganizationChangeInfoById" parameterType="java.util.Map">
+		UPDATE t_organization_change_info 
+			SET 
+			BGRQ=#{bgrq},
+			BGXM=#{bgxm},
+			BGQ=#{bgq},
+			BGH=#{bgh}
+		WHERE
+			ID = #{uuid}
+	</update>
+
+	<delete id="delOrganizationChangeInfoById" parameterType="java.util.Map">
+		DELETE t FROM t_organization_change_info t WHERE t.ID=#{uuid}
+	</delete>
+
+	<update id="updateOrganizationChangeInfoByUUID" parameterType="java.util.Map">
+		UPDATE t_organization_change_info 
+			SET 
+			BGRQ=#{changeBGRQ},
+			BGXM=#{changeXM},
+			BGQ=#{changeQ},
+			BGH=#{changeH}
+		WHERE
+			ID = #{uuid}
+	</update>
+
+	<update id="updateOrganizationChangeInfoByUUID2" parameterType="java.util.Map">
+		UPDATE t_organization_change_info 
+			SET 
+			BGRQ=#{changeBGRQ},
+			BGXM=#{changeXM},
+			BGQ=#{changeQ},
+			BGH=#{changeH}
+		WHERE
+			ID = #{uuid}
+	</update>
+
+	<insert id="saveOrganizationChangeInfo2" parameterType="java.util.Map">
+		INSERT INTO t_organization_change_info (id, bgrq, bgxm, bgq, bgh, ognid,CREATETIME)
+			VALUES
+				(
+					#{uuid},
+					#{changeBGRQ},
+					#{changeXM},
+					#{changeQ},
+					#{changeH},
+					#{ognid},
+					now()
+				)
+	</insert>
+
+	<select id="queryOrganizationChangeInfoListByOgnId2" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT * FROM t_organization_change_info t WHERE
+		t.OGNID =#{ognid} GROUP BY t.BGXM
+	</select>
+
+	<select id="queryOrganizationChangeInfoByOgnIdAndBgxm" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT
+			*
+			FROM
+				t_organization_change_info t
+			WHERE
+				 t.BGXM =#{bgxm}
+		AND t.OGNID =#{ognid}
+		ORDER BY t.CREATETIME  DESC
+		LIMIT 1
+	</select>
+
+    <select id="queryOrganizationChangeInfoByOgnIdAndBgxm2" parameterType="java.util.Map" resultMap="organizationResult">
+		SELECT
+			*
+			FROM
+				t_organization_change_info t
+			WHERE
+				 t.BGXM =#{bgxm}
+		AND t.OGNID =#{ognid}
+		ORDER BY t.CREATETIME  asc
+		LIMIT 1
+	</select>
+
+	<update id="updateOrganizationByOgnId" parameterType="java.util.Map">
+		UPDATE t_organization
+			SET
+			<if test="zczb !=null and zczb !=''">
+			ZCZB=#{zczb}
+			</if>
+			<if test="frdb !=null and frdb !=''">
+			FRDB=#{frdb}
+			</if>
+			<if test="dszzxds !=null and dszzxds !=''">
+			DSZZXDS=#{dszzxds}
+			</if>
+			<if test="zjl !=null and zjl !=''">
+			ZJL=#{zjl}
+			</if>
+			<if test="cwzj !=null and cwzj !=''">
+			CWZJ=#{cwzj}
+			</if>
+			<if test="jshzxjs !=null and jshzxjs !=''">
+			JSHZXJS=#{jshzxjs}
+			</if>
+			<if test="lxdh !=null and lxdh !=''">
+			LXDH=#{lxdh}
+			</if>
+			<if test="gsdz !=null and gsdz !=''">
+			GSDZ=#{gsdz}
+			</if>
+			<if test="gszh !=null and gszh !=''">
+			GSZH=#{gszh}
+			</if>
+			<if test="zhmc !=null and zhmc !=''">
+			ZHMC=#{zhmc}
+			</if>
+			<if test="khyh !=null and khyh !=''">
+			KHYH=#{khyh}
+			</if>
+			<if test="khhdz !=null and khhdz !=''">
+			KHHDZ=#{khhdz}
+			</if>
+			<if test="sjdw !=null and sjdw !=''">
+			PARENT_ID=#{sjdw}
+			</if>
+			<if test="sjcgbl !=null and sjcgbl !=''">
+			SJCGBL=#{sjcgbl}
+			</if>
+			<if test="jyfw !=null and jyfw !=''">
+			JYFW=#{jyfw}
+			</if>
+            <if test="name !=null and name !=''">
+                NAME=#{name}
+            </if>
+            <if test="shxydm !=null and shxydm !=''">
+                SHXYDM=#{shxydm}
+            </if>
+		WHERE
+			OGNID = #{ognid}
+	</update>
+
+</mapper>

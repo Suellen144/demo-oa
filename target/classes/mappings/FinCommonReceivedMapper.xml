@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinCommonReceivedDao">
+	
+	<resultMap id="finCommonReceivedResult" type="finCommonReceived">
+		<id property="id" column="id" />
+		<result property="status" column="status" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="voucherTime" column="voucher_time" />
+		<result property="receivedCompany" column="received_company" />
+		<result property="attachName" column="attach_name" />
+		<result property="attachments" column="attachments" />
+		<result property="encrypted" column="encrypted" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="user" column="user_id" javaType="sysUser" select="findUserByUserId" />
+		<collection property="commonReceivedAttachs" column="id" select="findCommonReceivedAttachs" />
+	</resultMap>
+	
+	<resultMap id="finCommonReceivedAttachResult" type="finCommonReceivedAttach">
+		<id property="id" column="id" />
+		<result property="commonReceivedId" column="COMMON_RECEIVED_ID" />
+		<result property="projectManageId" column="PROJECT_MANAGE_ID" />
+		<result property="date" column="DATE" />
+		<result property="reason" column="REASON" />
+		<result property="money" column="MONEY" />
+		<result property="type" column="TYPE" />
+		<result property="deptId" column="DEPT_ID" />
+		<result property="payAccount" column="PAY_ACCOUNT" />
+		<result property="payCompany" column="PAY_COMPANY" />
+		<result property="costProperty" column="COST_PROPERTY" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="projectManage" column="PROJECT_MANAGE_ID" javaType="saleProjectManage" select="findProjectByProjectId" /> 
+	</resultMap>
+	
+	<select id="findProjectByProjectId" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id}
+	</select>
+	
+	<!-- 关联查询 Begin -->
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	<select id="findCommonReceivedAttachs" resultMap="finCommonReceivedAttachResult">
+		SELECT * FROM fin_common_received_attach WHERE `COMMON_RECEIVED_ID` = #{id} 
+		ORDER BY DATE ASC
+	</select>
+	
+	
+	<select id="findAll" resultMap="finCommonReceivedResult">
+		SELECT * FROM fin_common_received
+	</select>
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="finCommonReceivedResult">
+		SELECT `received`.* FROM fin_common_received `received`
+		JOIN sys_user `user`
+				ON `user`.`ID` = `received`.USER_ID
+			JOIN sys_dept dept
+				ON dept.`ID` = `user`.`DEPT_ID`
+				LEFT JOIN sys_dictdata dictdata on received.`RECEIVED_COMPANY`=dictdata.`value` where type_id=17
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND `received`.USER_ID = #{userId}
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND (dept.`ID` IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach> 
+			OR `received`.USER_ID = #{userId})
+		</if>
+		<if test="status != null and status != ''">
+			AND received.STATUS = #{status}
+		</if>
+		<if test="payCompany != null and payCompany != ''">
+			AND `received`.`RECEIVED_COMPANY` = #{payCompany}
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( dictdata.`name` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR DATE_FORMAT(`received`.VOUCHER_TIME,'%Y-%m') LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%'))
+		</if>
+		GROUP BY `received`.id
+		ORDER by `received`.received_company DESC,`received`.voucher_time DESC
+	</select>
+	
+	<select id="findById" resultMap="finCommonReceivedResult">
+		SELECT * FROM fin_common_received WHERE ID = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE fin_common_received 
+			SET
+				PROCESS_INSTANCE_ID=#{processInstanceId},
+				STATUS=#{status},
+			  	USER_ID=#{userId},
+			  	APPLY_TIME=#{applyTime},
+			  	VOUCHER_TIME=#{voucherTime},
+			  	DEPT_ID=#{deptId},
+			  	RECEIVED_COMPANY=#{receivedCompany},
+			  	ATTACH_NAME=#{attachName},
+			  	ATTACHMENTS=#{attachments},
+			  	ENCRYPTED=#{encrypted},
+			  	REMARK=#{remark},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	IS_DELETED=#{isDeleted}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_common_received(
+				PROCESS_INSTANCE_ID,
+				STATUS,
+			  	USER_ID,
+			  	APPLY_TIME,
+			  	VOUCHER_TIME,
+			  	DEPT_ID,
+			  	RECEIVED_COMPANY,
+			  	ATTACH_NAME,
+			  	ATTACHMENTS,
+			  	ENCRYPTED,
+			  	REMARK,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_DELETED
+			) 
+			VALUES (
+				#{processInstanceId},
+				#{status},
+			  	#{userId},
+			  	#{applyTime},
+			  	#{voucherTime},
+			  	#{deptId},
+			  	#{receivedCompany},
+			  	#{attachName},
+			  	#{attachments},
+			  	#{encrypted},
+			  	#{remark},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isDeleted}
+			)
+	</insert>
+		
+	<delete id="deleteById">
+		DELETE FROM fin_common_received WHERE ID = #{id}
+	</delete>
+	
+	
+</mapper>

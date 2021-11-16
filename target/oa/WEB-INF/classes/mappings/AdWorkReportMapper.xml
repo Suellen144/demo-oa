@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdWorkReportDao">
+
+	<!-- 主表 resultMap -->
+	<resultMap id="adWorkReportResult" type="adWorkReport">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="month" column="month" />
+		<result property="number" column="number" />
+		<result property="weekPlan" column="week_plan" />
+		<result property="monthSummary" column="month_summary" />
+		<result property="monthPlan" column="month_plan" />
+		<result property="status" column="status" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+
+		<association property="author" column="user_id" javaType="sysUser" select="findUserByUserId" />
+		<collection property="workReportAttachList" column="id" select="findWorkReportAttachToList" />
+	</resultMap>
+
+	<!-- 附加表 resultMap -->
+	<resultMap id="adWorkReportAttachResult" type="adWorkReportAttach">
+		<id property="id" column="id" />
+		<result property="workReportId" column="work_report_id" />
+		<result property="projectId" column="project_id" />
+		<result property="workDate" column="work_date" />
+		<result property="workTime" column="work_time" />
+		<result property="description" column="description" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+
+		<association property="project" column="project_id" javaType="saleProjectManage" select="findProjectByProjectId" />
+	</resultMap>
+
+	<!-- Excel对象 resultMap -->
+	<resultMap id="workReportExcelResult" type="com.reyzar.oa.common.dto.WorkReportExcelDTO">
+		<result property="name" column="name" />
+		<result property="dept" column="dept" />
+		<result property="project" column="project" />
+		<result property="workTime" column="work_time" />
+	</resultMap>
+
+	<select id="findAll" resultMap="adWorkReportResult">
+		SELECT * FROM ad_work_report
+	</select>
+
+	<select id="findByPage" resultMap="adWorkReportResult">
+		SELECT t.* FROM (
+			SELECT wr.*, `user`.`NAME` AS `USER_NAME` FROM ad_work_report wr
+				JOIN sys_user `user`
+					ON `user`.`ID` = wr.USER_ID
+				JOIN sys_dept dept
+					ON dept.`ID` = `user`.`DEPT_ID`
+			WHERE 1 = 1
+			<if test="deptIdSet == null or deptIdSet.size == 0">
+				<choose>
+					<when test="userSet !=null and userSet.size > 0">
+						AND (wr.USER_ID IN
+						<foreach collection="userSet" item="principalId" index="index" open="(" separator=",">
+							#{principalId}
+						</foreach>
+						,#{userId}))
+					</when>
+					<otherwise>
+						AND wr.USER_ID = #{userId}
+					</otherwise>
+				</choose>
+			</if>
+			<if test="deptIdSet != null and deptIdSet.size > 0">
+				AND (dept.`ID` IN
+				<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">
+					#{deptId}
+				</foreach>
+				OR wr.USER_ID = #{userId})
+			</if>
+		) t
+		WHERE 1 = 1
+		<if test="month != null and month != ''">
+			AND t.MONTH = #{month}
+		</if>
+		<if test="number != null and number != ''">
+			AND t.NUMBER = #{number}
+		</if>
+		<if test="status != null and status != ''">
+			AND t.STATUS = #{status}
+		</if>
+		<if test="userName != null and userName != ''">
+			AND t.USER_NAME LIKE CONCAT('%',#{userName},'%')
+		</if>
+		ORDER BY t.CREATE_DATE DESC
+	</select>
+
+	<select id="findById" resultMap="adWorkReportResult">
+		SELECT * FROM ad_work_report WHERE ID = #{id}
+	</select>
+
+	<select id="findByCondition" resultMap="adWorkReportResult">
+		SELECT * FROM ad_work_report `work_report` JOIN ad_work_report_attach `work_report_attach`
+			ON
+				`work_report`.id = `work_report_attach`.work_report_id
+					WHERE 1 = 1
+		<if test="id != null">
+			<!-- 不需要查询自己的数据 -->
+			AND `work_report`.`ID` != #{id}
+		</if>
+		<if test="userId != null">
+			AND `work_report`.`USER_ID` = #{userId}
+		</if>
+		<if test="year != null">
+			AND YEAR(`work_report_attach`.`WORK_DATE`) = #{year}
+		</if>
+		<if test="month != null">
+			AND `work_report`.`MONTH` = #{month}
+		</if>
+		<if test="number != null">
+			AND `work_report`.`NUMBER` = #{number}
+		</if>
+	</select>
+
+	<!-- 关联查询 Begin -->
+	<select id="findUserByUserId" resultType="sysUser">
+			SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	<select id="findWorkReportAttachToList" resultMap="adWorkReportAttachResult">
+		SELECT * FROM ad_work_report_attach WHERE WORK_REPORT_ID = #{id}
+	</select>
+	<select id="findProjectByProjectId" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id}
+	</select>
+	<!-- 关联查询 End -->
+
+	<!-- 导出Excel数据 -->
+	<select id="getExcelData" resultType="com.reyzar.oa.common.dto.WorkReportExcelDTO">
+		SELECT `user`.`NAME`, `dept`.`NAME` AS `DEPT`, `project`.`NAME` AS `PROJECT`,
+				SUM(`attach`.`WORK_TIME`) AS `WORK_TIME`
+		FROM ad_work_report `work_report`
+			JOIN sys_user `user`
+			ON `user`.`ID` = `work_report`.`USER_ID`
+			JOIN sys_dept `dept`
+			ON `dept`.`ID` = `user`.`DEPT_ID`
+			JOIN ad_work_report_attach `attach`
+			ON `attach`.`WORK_REPORT_ID` = `work_report`.`ID`
+			JOIN sale_project_manage `project`
+			ON `project`.`ID` = `attach`.`PROJECT_ID`
+			WHERE 1 = 1
+			<if test="deptIdList != null and deptIdList.size > 0">
+				AND `dept`.`ID` IN
+				<foreach item="deptId" index="index" collection="deptIdList" open="(" separator="," close=")">
+	  				#{deptId}
+	  			</foreach>
+			</if>
+			<if test="year != null">
+				AND YEAR(`attach`.`WORK_DATE`) = #{year}
+			</if>
+			<if test="month != null">
+				AND MONTH(`attach`.`WORK_DATE`) = #{month}
+			</if>
+			GROUP BY `attach`.`PROJECT_ID`, `user`.`NAME`, `dept`.`NAME`
+			ORDER BY `dept`.`ID`, `user`.`ID`
+	</select>
+
+	<!-- 报表数据 -->
+	<select id="getChartsData" resultType="java.util.HashMap">
+		SELECT report.`MONTH`, report.`NUMBER`, attach.`WORK_DATE`, attach.`WORK_TIME`,
+				`user`.`ID` AS USER_ID, `user`.`NAME` AS USER_NAME
+			FROM ad_work_report report
+				JOIN ad_work_report_attach attach
+				ON attach.`WORK_REPORT_ID` = report.`ID`
+				JOIN sys_user `user`
+				ON `user`.`ID` = report.`USER_ID` AND `user`.`IS_DELETED` IS NULL
+			WHERE `user`.`is_delete` is null
+		<if test="yearWithMonth != null">
+			AND DATE_FORMAT(attach.`WORK_DATE`, '%Y-%m') = #{yearWithMonth}
+		</if>
+		<if test="year != null">
+			AND DATE_FORMAT(attach.`WORK_DATE`, '%Y') = #{year}
+		</if>
+		<if test="number != null">
+			AND report.`NUMBER` = #{number}
+		</if>
+		<if test="deptIdList.size > 0">
+			AND `user`.`DEPT_ID` IN
+			<foreach item="deptId" index="index" collection="deptIdList" open="(" separator="," close=")">
+  				#{deptId}
+  			</foreach>
+		</if>
+		<if test="userId != null">
+			AND `user`.`ID` = #{userId}
+		</if>
+		ORDER BY attach.`WORK_DATE`
+	</select>
+
+	<update id="update">
+		UPDATE ad_work_report 
+			SET
+			  	USER_ID=#{userId},
+			  	MONTH=#{month},
+			  	NUMBER=#{number},
+			  	WEEK_PLAN=#{weekPlan},
+			  	MONTH_SUMMARY=#{monthSummary},
+			  	MONTH_PLAN=#{monthPlan},
+			  	STATUS=#{status},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_work_report(
+			  	USER_ID,
+			  	MONTH,
+			  	NUMBER,
+			  	WEEK_PLAN,
+			  	MONTH_SUMMARY,
+			  	MONTH_PLAN,
+			  	STATUS,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{userId},
+			  	#{month},
+			  	#{number},
+			  	#{weekPlan},
+			  	#{monthSummary},
+			  	#{monthPlan},
+			  	#{status},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+
+	<delete id="deleteById">
+		DELETE FROM ad_work_report WHERE ID = #{id}
+	</delete>
+
+</mapper>

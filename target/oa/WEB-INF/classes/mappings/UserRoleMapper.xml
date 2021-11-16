@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IUserRoleDao">
+
+	<select id="findRoleidByUserid" resultType="Integer">
+		SELECT ROLE_ID FROM sys_user_role
+			WHERE USER_ID = #{userId}
+	</select>
+	
+	<delete id="delByRoleid">
+		DELETE FROM sys_user_role WHERE ROLE_ID = #{roleId}
+	</delete>
+	
+	<delete id="delByUserid">
+		DELETE FROM sys_user_role WHERE USER_ID = #{userId}
+	</delete>
+	
+	<delete id="delByUseridAndNotRoleid">
+		DELETE FROM sys_user_role WHERE USER_ID = #{userId}
+		<if test="roleidList != null and roleidList.size > 0">
+			 AND ROLE_ID NOT IN 
+			<foreach item="roleid" index="index" collection="roleidList" open="(" separator="," close=")">  
+				#{roleid}
+			</foreach>
+		</if>
+	</delete>
+	
+	<!-- 批量插入 -->
+	<insert id="insertAll">
+		INSERT INTO sys_user_role(USER_ID, ROLE_ID) 
+			VALUES
+			<foreach collection="roleidList" item="roleid" index="index" separator=",">
+				(
+					#{userId}, #{roleid}
+				)
+			</foreach>
+	</insert>
+</mapper>

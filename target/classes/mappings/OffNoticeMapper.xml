@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IOffNoticeDao">
+	
+	<resultMap id="offNoticeResult" type="com.reyzar.oa.domain.OffNotice">
+		<id property="id" column="id" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="type" column="type" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="commnet" column="commnet" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="deptIds" column="dept_ids" />
+		<result property="attachments" column="attachments" />
+		<result property="attachName" column="attach_name" />
+		<result property="approveStatus" column="approve_status" />
+		<result property="approverId" column="approver_id" />
+		<result property="userId" column="user_id" />
+		<result property="publisherId" column="publisher_id" />
+		<result property="publishTime" column="publish_time" />
+		<result property="actualPublishTime" column="actual_publish_time" />
+		<result property="isPublished" column="is_published" />
+		<result property="processInstanceId" column="process_instance_id" />
+		
+		<association property="user" column="user_id" javaType="sysUser" select="findUserByUserId" />
+		<association property="approver" column="approver_id" javaType="sysUser" select="findUserByUserId" />  
+	</resultMap>
+	
+	<!-- 读取指定用户且未过时（一个月过时）的公告总数 -->
+	<select id="getNoticeCount" resultType="Integer">
+		SELECT COUNT(1) FROM off_notice 
+		WHERE 
+			(IS_DELETED != '1' OR IS_DELETED IS NULL)
+			<if test="!seeall">
+				AND (CONCAT(',', `DEPT_IDS`, ',') REGEXP CONCAT(',(',REPLACE(#{deptIdList},',','|'),'),')
+					OR DEPT_IDS = '' 
+					OR DEPT_IDS IS NULL 
+					OR ( USER_ID = #{userId} AND (APPROVE_STATUS = '0' OR APPROVE_STATUS = '2'))
+					) 
+			</if>
+				AND ID NOT IN
+			(
+				SELECT n.`ID` FROM off_notice n
+					JOIN off_notice_read nr
+					ON nr.`NOTICE_ID` = n.`ID`
+					WHERE nr.`USER_ID` = #{userId}
+			)
+			AND IS_PUBLISHED = 1
+			AND (APPROVE_STATUS = '1' OR ( USER_ID = #{userId} AND (APPROVE_STATUS = '0' OR APPROVE_STATUS = '2') ))
+			OR ( USER_ID = #{userId} AND (IS_PUBLISHED IS NULL OR IS_PUBLISHED = 0) AND (IS_DELETED != '1' OR IS_DELETED IS NULL))
+	</select>
+	
+	<!-- 读取指定用户且未过时（一个月过时）的公告总数 -->
+	<select id="getUnreadCount" resultType="Integer">
+		SELECT COUNT(1) FROM off_notice 
+		WHERE 
+			(IS_DELETED != '1' OR IS_DELETED IS NULL)
+			<if test="!seeall">
+				AND (<!-- DEPT_IDS LIKE CONCAT('%,' ,#{userDeptId}, ',%') 
+						OR DEPT_IDS LIKE CONCAT(#{userDeptId}, ',%') 
+						OR DEPT_IDS LIKE CONCAT('%,', #{userDeptId})
+						OR DEPT_IDS = #{userDeptId}
+						OR DEPT_IDS = '' OR DEPT_IDS IS NULL  -->
+						CONCAT(',', `DEPT_IDS`, ',') REGEXP CONCAT(',(',REPLACE(#{deptIdList},',','|'),'),')
+						OR DEPT_IDS = '' 
+						OR DEPT_IDS IS NULL 
+						OR ( USER_ID = #{userId} AND (APPROVE_STATUS = '0' OR APPROVE_STATUS = '2'))
+					) 
+			</if>
+				AND ID NOT IN
+			(
+				SELECT n.`ID` FROM off_notice n
+					JOIN off_notice_read nr
+					ON nr.`NOTICE_ID` = n.`ID`
+					WHERE nr.`USER_ID` = #{userId}
+			)
+			<!-- AND (APPROVE_STATUS = '1' OR ( USER_ID = #{userId} AND (APPROVE_STATUS = '0' OR APPROVE_STATUS = '2') )) -->
+			AND type = #{type}
+			AND IS_PUBLISHED = 1
+			AND (APPROVE_STATUS = '1' OR ( USER_ID = #{userId} AND (APPROVE_STATUS = '0' OR APPROVE_STATUS = '2') ))
+			OR ( USER_ID = #{userId} AND (IS_PUBLISHED IS NULL OR IS_PUBLISHED = 0) AND (IS_DELETED != '1' OR IS_DELETED IS NULL) AND type = #{type})
+	</select>
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="offNoticeResult">
+		SELECT notice.* FROM off_notice notice 
+		JOIN sys_user `user` ON notice.`user_id` = `user`.id
+		WHERE (notice.IS_DELETED != '1' OR notice.IS_DELETED IS NULL)  
+			AND IS_PUBLISHED = 1
+		<if test="beginDate != null and beginDate != ''">
+			AND notice.`create_date` &gt;= #{beginDate} 
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND notice.`create_date` &lt;= #{endDate} 
+		</if>
+		<if test="type != null and type != ''">
+			AND notice.type = #{type} 
+		</if>
+		<if test="userName != null and userName != ''">
+			AND `user`.`NAME` LIKE CONCAT('%' ,#{userName}, '%') 
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''">
+			AND (notice.title LIKE CONCAT('%' ,#{fuzzyContent}, '%') OR notice.content LIKE CONCAT('%' ,#{fuzzyContent}, '%')) 
+		</if>
+		<if test="!seeall">
+			AND (<!-- notice.DEPT_IDS LIKE CONCAT('%,' ,#{userDeptId}, ',%') 
+					OR notice.DEPT_IDS LIKE CONCAT(#{userDeptId}, ',%') 
+					OR notice.DEPT_IDS LIKE CONCAT('%,', #{userDeptId})
+					OR notice.DEPT_IDS = #{userDeptId} -->
+					CONCAT(',', notice.`DEPT_IDS`, ',') REGEXP CONCAT(',(',REPLACE(#{deptIdList},',','|'),'),')
+					OR notice.DEPT_IDS = '' 
+					OR notice.DEPT_IDS IS NULL 
+					OR ( notice.USER_ID = #{userId} AND (notice.APPROVE_STATUS = '0' OR notice.APPROVE_STATUS = '2'))
+				)
+		</if>
+		<if test="isRead != null and isRead == '1'.toString()">
+			AND notice.`id` IN 
+			(
+				SELECT n.`ID` FROM off_notice n
+					JOIN off_notice_read nr
+					ON nr.`NOTICE_ID` = n.`ID`
+					WHERE nr.`USER_ID` = #{userId}
+			)
+		</if>
+		<if test="isRead != null and isRead == '0'.toString()">
+			AND notice.`id` NOT IN 
+			(
+				SELECT n.`ID` FROM off_notice n
+					JOIN off_notice_read nr
+					ON nr.`NOTICE_ID` = n.`ID`
+					WHERE nr.`USER_ID` = #{userId}
+			)
+		</if>
+		AND (notice.APPROVE_STATUS = '1' OR ( notice.USER_ID = #{userId} AND (notice.APPROVE_STATUS = '0' OR notice.APPROVE_STATUS = '2') ))
+		OR ( notice.USER_ID = #{userId} AND (IS_PUBLISHED IS NULL OR IS_PUBLISHED = 0) AND (notice.IS_DELETED != '1' OR notice.IS_DELETED IS NULL) )
+		ORDER BY notice.CREATE_DATE DESC
+	</select>
+	
+	
+	<select id="findPointByPage" parameterType="java.util.Map" resultMap="offNoticeResult">
+		SELECT notice.* FROM off_notice notice 
+		JOIN sys_user `user` ON notice.`user_id` = `user`.id
+		WHERE (notice.IS_DELETED != '1' OR notice.IS_DELETED IS NULL)  
+			AND IS_PUBLISHED = 1
+		<if test="beginDate != null and beginDate != ''">
+			AND notice.`create_date` &gt;= #{beginDate} 
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND notice.`create_date` &lt;= #{endDate} 
+		</if>
+		<if test="type != null and type != ''">
+			AND notice.type = #{type} 
+		</if>
+		<if test="userName != null and userName != ''">
+			AND `user`.`NAME` LIKE CONCAT('%' ,#{userName}, '%') 
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''">
+			AND (notice.title LIKE CONCAT('%' ,#{fuzzyContent}, '%') OR notice.content LIKE CONCAT('%' ,#{fuzzyContent}, '%')) 
+		</if>
+		<if test="!seeall">
+			AND (<!-- notice.DEPT_IDS LIKE CONCAT('%,' ,#{userDeptId}, ',%') 
+					OR notice.DEPT_IDS LIKE CONCAT(#{userDeptId}, ',%') 
+					OR notice.DEPT_IDS LIKE CONCAT('%,', #{userDeptId})
+					OR notice.DEPT_IDS = #{userDeptId} -->
+					CONCAT(',', notice.`DEPT_IDS`, ',') REGEXP CONCAT(',(',REPLACE(#{deptIdList},',','|'),'),')
+					OR notice.DEPT_IDS = '' 
+					OR notice.DEPT_IDS IS NULL 
+					OR ( notice.USER_ID = #{userId} AND (notice.APPROVE_STATUS = '0' OR notice.APPROVE_STATUS = '2'))
+				)
+		</if>
+		<if test="isRead != null and isRead == '1'.toString()">
+			AND notice.`id` IN 
+			(
+				SELECT n.`ID` FROM off_notice n
+					JOIN off_notice_read nr
+					ON nr.`NOTICE_ID` = n.`ID`
+					WHERE nr.`USER_ID` = #{userId}
+			)
+		</if>
+		<if test="isRead != null and isRead == '0'.toString()">
+			AND notice.`id` NOT IN 
+			(
+				SELECT n.`ID` FROM off_notice n
+					JOIN off_notice_read nr
+					ON nr.`NOTICE_ID` = n.`ID`
+					WHERE nr.`USER_ID` = #{userId}
+			)
+		</if>
+		AND (notice.APPROVE_STATUS = '1' OR ( notice.USER_ID = #{userId} AND (notice.APPROVE_STATUS = '0' OR notice.APPROVE_STATUS = '2') ))
+		OR ( notice.USER_ID = #{userId} AND (IS_PUBLISHED IS NULL OR IS_PUBLISHED = 0) AND (notice.IS_DELETED != '1' OR notice.IS_DELETED IS NULL) AND notice.type = #{type})
+		ORDER BY notice.CREATE_DATE DESC
+	</select>
+	
+	<select id="getUnpublishNotice" resultMap="offNoticeResult">
+		SELECT * FROM off_notice 
+			WHERE ( `type` = 2 OR (`type` = 1 AND `approve_status` = 1) ) 
+				AND (`is_published` IS NULL OR `is_published` = 0)
+				AND `is_deleted` != '1'
+				AND `actual_publish_time` &lt;= #{actualPublishTime}
+	</select>
+	
+	<select id="findById" resultMap="offNoticeResult">
+		SELECT * FROM off_notice WHERE ID = #{id}
+	</select>
+	
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO off_notice(
+			title,type,content,create_by,create_date,update_by,update_date,comment,
+			remark,is_deleted,dept_ids,attachments,attach_name,user_id,approve_status,approver_id,process_instance_id,publisher_id,publish_time,actual_publish_time,is_published
+		)VALUES(
+			#{title},#{type},#{content},#{createBy},#{createDate},#{updateBy},#{updateDate},#{comment},
+			#{remark},#{isDeleted},#{deptIds},#{attachments},#{attachName},#{userId},#{approveStatus},#{approverId},#{processInstanceId},#{publisherId},#{publishTime},#{actualPublishTime},#{isPublished}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE `off_notice` 
+			SET
+			  `content` = #{content},
+			  `update_by` = #{updateBy},
+			  `update_date` = #{updateDate},
+			  `remark` = #{remark},
+			  `comment` = #{comment},
+			  `is_deleted` = #{isDeleted},
+			  `title` = #{title},
+			  `type` = #{type},
+			  `dept_ids` = #{deptIds},
+			  `attachments` = #{attachments},
+			  `attach_name` = #{attachName},
+			  `user_id` = #{userId},
+			  `approve_status` = #{approveStatus},
+			  `approver_id` = #{approverId},
+			  `process_instance_id` = #{processInstanceId},
+			  `publisher_id` = #{publisherId},
+			  `publish_time` = #{publishTime},
+			  `actual_publish_time` = #{actualPublishTime},
+			  `is_published` = #{isPublished}
+			WHERE `id` = #{id} ;
+	</update>
+	
+	<update id="batchUpdateIsPublished">
+		<foreach collection="noticeList" item="notice" index="index" open="" close="" separator=";">
+			UPDATE `off_notice` 
+				SET
+				  	`is_published` = #{notice.isPublished}
+			WHERE `id` = #{notice.id}
+		</foreach>
+	</update>
+	
+	<select id="getTop5Notice" resultType="offNotice">
+		<!-- SELECT * FROM off_notice ORDER BY create_date DESC LIMIT 3 -->
+		SELECT notice.* FROM off_notice notice 
+		JOIN sys_user `user` ON notice.`user_id` = `user`.id
+		WHERE (notice.IS_DELETED != '1' OR notice.IS_DELETED IS NULL)  
+			AND IS_PUBLISHED = 1
+		<if test="beginDate != null and beginDate != ''">
+			AND notice.`create_date` &gt;= #{beginDate} 
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND notice.`create_date` &lt;= #{endDate} 
+		</if>
+		<if test="type != null and type != ''">
+			AND notice.type = #{type} 
+		</if>
+		<if test="userName != null and userName != ''">
+			AND `user`.`NAME` LIKE CONCAT('%' ,#{userName}, '%') 
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''">
+			AND (notice.title LIKE CONCAT('%' ,#{fuzzyContent}, '%') OR notice.content LIKE CONCAT('%' ,#{fuzzyContent}, '%')) 
+		</if>
+		<if test="!seeall">
+			AND (<!-- notice.DEPT_IDS LIKE CONCAT('%,' ,#{userDeptId}, ',%') 
+					OR notice.DEPT_IDS LIKE CONCAT(#{userDeptId}, ',%') 
+					OR notice.DEPT_IDS LIKE CONCAT('%,', #{userDeptId})
+					OR notice.DEPT_IDS = #{userDeptId} -->
+					CONCAT(',', notice.`DEPT_IDS`, ',') REGEXP CONCAT(',(',REPLACE(#{deptIdList},',','|'),'),')
+					OR notice.DEPT_IDS = '' 
+					OR notice.DEPT_IDS IS NULL 
+					OR ( notice.USER_ID = #{userId} AND (notice.APPROVE_STATUS = '0' OR notice.APPROVE_STATUS = '2'))
+				)
+		</if>
+		<if test="isRead != null and isRead == '1'.toString()">
+			AND notice.`id` IN 
+			(
+				SELECT n.`ID` FROM off_notice n
+					JOIN off_notice_read nr
+					ON nr.`NOTICE_ID` = n.`ID`
+					WHERE nr.`USER_ID` = #{userId}
+			)
+		</if>
+		<if test="isRead != null and isRead == '0'.toString()">
+			AND notice.`id` NOT IN 
+			(
+				SELECT n.`ID` FROM off_notice n
+					JOIN off_notice_read nr
+					ON nr.`NOTICE_ID` = n.`ID`
+					WHERE nr.`USER_ID` = #{userId}
+			)
+		</if>
+		AND (notice.APPROVE_STATUS = '1' OR ( notice.USER_ID = #{userId} AND (notice.APPROVE_STATUS = '0' OR notice.APPROVE_STATUS = '2') ))
+		OR ( notice.USER_ID = #{userId} AND (IS_PUBLISHED IS NULL OR IS_PUBLISHED = 0) AND (notice.IS_DELETED != '1' OR notice.IS_DELETED IS NULL) )
+		ORDER BY notice.CREATE_DATE DESC LIMIT 5
+	</select>
+	
+</mapper>

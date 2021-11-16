@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdWorkMarketDao">
+	
+	<resultMap id="adWorkMarketResult" type="adWorkMarket">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="type" column="type" />
+		<result property="status" column="status" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" />
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<collection property="marketAttachsList" column="id" select="findMarketBusinessAttachToList" />
+		<collection property="marketBacksList" column="id" select="findWorkMarketBackToList" />
+	</resultMap>
+	
+	<!-- 附加表 resultMap -->
+	<resultMap id="adWorkMarketAttachResult" type="adWorkMarketAttach">
+		<id property="id" column="id" />
+		<result property="workMarketId" column="WORK_MARKET_ID" />
+		<result property="responsibleUserId" column="RESPONSIBLE_USER_ID" />
+		<result property="responsibleUserName" column="responsible_user_name" />
+		<result property="workDate" column="WORK_DATE" />
+		<result property="startTime" column="START_TIME" />
+		<result property="endTime" column="END_TIME" />
+		<result property="company" column="COMPANY" />
+		<result property="clientName" column="CLIENT_NAME" />
+		<result property="clientPosition" column="CLIENT_POSITION" />
+		<result property="clientPosition" column="CLIENT_POSITION" />
+		<result property="clientPhone" column="CLIENT_PHONE" />
+		<result property="level" column="LEVEL" />
+		<result property="content" column="CONTENT" />
+		<result property="isDeleted" column="IS_DELETED" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<!-- 退回附表 -->
+	<resultMap id="adWorkMarketBackResult" type="adWorkMarketBack">
+		<id property="id" column="id" />
+		<result property="userId" column="USER_ID" />
+		<result property="workMarketId" column="WORK_MARKET_ID" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="content" column="CONTENT" />
+		<association property="sysUser" column="user_id" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	<select id="findWorkMarketBackToList" resultMap="adWorkMarketBackResult">
+		SELECT * FROM ad_work_market_back WHERE WORK_MARKET_ID = #{id}
+	</select> 
+	
+	
+	<select id="findAll" resultMap="adWorkMarketResult">
+		SELECT * FROM ad_work_market
+	</select>
+	
+	<select id="findById" resultMap="adWorkMarketResult">
+		SELECT * FROM ad_work_market WHERE ID = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE ad_work_market 
+			SET
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	APPLY_TIME=#{applyTime},
+			  	TYPE=#{type},
+			  	STATUS=#{status},
+			  	IS_DELETED=#{isDeleted},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="setSstatus">
+		UPDATE ad_work_market 
+			SET
+			  	STATUS=#{status}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_work_market(
+			  	USER_ID,
+			  	DEPT_ID,
+			  	APPLY_TIME,
+			  	TYPE,
+			  	STATUS,
+			  	IS_DELETED,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{userId},
+			  	#{deptId},
+			  	#{applyTime},
+			  	#{type},
+			  	#{status},
+			  	#{isDeleted},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+		
+	<!-- 关联查询 Begin -->
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	<select id="findUserByUserId" resultType="sysUser">
+			SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	<select id="findMarketBusinessAttachToList" resultMap="adWorkMarketAttachResult">
+		SELECT * FROM ad_work_market_attach WHERE WORK_MARKET_ID = #{id}
+	</select>
+	<!-- 关联查询 End -->
+	
+	<delete id="deleteById">
+		DELETE FROM ad_work_market WHERE ID = #{id}
+	</delete>
+	
+</mapper>

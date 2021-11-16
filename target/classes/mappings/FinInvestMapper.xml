@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinInvestDao">
+	
+	<resultMap id="finInvestResult" type="finInvest">
+		<id property="id" column="id" />
+		<result property="value" column="value" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="finInvestResult">
+		SELECT * FROM fin_invest
+	</select>
+	
+	<select id="findByPage"  resultMap="finInvestResult">
+		SELECT * FROM fin_invest
+	</select>
+	
+	<select id="findById" resultMap="finInvestResult">
+		SELECT * FROM fin_invest WHERE ID = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE fin_invest 
+			SET
+			  	VALUE=#{value},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_invest(
+			  	VALUE,
+			  	CREATE_BY,
+			  	CREATE_DATE
+			) 
+			VALUES (
+			  	#{value},
+			  	#{createBy},
+			  	#{createDate}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_invest WHERE ID = #{id}
+	</delete>
+	
+</mapper>

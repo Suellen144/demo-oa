@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysDataPermissionDao">
+	
+	<resultMap id="sysDataPermissionResult" type="sysDataPermission">
+		<id property="id" column="id" />
+		<result property="roleId" column="role_id" />
+		<result property="menuId" column="menu_id" />
+		<result property="deptIds" column="dept_ids" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="sysDataPermissionResult">
+		SELECT * FROM sys_data_permission
+	</select>
+	
+	<select id="findById" resultMap="sysDataPermissionResult">
+		SELECT * FROM sys_data_permission WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByRoleId" resultMap="sysDataPermissionResult">
+		SELECT * FROM sys_data_permission WHERE ROLE_ID = #{roleId}
+	</select> 
+	
+	<select id="findByRoleIdAndMenuId" resultMap="sysDataPermissionResult">
+		SELECT * FROM sys_data_permission 
+			WHERE MENU_ID = #{menuId} AND ROLE_ID IN
+			<foreach collection="roleIdList" item="roleId" index="index" open="(" separator="," close=")">
+				#{roleId}
+			</foreach>
+	</select>
+	
+	<select id="getCountByRoleIdAndMenuId" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM sys_data_permission 
+			WHERE MENU_ID = #{menuId} AND ROLE_ID IN
+			<foreach collection="roleIdList" item="roleId" index="index" open="(" separator="," close=")">
+				#{roleId}
+			</foreach>
+	</select>
+	
+	<update id="update">
+		UPDATE sys_data_permission 
+			SET
+			  	ROLE_ID=#{roleId},
+			  	MENU_ID=#{menuId},
+			  	DEPT_IDS=#{deptIds},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<!-- 批量更新 -->
+	<update id="batchUpdate">
+		<foreach collection="dataPermissionList" item="dataPermission" index="index" open="" close="" separator=";">
+			UPDATE sys_data_permission 
+				SET
+				  	ROLE_ID=#{dataPermission.roleId},
+				  	MENU_ID=#{dataPermission.menuId},
+				  	DEPT_IDS=#{dataPermission.deptIds},
+				  	UPDATE_BY=#{dataPermission.updateBy},
+				  	UPDATE_DATE=#{dataPermission.updateDate}
+			WHERE ID = #{dataPermission.id}
+		</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sys_data_permission(
+			  	ROLE_ID,
+			  	MENU_ID,
+			  	DEPT_IDS,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{roleId},
+			  	#{menuId},
+			  	#{deptIds},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO sys_data_permission(
+			  	ROLE_ID,
+			  	MENU_ID,
+			  	DEPT_IDS,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES 
+			<foreach collection="dataPermissionList" item="dataPermission" index="index" separator=",">
+				(
+					#{dataPermission.roleId},
+				  	#{dataPermission.menuId},
+				  	#{dataPermission.deptIds},
+				  	#{dataPermission.createBy},
+				  	#{dataPermission.createDate},
+				  	#{dataPermission.updateBy},
+				  	#{dataPermission.updateDate}
+				)
+			</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM sys_data_permission WHERE ID = #{id}
+	</delete>
+	
+</mapper>

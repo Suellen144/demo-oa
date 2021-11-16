@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdWorkMarketAttachDao">
+	
+	<resultMap id="adWorkMarketAttachResult" type="adWorkMarketAttach">
+		<id property="id" column="id" />
+		<result property="workMarketId" column="WORK_MARKET_ID" />
+		<result property="responsibleUserId" column="RESPONSIBLE_USER_ID" />
+		<result property="responsibleUserName" column="RESPONSIBLE_USER_NAME" />
+		<result property="workDate" column="WORK_DATE" />
+		<result property="startTime" column="START_TIME" />
+		<result property="endTime" column="END_TIME" />
+		<result property="company" column="COMPANY" />
+		<result property="clientName" column="CLIENT_NAME" />
+		<result property="clientPosition" column="CLIENT_POSITION" />
+		<result property="clientPosition" column="CLIENT_POSITION" />
+		<result property="clientPhone" column="CLIENT_PHONE" />
+		<result property="level" column="LEVEL" />
+		<result property="content" column="CONTENT" />
+		<result property="remark" column="REMARK" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	
+	<select id="findUserByUserId" resultType="sysUser">
+			SELECT * FROM sys_user WHERE ID = #{id} AND IS_DELETED IS NULL
+	</select>
+	
+	<select id="findAll" resultMap="adWorkMarketAttachResult">
+		SELECT * FROM ad_work_market_attach
+	</select>
+	
+	<select id="findById" resultMap="adWorkMarketAttachResult">
+		SELECT * FROM ad_work_market_attach WHERE ID = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE ad_work_market_attach 
+			SET
+			  	WORK_MARKET_ID=#{workMarketId},
+			  	RESPONSIBLE_USER_ID=#{responsibleUserId},
+			  	RESPONSIBLE_USER_NAME=#{responsibleUserName},
+			  	WORK_DATE=#{workDate},
+			  	START_TIME=#{startTime},
+			  	END_TIME=#{endTime},
+			  	COMPANY=#{company},
+			  	CLIENT_NAME=#{clientName},
+			  	CLIENT_POSITION=#{clientPosition},
+			  	CLIENT_PHONE=#{clientPhone},
+			  	LEVEL=#{level},
+			  	REMARK=#{remark},
+			  	CONTENT=#{content},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="marketAttachsList" item="marketAttach" index="index" open="" close="" separator=";">
+			UPDATE ad_work_business_attach 
+				SET
+				  	WORK_MARKET_ID=#{marketAttach.workReportId},
+				  	RESPONSIBLE_USER_ID=#{marketAttach.responsibleUserId},
+				  	RESPONSIBLE_USER_NAME=#{marketAttach.responsibleUserName},
+				  	WORK_DATE=#{marketAttach.workDate},
+				  	START_TIME=#{marketAttach.startTime},
+				  	END_TIME=#{marketAttach.endTime},
+				  	COMPANY=#{marketAttach.company},
+				  	CLIENT_NAME=#{marketAttach.clientName},
+				  	CLIENT_POSITION=#{marketAttach.clientPosition},
+				  	CLIENT_PHONE=#{marketAttach.clientPhone},
+				  	LEVEL=#{marketAttach.level},
+				  	CONTENT=#{marketAttach.content},
+				  	REMARK=#{marketAttach.remark},
+				  	CREATE_BY=#{marketAttach.createBy},
+				  	CREATE_DATE=#{marketAttach.createDate},
+				  	UPDATE_BY=#{marketAttach.updateBy},
+				  	UPDATE_DATE=#{marketAttach.updateDate}
+			WHERE ID = #{marketAttach.id}
+		</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_work_market_attach(
+			  	WORK_MARKET_ID,
+			  	RESPONSIBLE_USER_ID,
+			  	RESPONSIBLE_USER_NAME,
+			  	WORK_DATE,
+			  	START_TIME,
+			  	END_TIME,
+			  	COMPANY,
+			  	CLIENT_NAME,
+			  	CLIENT_POSITION,
+			  	CLIENT_PHONE,
+			  	LEVEL,
+			  	CONTENT,
+			  	REMARK,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{workMarketId},
+			  	#{responsibleUserId},
+			  	#{responsibleUserName},
+			  	#{workDate},
+			  	#{startTime},
+			  	#{endTime},
+			  	#{company},
+			  	#{clientName},
+			  	#{clientPosition},
+			  	#{clientPhone},
+			  	#{level},
+			  	#{content},
+			  	#{remark},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO ad_work_market_attach(
+			  	WORK_MARKET_ID,
+			  	RESPONSIBLE_USER_ID,
+			  	RESPONSIBLE_USER_NAME,
+			  	WORK_DATE,
+			  	START_TIME,
+			  	END_TIME,
+			  	COMPANY,
+			  	CLIENT_NAME,
+			  	CLIENT_POSITION,
+			  	CLIENT_PHONE,
+			  	LEVEL,
+			  	CONTENT,
+			  	REMARK,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES 
+		<foreach item="adWorkMarketAttach" index="index" collection="list" separator=",">  
+			(
+			  	#{adWorkMarketAttach.workMarketId},
+			  	#{adWorkMarketAttach.responsibleUserId},
+			  	#{adWorkMarketAttach.responsibleUserName},
+			  	#{adWorkMarketAttach.workDate},
+			  	#{adWorkMarketAttach.startTime},
+			  	#{adWorkMarketAttach.endTime},
+			  	#{adWorkMarketAttach.company},
+			  	#{adWorkMarketAttach.clientName},
+			  	#{adWorkMarketAttach.clientPosition},
+			  	#{adWorkMarketAttach.clientPhone},
+			  	#{adWorkMarketAttach.level},
+			  	#{adWorkMarketAttach.content},
+			  	#{adWorkMarketAttach.remark},
+			  	#{adWorkMarketAttach.createBy},
+			  	#{adWorkMarketAttach.createDate},
+			  	#{adWorkMarketAttach.updateBy},
+			  	#{adWorkMarketAttach.updateDate}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_work_market_attach WHERE ID = #{id}
+	</delete>
+	
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_work_market_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

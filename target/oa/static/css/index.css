@@ -1,0 +1,649 @@
+.w1280 {
+  width: 1200px;
+}
+.ma {
+  margin: auto;
+}
+.tc {
+  text-align: center;
+}
+.bd {
+  display: block;
+}
+.pr {
+  position: relative;
+}
+.pa {
+  position: absolute;
+}
+.db {
+  display: block;
+}
+.dn {
+  display: none;
+}
+.dib {
+  display: inline-block;
+}
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+.clearfix::after {
+  content: ".";
+  clear: both;
+  display: block;
+  overflow: hidden;
+  font-size: 0;
+  height: 0;
+}
+.clearfix {
+  zoom: 1;
+}
+.t-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.navbar-nav > li > a:hover,
+.navbar-nav > li > a .active {
+  background: #2577FF;
+}
+.navbar-nav > li > a:focus {
+  background: #2577FF;
+}
+.nav .open > a,
+.nav .open > a:focus,
+.nav .open > a:hover {
+  background: #2577FF;
+}
+.dropdown-menu > li > a {
+  padding: 15px 15px 15px 20px;
+  color: #333;
+}
+.dropdown-menu > li > a:hover {
+  background: #4289FF;
+  color: white;
+}
+html,
+body {
+  background-color: #F0F3F8;
+  height: 100%;
+}
+a {
+  color: #333;
+}
+a:hover {
+  color: #333;
+}
+a:active {
+  color: #333;
+}
+p {
+  margin-bottom: 0;
+}
+input {
+  outline: none;
+}
+header {
+  background-color: #4289FF;
+  height: 60px;
+}
+header .head-main {
+  width: 1200px;
+  margin: auto;
+}
+header .head-main .logo-box {
+  width: 93px;
+  height: 37px;
+  margin-top: 10px;
+}
+header .head-main .nav {margin: 0;}
+
+header .head-main .nav > li {
+  height: 60px;
+}
+header .head-main .nav > li .nav-icon {
+  display: block;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  color: white;
+  text-align: center;
+}
+
+header .head-main .nav > li .nav-icon:before {
+  vertical-align: middle;
+}
+.main-1 {
+  padding: 30px 0 20px 0;
+  width: 1200px;
+  margin: auto;
+}
+.main-1 .main-1-carousel {	
+  /*width: 430px;*/
+ 	width: 390px;
+  height: 350px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  float: left;
+  overflow:hidden;
+}
+.main-1 .main-1-carousel .time-con {
+  width: 100%;
+  height: 350px;
+  background: url("../images/index/time-bg.png") center no-repeat;
+  background-size: 100% 100%;
+  color: white;
+  text-align: center;
+}
+.main-1 .main-1-carousel .time-con .date {
+  font-size: 16px;
+  padding-top: 55px;
+}
+.main-1 .main-1-carousel .time-con .date-day {
+  font-size: 16px;
+  padding-top: 5px;
+}
+.main-1 .main-1-carousel .time-con .date-tiem {
+  font-size: 50px;
+  padding-top: 30px;
+}
+
+.carousel-indicators{bottom:0}
+
+
+.main-1 .main-1-carousel #performance{display: block;width:100%;height:350px;}
+.main-1 .main-1-carousel #performance img{height:350px;}
+
+.main-1 .main-1-ad {
+  /*width: 630px;*/
+ 	width: 590px;
+  height: 350px;
+  margin-left: 20px;
+  float: left;
+}
+.main-1 .main-1-ad .time {
+  float: right;
+}
+.main-1 .main-1-ad .title {
+  max-width: 350px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.main-1 .main-1-ad .pan-con a{display: block;padding: 20px;border-bottom: 1px solid #d7d7d7;padding-left: 30px;position: relative;}
+.main-1 .main-1-ad .pan-con a+ a+ a+ a+ a{border: 0;}
+.main-1 .main-1-ad .pan-con a:before{content: '';display: block;position: absolute;top: 0;bottom: 0;margin: auto;left: 10px;width: 8px;height: 8px;border-radius: 50%;background-color: #BBD9FF;}
+.main-1 .main-1-ad .pan-con a p{height: 20px;}
+.navbar-nav>li>.dropdown-menu{border: 0;-moz-box-shadow:0 6px 12px rgba(0,0,0,.175); -webkit-box-shadow:0 6px 12px rgba(0,0,0,.175); box-shadow:0 6px 12px rgba(0,0,0,.175);}
+
+.main-1 .main-1-ad .pan-con {
+  height: 307px;
+  overflow: auto;
+  padding: 0 20px 0 30px;
+  margin-right: 10px;
+}
+.main-1 .main-1-ad .pan-con::-webkit-scrollbar {
+  /*滚动条整体样式*/
+  width: 4px;
+  /*高宽分别对应横竖滚动条的尺寸*/
+  height: 1px;
+}
+.main-1 .main-1-ad .pan-con::-webkit-scrollbar-thumb {
+  /*滚动条里面小方块*/
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  background: #D8D8D8;
+}
+.main-1 .main-1-ad .pan-con::-webkit-scrollbar-track {
+  /*滚动条里面轨道*/
+  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  background: #EEEEEE;
+}
+.main-1 .main-1-tz {
+  float: right;
+}
+.main-1 .main-1-tz .tz-con {
+  width: 180px;
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+.main-1 .main-1-tz .tz-con .icon {
+  display: inline-block;
+  width: 55px;
+  height: 55px;
+  background: url("../images/index/icon/icon-tz-01.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-1 .main-1-tz .tz-con .icon.tz-icon {
+  background: url("../images/index/icon/icon-tz-02.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-1 .main-1-tz .tz-con .number {
+  font-size: 30px;
+  line-height: 38px;
+}
+.main-1 .main-1-tz .tz-con .text-su {
+  font-size: 12px;
+  color: #A0A0A0;
+}
+.main-1 .main-1-tz .tz-notice {
+  margin-top: 20px;
+}
+.main-2 {
+  width: 1200px;
+  margin: auto;
+}
+.main-2 .fn-url {
+  display: inline-block;
+  padding: 19px;
+  background-color: #35A7FF;
+  border-radius: 14px;
+ 
+}
+.main-2 .fn-url.fn-icon-1 {
+  background-color: #35A7FF;
+}
+.main-2 .fn-url.fn-icon-1 .fn-icon {
+  background: url("../images/index/icon/icon_01.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-2 {
+  background-color: #00B285;
+}
+.main-2 .fn-url.fn-icon-2 .fn-icon {
+  background: url("../images/index/icon/icon_02.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-3 {
+  background-color: #FFA800;
+}
+.main-2 .fn-url.fn-icon-3 .fn-icon {
+  background: url("../images/index/icon/icon_03.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-4 {
+  background-color: #FF5964;
+}
+.main-2 .fn-url.fn-icon-4 .fn-icon {
+  background: url("../images/index/icon/icon_04.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-5 {
+  background-color: #FF8523;
+}
+.main-2 .fn-url.fn-icon-5 .fn-icon {
+  background: url("../images/index/icon/icon_05.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-6 {
+  background-color: #35A7FF;
+}
+.main-2 .fn-url.fn-icon-6 .fn-icon {
+  background: url("../images/index/icon/icon_06.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-7 {
+  background-color: #4D7AFF;
+}
+.main-2 .fn-url.fn-icon-7 .fn-icon {
+  background: url("../images/index/icon/icon_07.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-8 {
+  background-color: #00B285;
+}
+.main-2 .fn-url.fn-icon-8 .fn-icon {
+  background: url("../images/index/icon/icon_08.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-9 {
+  background-color: #00B285;
+}
+.main-2 .fn-url.fn-icon-9 .fn-icon {
+  background: url("../images/index/icon/icon_09.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-10 {
+  background-color: #00B285;
+}
+.main-2 .fn-url.fn-icon-10 .fn-icon {
+  background: url("../images/index/icon/icon_10.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-11 {
+  background-color: #4D7AFF;
+}
+.main-2 .fn-url.fn-icon-11 .fn-icon {
+  background: url("../images/index/icon/icon_11.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-12 {
+  background-color: #FF5964;
+}
+.main-2 .fn-url.fn-icon-12 .fn-icon {
+  background: url("../images/index/icon/icon_12.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-13 {
+  background-color: #FF7200;
+}
+.main-2 .fn-url.fn-icon-13 .fn-icon {
+  background: url("../images/index/icon/icon_13.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-14 {
+  background-color: #00B285;
+}
+.main-2 .fn-url.fn-icon-14 .fn-icon {
+  background: url("../images/index/icon/icon_14.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-15 {
+  background-color: #35A7FF;
+}
+.main-2 .fn-url.fn-icon-15 .fn-icon {
+  background: url("../images/index/icon/icon_15.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-16 {
+  background-color: #FFA800;
+}
+.main-2 .fn-url.fn-icon-16 .fn-icon {
+  background: url("../images/index/icon/icon_16.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-17 {
+  background-color: #FFA800;
+}
+.main-2 .fn-url.fn-icon-17 .fn-icon {
+  background: url("../images/index/icon/icon_17.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-18 {
+  background-color: #FFA800;
+}
+.main-2 .fn-url.fn-icon-18 .fn-icon {
+  background: url("../images/index/icon/icon_18.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-19 {
+  background-color: #FFA800;
+}
+.main-2 .fn-url.fn-icon-19 .fn-icon {
+  background: url("../images/index/icon/icon_19.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-20 {
+  background-color: #FFA800;
+}
+.main-2 .fn-url.fn-icon-20 .fn-icon {
+  background: url("../images/index/icon/icon_20.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-21 {
+  background-color: #4D7AFF;
+}
+.main-2 .fn-url.fn-icon-21 .fn-icon {
+  background: url("../images/index/icon/icon_21.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-22 {
+  background-color: #FF5964;
+}
+.main-2 .fn-url.fn-icon-22 .fn-icon {
+  background: url("../images/index/icon/icon_22.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-23 {
+  background-color: #FF7200;
+}
+.main-2 .fn-url.fn-icon-23 .fn-icon {
+  background: url("../images/index/icon/icon_23.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-24 {
+  background-color: #00B285;
+}
+.main-2 .fn-url.fn-icon-24 .fn-icon {
+  background: url("../images/index/icon/icon_24.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn-url.fn-icon-25 {
+  background-color: #35A7FF;
+}
+.main-2 .fn-url.fn-icon-25 .fn-icon {
+  background: url("../images/index/icon/icon_25.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .use-fn {
+ 	padding: 42px 40px 0 42px;
+ 	clear: both;
+    overflow: hidden;
+}
+.main-2 .use-fn a{
+	display: block;
+	margin-right: 35px;
+	margin-bottom: 38px;
+	float: left;
+}
+.main-2 .use-fn a:nth-child(10n+10) {
+  margin-right: 0;
+}
+.main-2 .fn-box {
+  display: inline-block;
+ 
+}
+.main-2 .fn-icon {
+  display: block;
+  margin: auto;
+  width: 42px;
+  height: 42px;
+  background: url("../images/index/icon/icon_01.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.main-2 .fn_txt {
+  text-align: center;
+  width: 80px;
+  padding: 7px 0 0 0;
+}
+.pannel-main {
+  border-radius: 8px;
+  background-color: white;
+}
+.pannel-main .pan-top {
+  font-size: 16px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #D7D7D7;
+}
+.pannel-main .pan-top .more i {
+  float: right;
+  display: inline-block;
+  width: 22px;
+  height: 15px;
+  background: url("../images/index/icon/icon-more.png") center no-repeat;
+  background-size: 100% 100%;
+  margin-top: 5px;
+}
+footer {
+  text-align: center;
+  padding: 40px 0;
+  font-size: 12px;
+  color: #999999;
+}
+footer.login {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 30px;
+  color: #405783;
+}
+.carousel-indicators li {
+  width: 8px;
+  height: 8px;
+}
+.carousel-indicators .active {
+  width: 8px;
+  height: 8px;
+  margin: 1px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu > .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -5px;
+  margin-left: -1px;
+  -webkit-border-radius: 0 6px 6px 6px;
+  -moz-border-radius: 0 6px 6px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover > .dropdown-menu {
+  display: block;
+}
+.dropdown-submenu > a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #ccc;
+  margin-top: 5px;
+  /*margin-right: -10px;*/
+}
+.dropdown-submenu:hover > a:after {
+  border-left-color: #fff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+  width: 100%;
+}
+.dropdown-submenu.pull-left > .dropdown-menu {
+  left: -99%;
+  margin-left: -2px;
+  -webkit-border-radius: 6px 0 6px 6px;
+  -moz-border-radius: 6px 0 6px 6px;
+  border-radius: 6px 0 6px 6px;
+  border: 0;
+  box-shadow: 0 0px 12px rgba(0,0,0,.175);
+}
+.login-con {
+  width: 100%;
+  height: 100%;
+}
+.login-con .login-con-1 {
+  height: 50%;
+  background: url("../images/index/OA01.png") center no-repeat;
+  background-size: cover;
+}
+.login-con .login-con-2 {
+  height: 50%;
+  background-color: #FEFEFE;
+}
+.login-con .login-box {
+  width: 470px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-left: -235px;
+  margin-top: -300px;
+}
+.login-con .login-box .login-logo{text-align: center;padding-bottom: 30px;}
+.login-con .login-box .login-logo .logo {
+  display: block;
+  width: 239px;
+  height: 100px;
+  background: url("../images/index/OA02_03.png") center no-repeat;
+  background-size: 100% 100%;
+  margin: auto;
+}
+.login-con .login-box .login-logo .logo-txt { 
+	margin-top: 10px;
+  display: inline-block;
+  font-size: 13px;
+  line-height: 30px;
+  height: 30px;
+  width: 150px;
+  border-radius: 50px;
+  border: 1px solid #fff;
+  color: #fffefe;
+}
+.login-con .login-box .login-in {
+  background: #fff;
+  padding: 50px;
+  border-radius: 8px;
+  -moz-box-shadow: 0px 5px 10px rgba(0,0,0,0.06);
+  -webkit-box-shadow: 0px 5px 10px rgba(0,0,0,0.06);
+  box-shadow: 0px 5px 10px rgba(0,0,0,0.06);
+}
+.login-con .login-box .login-in .in-i {
+  position: relative;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+}
+.login-con .login-box .login-in .in-i .in-icon {
+  display: block;
+  width: 14px;
+  height: 16px;
+  position: absolute;
+  left: 26px;
+  top: 12px;
+}
+.login-con .login-box .login-in .in-i .in-icon.icon-user {
+  background: url("../images/index/icon/OA02_07.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.login-con .login-box .login-in .in-i .in-icon.icon-password {
+  background: url("../images/index/icon/OA02_11.png") center no-repeat;
+  background-size: 100% 100%;
+}
+.login-con .login-box .login-in .in-i input {
+  border: 0;
+  padding: 12px 0 12px 60px;
+  width: 100%;
+  border-radius: 6px;
+}
+.login-con .login-box .login-in .in-i input::-webkit-input-placeholder {
+  /* WebKit, Blink, Edge */
+  color: #999999;
+}
+.login-con .login-box .login-in .in-i input:-moz-placeholder {
+  /* Mozilla Firefox 4 to 18 */
+  color: #999999;
+}
+.login-con .login-box .login-in .in-i input::-moz-placeholder {
+  /* Mozilla Firefox 19+ */
+  color: #999999;
+}
+.login-con .login-box .login-in .in-i input:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: #999999;
+}
+.login-con .login-box .login-in .in-password {
+  margin-top: 20px;
+}
+.login-con .login-box .login-in .login-btn {
+  background-color: #47A6FF;
+  color: white;
+  border: 0;
+  width: 100%;
+  padding: 16px;
+  border-radius: 6px;
+  margin-top: 45px;
+  font-size: 16px;
+}

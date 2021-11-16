@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IOffForumDao">
+	
+	<resultMap id="offForumResult" type="com.reyzar.oa.domain.OffForum">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="remark" column="remark" />
+		<result property="postCount" column="postCount" />
+		<result property="lastPostTime" column="lastPostTime" />
+		<result property="url" column="url" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="Is_delete" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="offForumResult">
+		SELECT * FROM off_forum WHERE  is_delete is null
+	</select>
+
+</mapper>

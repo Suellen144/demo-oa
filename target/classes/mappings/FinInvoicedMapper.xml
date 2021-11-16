@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinInvoicedDao">
+	
+	<resultMap id="finInvoicedResult" type="finInvoiced">
+		<id property="id" column="id" />
+		<result property="payname" column="pay_name" />
+		<result property="paynumber" column="pay_number" />
+		<result property="payaddress" column="pay_address" />
+		<result property="payphone" column="pay_phone" />
+		<result property="bankAddress" column="bank_address" />
+		<result property="bankNumber" column="bank_number" />
+		<result property="collectionCompany" column="collection_company" />
+		<result property="collectionContact" column="collection_contact" />
+		<result property="collectionAddress" column="collection_address" />
+		<result property="collectionAccount" column="collection_account" />
+		<result property="collectionBank" column="collection_bank" />
+		<result property="collectionNumber" column="colletcion_number" />
+		<result property="remark" column="remark" />
+		<result property="total" column="total" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="finInvoicedDate" column="finInvoiced_Date" />
+		<!-- 项目管理模块字段添加 -->
+		<result property="processInstanceId" column="PROCESS_INSTANCE_ID" />
+		<result property="invoiceAmount" column="invoice_amount" />
+		<result property="ticketUser" column="ticket_user" />
+		<result property="ticketPhone" column="ticket_phone" />
+		<result property="sendWay" column="send_way" />
+		<result property="isNewProject" column="is_new_project" />
+		<result property="attachName" column="ATTACH_NAME" />
+		<result property="attachments" column="ATTACHMENTS" />
+		<result property="barginManageId" column="bargin_manage_id" />
+		<result property="applyUserId" column="apply_user_id" />
+		<result property="applyUnit" column="apply_unit" />
+		<result property="status" column="STATUS" />
+		
+		<association property="applyUser" column="apply_user_id" javaType="sysUser"  select="findUserByUserId" />
+		<association property="barginManage" column="bargin_manage_id"  javaType="saleBarginManage" select="findBarginManageResultList" />
+		<association property="applicant" column="projectUserId" javaType="sysUser"  select="findUserByUserId" />
+		<collection property="invoicedAttachList" column="id" select="findInvoicedAttachInList" />
+	</resultMap>
+	
+	<resultMap id="finInvoicedAttachResult" type="finInvoicedAttach">
+		<id property="id" column="id" />
+		<result property="invoicedId" column="invoiced_id" />
+		<result property="name" column="name" />
+		<result property="model" column="model" />
+		<result property="unit" column="unit" />
+		<result property="number" column="number" />
+		<result property="price" column="price" />
+		<result property="money" column="money" />
+		<result property="excise" column="excise" />
+		<result property="levied" column="ldvied" />
+		<result property="exciseMoney" column="excise_money" />
+		<result property="totalMoney" column="total_money" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+
+	<select id="findByBarginId" resultMap="finInvoicedResult">
+		SELECT * FROM fin_invoiced WHERE bargin_manage_id = #{barginId} and STATUS = 6
+	</select>
+
+	<select id="findByBarginIdAndCreateDate" resultMap="finInvoicedResult">
+		SELECT * FROM fin_invoiced WHERE bargin_manage_id = #{barginId}
+		<if test="createDate != null and createDate != ''">
+			AND create_date &lt; #{createDate}
+		</if>
+	</select>
+
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findAll" resultMap="finInvoicedResult">
+		SELECT * FROM fin_invoiced
+	</select>
+	
+	<select id="findById" resultMap="finInvoicedResult">
+		SELECT * FROM fin_invoiced WHERE ID = #{id}
+	</select> 
+	
+	<select id="findSaleProjectManageById" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id}  
+	</select>
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="finInvoicedResult">
+		select *,
+		(select name from sale_project_manage where id=(select PROJECT_MANAGE_ID from sale_bargin_manage where id=fin_invoiced.bargin_manage_id limit 0,1) limit 0,1) as projectName,
+		(select USER_ID from sale_project_manage where id=(select PROJECT_MANAGE_ID from sale_bargin_manage where id=fin_invoiced.bargin_manage_id limit 0,1) limit 0,1) as projectUserId
+		FROM fin_invoiced   WHERE   bargin_manage_id is not null
+		<if test="barginManageId !=null and barginManageId != ''.toString()">
+		and  bargin_manage_id = #{barginManageId}
+		</if>
+		<if test="userIdCurrent !=null and userIdCurrent !=''">
+				AND ( (select APPLICANT from sale_project_manage where id=( select PROJECT_MANAGE_ID from sale_bargin_manage where id=fin_invoiced.bargin_manage_id))= #{userIdCurrent} or apply_user_id = #{userIdCurrent})
+			</if>
+			<if test="idStr != null and idStr !=''">
+				AND ( (select APPLICANT from sale_project_manage where id=( select PROJECT_MANAGE_ID from sale_bargin_manage where id=fin_invoiced.bargin_manage_id)) in
+				<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+				  #{item}
+				</foreach>
+				 or apply_user_id in
+				<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+				  #{item}
+				</foreach>
+				)
+			</if>
+		<if test="status != null and status != ''">
+			AND STATUS = #{status}
+		</if>
+		<if test="status_a != null and status_a != ''">
+			AND STATUS != 6
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			and ((select BARGIN_NAME from sale_bargin_manage where id=fin_invoiced.bargin_manage_id limit 0,1)  LIKE CONCAT('%',#{fuzzyContent},'%')
+			or invoice_amount like CONCAT('%',#{fuzzyContent},'%')
+			or (select BARGIN_CODE from sale_bargin_manage where id=fin_invoiced.bargin_manage_id limit 0,1)  LIKE CONCAT('%',#{fuzzyContent},'%'))
+		</if>
+		<if test="startTime != null and startTime != ''.toString()">
+			AND finInvoiced_Date &gt;= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''.toString()">
+			AND finInvoiced_Date &lt;= #{endTime}
+		</if>
+	</select>
+	
+	<select id="findBarginManageResultList" resultType="saleBarginManage">
+		SELECT * FROM sale_bargin_manage WHERE id=#{id}
+	</select>
+	
+	<update id="update">
+		UPDATE fin_invoiced 
+			SET
+			  	pay_name=#{payname},
+			  	PAY_NUMBER=#{paynumber},
+			  	PAY_ADDRESS=#{payaddress},
+			  	PAY_PHONE=#{payphone},
+			  	BANK_ADDRESS=#{bankAddress},
+			  	BANK_NUMBER=#{bankNumber},
+			  	COLLECTION_COMPANY=#{collectionCompany},
+			  	COLLECTION_CONTACT=#{collectionContact},
+			  	collection_address=#{collectionAddress},
+			  	collection_account=#{collectionAccount},
+			  	COLLECTION_BANK=#{collectionBank},
+			  	COLLECTION_NUMBER=#{collectionNumber},
+			  	REMARK=#{remark},
+			  	TOTAL=#{total},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	IS_DELETED=#{isDeleted},
+			  	
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	bargin_manage_id=#{barginManageId},
+			  	invoice_amount=#{invoiceAmount},
+			  	ticket_user=#{ticketUser},
+			  	ticket_phone=#{ticketPhone},
+			  	send_way=#{sendWay},
+			  	is_new_project=#{isNewProject},
+			  	ATTACH_NAME=#{attachName},
+			  	ATTACHMENTS=#{attachments},
+			  	apply_user_id=#{applyUserId},
+			  	apply_unit=#{applyUnit},
+			  	STATUS=#{status},
+			  	finInvoiced_Date=#{finInvoicedDate}
+			  	
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_invoiced(
+			  	PAY_NAME,
+			  	PAY_NUMBER,
+			  	PAY_ADDRESS,
+			  	PAY_PHONE,
+			  	BANK_ADDRESS,
+			  	BANK_NUMBER,
+			  	COLLECTION_COMPANY,
+			  	COLLECTION_CONTACT,
+			  	COLLECTION_ADDRESS,
+			  	COLLECTION_ACCOUNT,
+			  	COLLECTION_BANK,
+			  	COLLECTION_NUMBER,
+			  	REMARK,
+			  	TOTAL,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_DELETED,
+			  	PROCESS_INSTANCE_ID,
+			  	bargin_manage_id,
+			  	invoice_amount,
+			  	ticket_user,
+			  	ticket_phone,
+			  	send_way,
+			  	is_new_project,
+			  	ATTACH_NAME,
+			  	ATTACHMENTS,
+			  	apply_user_id,
+			  	apply_unit,
+			  	STATUS,
+			  	finInvoiced_Date
+			) 
+			VALUES (
+			  	#{payname},
+			  	#{paynumber},
+			  	#{payaddress},
+			  	#{payphone},
+			  	#{bankAddress},
+			  	#{bankNumber},
+			  	#{collectionCompany},
+			  	#{collectionContact},
+			  	#{collectionAddress},
+			  	#{collectionAccount},
+			  	#{collectionBank},
+			  	#{collectionNumber},
+			  	#{remark},
+			  	#{total},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isDeleted},
+			  	#{processInstanceId},
+			  	#{barginManageId},
+			  	#{invoiceAmount},
+			  	#{ticketUser},
+			  	#{ticketPhone},
+			  	#{sendWay},
+			  	#{isNewProject},
+			  	#{attachName},
+			  	#{attachments},
+			  	#{applyUserId},
+			  	#{applyUnit},
+			  	#{status},
+			  	#{finInvoicedDate}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_invoiced WHERE ID = #{id}
+	</delete>
+	
+	<select id="findInvoicedAttachInList" resultMap="finInvoicedAttachResult">
+		SELECT * FROM fin_invoiced_attach WHERE invoiced_id = #{id}
+	</select>
+	
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IResponsibilityDao">
+	
+	<resultMap id="responsibilityResult" type="responsibility">
+		<id property="id" column="id" />
+		<result property="deptId" column="dept_id" />
+		<result property="content" column="content" />
+		<result property="titleOrContent" column="title_or_content" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<insert id="saveByDept" parameterType="java.util.Map">
+		INSERT INTO t_responsibility(dept_id, content,title_or_content,create_by,create_date) VALUES(#{deptId}, #{content}, #{titleOrContent}, #{createBy}, now())
+	</insert>
+
+	<update id="updateByDeptId" parameterType="java.util.Map">
+		UPDATE t_responsibility SET content = #{content},update_by = #{updateBy} ,update_date = now()  WHERE dept_id = #{id}
+	</update>
+
+	<select id="findByDeptId2"  resultType="responsibility">
+		SELECT 	* FROM 	t_responsibility  WHERE dept_id=#{id}
+	</select>
+	
+	<select id="findById"  resultType="responsibility">
+		SELECT 	* FROM 	t_responsibility  WHERE id=#{id}
+	</select>
+	
+	<select id="findByDeptId"  resultMap="responsibilityResult">
+		SELECT 	* FROM 	t_responsibility  WHERE dept_id=#{deptId} and title_or_content=#{titleOrContent}
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO t_responsibility(dept_id, content,title_or_content,create_by,create_date) VALUES(#{deptId}, #{content}, #{titleOrContent}, #{createBy}, #{createDate})
+	</insert>
+	
+	<update id="update">
+		UPDATE t_responsibility SET dept_id=#{deptId}, content=#{content},title_or_content=#{titleOrContent},UPDATE_BY=#{updateBy},UPDATE_DATE=#{updateDate} WHERE ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM t_responsibility WHERE ID = #{id}
+	</delete>
+</mapper>

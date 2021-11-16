@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdFileManageDao">
+	
+	<resultMap id="adFileManageResult" type="adFileManage">
+		<id property="id" column="id" />
+		<result property="directoryId" column="directory_id" />
+		<result property="name" column="name" />
+		<result property="originName" column="origin_name" />
+		<result property="filePath" column="file_path" />
+		<result property="deptIds" column="dept_ids" />
+		<result property="type" column="type" />
+		<result property="comment" column="comment" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="isDeleted" />
+	</resultMap>
+	
+	<select id="findByPage" resultMap="adFileManageResult">
+		SELECT file.* FROM ad_file_manage file
+			JOIN ad_directory_manage dir
+			ON dir.ID = file.DIRECTORY_ID
+			WHERE 1 = 1 AND (file.IS_DELETED != 'y' OR file.IS_DELETED IS NULL)
+		<if test="!seeall">
+			<!-- AND ( (dir.DEPT_IDS LIKE CONCAT('%,' ,#{userDeptId}, ',%') 
+					OR dir.DEPT_IDS LIKE CONCAT(#{userDeptId}, ',%') 
+					OR dir.DEPT_IDS LIKE CONCAT('%,', #{userDeptId})
+					OR dir.`DEPT_IDS` = #{userDeptId}
+				  )
+				  OR (dir.DEPT_IDS = '' OR dir.DEPT_IDS IS NULL)
+			    ) -->
+			AND (
+				CONCAT(',', dir.`DEPT_IDS`, ',') REGEXP CONCAT(  ',('  ,   REPLACE(#{deptIdList},  ',' , '|'),    '),'   )
+				OR (dir.DEPT_IDS = '' OR dir.DEPT_IDS IS NULL)
+			)
+		</if>
+		ORDER BY file.CREATE_DATE DESC
+	</select>
+	
+	<select id="findAll" resultMap="adFileManageResult">
+		SELECT * FROM ad_file_manage WHERE IS_DELETED != 'y' OR IS_DELETED IS NULL
+	</select>
+	
+	<select id="findById" resultMap="adFileManageResult">
+		SELECT * FROM ad_file_manage WHERE ID = #{id}
+	</select> 
+	
+	<select id="fileExists" resultType="int">
+		SELECT COUNT(1) FROM ad_file_manage 
+			WHERE DIRECTORY_ID = #{parentId} AND ORIGIN_NAME = #{name} and IS_DELETED != 'y'
+			<if test="id != null and id != ''">
+				AND ID != #{id}
+			</if>
+	</select>
+	
+	<select id="existsAdFileManage" resultMap="adFileManageResult">
+		SELECT * FROM ad_file_manage 
+			WHERE DIRECTORY_ID = #{parentId} AND ORIGIN_NAME = #{name}
+			<if test="id != null and id != ''">
+				AND ID != #{id}
+			</if>
+			AND is_deleted='n'
+	</select>
+	
+	<update id="update">
+		UPDATE ad_file_manage 
+			SET
+				DIRECTORY_ID=#{directoryId},
+			  	NAME=#{name},
+			  	ORIGIN_NAME=#{originName},
+			  	FILE_PATH=#{filePath},
+			  	DEPT_IDS=#{deptIds},
+			  	TYPE=#{type},
+			  	COMMENT=#{comment},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	IS_DELETED=#{isDeleted}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="deleteFileByDirectoryId">
+		UPDATE ad_file_manage `file` SET `file`.IS_DELETED = 'y'
+		WHERE `file`.DIRECTORY_ID IN (
+			SELECT dir.ID FROM ad_directory_manage dir
+				WHERE dir.ID = #{id}
+					OR dir.PARENTS_ID LIKE CONCAT('%,' ,#{id}, ',%') 
+					OR dir.PARENTS_ID LIKE CONCAT(#{id}, ',%') 
+					OR dir.PARENTS_ID LIKE CONCAT('%,', #{id})
+					<!-- OR dir.PARENTS_ID = #{id} -->
+		)
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_file_manage(
+				DIRECTORY_ID,
+			  	NAME,
+			  	ORIGIN_NAME,
+			  	FILE_PATH,
+			  	DEPT_IDS,
+			  	TYPE,
+			  	COMMENT,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_DELETED
+			) 
+			VALUES (
+				#{directoryId},
+			  	#{name},
+			  	#{originName},
+			  	#{filePath},
+			  	#{deptIds},
+			  	#{type},
+			  	#{comment},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isDeleted}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_file_manage WHERE ID = #{id}
+	</delete>
+	
+</mapper>

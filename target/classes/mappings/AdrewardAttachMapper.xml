@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdrewardAttachDao">
+	
+	<resultMap id="adrewardAttachResult" type="adrewardAttach">
+		<id property="id" column="id" />
+		<result property="rewardId" column="reward_id" />
+		<result property="userId" column="user_id" />
+		<result property="dpetId" column="dept_id" />
+		<result property="userBarginId" column="user_bargin_id" />
+		<result property="coefficient" column="coefficient" />
+		<result property="businessreward" column="businessreward" />
+		<result property="otherreward" column="otherreward" />
+		<result property="totalreward" column="totalreward" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<association property="record" column="user_id" javaType="AdRecord" select="findRecordByUserId" />
+		<association property="salary" column="user_id" javaType="AdRecordSalaryHistory" select="findSalaryByUserId" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="adrewardAttachResult">
+		SELECT * FROM ad_reward_attach
+	</select>
+	
+	<select id="findById" resultMap="adrewardAttachResult">
+		SELECT * FROM ad_reward_attach WHERE reward_id = #{rewardId}
+	</select>
+
+	<select id="findByRewardId" resultMap="adrewardAttachResult">
+		SELECT * FROM ad_reward_attach WHERE reward_id = #{id}
+	</select>
+
+	<select id="findByIds" resultType="adrewardAttach">
+		SELECT * FROM ad_reward_attach WHERE ID IN
+		<foreach item="id" index="index" collection="ids" open="(" close=")"  separator=",">
+			#{id}
+		</foreach>
+	</select>
+	
+	<update id="update">
+		UPDATE ad_reward_attach 
+			SET
+			  	REWARD_ID=#{rewardId},
+			  	USER_BARGIN_ID=#{userBarginId},
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	wages=#{wages},
+			  	score=#{score},
+			  	COEFFICIENT=#{coefficient},
+			  	BUSINESSREWARD=#{businessreward},
+			  	OTHERREWARD=#{otherreward},
+			  	TOTALREWARD=#{totalreward},
+			  	REMARK=#{remark}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_reward_attach(
+			  	REWARD_ID,
+				USER_ID,
+			  	DEPT_ID,
+			  	USER_BARGIN_ID,
+			  	wages,
+			  	score,
+			  	COEFFICIENT,
+			  	BUSINESSREWARD,
+			  	OTHERREWARD,
+			  	TOTALREWARD,
+			  	REMARK
+			)
+			VALUES (
+			  	#{rewardId},
+			  	#{userId},
+			  	#{deptId},
+			  	#{userBarginId},
+			  	#{wages},
+			  	#{score},
+			  	#{coefficient},
+			  	#{businessreward},
+			  	#{otherreward},
+			  	#{totalreward},
+			  	#{remark}
+			)
+	</insert>
+
+
+	<insert id="insertAll">
+		INSERT INTO ad_reward_attach(
+		REWARD_ID,
+		USER_ID,
+		DEPT_ID,
+		USER_BARGIN_ID,
+		wages,
+		score,
+		COEFFICIENT,
+		BUSINESSREWARD,
+		OTHERREWARD,
+		TOTALREWARD,
+		REMARK
+		)
+		VALUES
+		<foreach item="rewardAttach" index="index" collection="list" separator=",">
+		(
+		#{rewardAttach.rewardId},
+		#{rewardAttach.userId},
+		#{rewardAttach.dpetId},
+		#{rewardAttach.userBarginId},
+		#{rewardAttach.wages},
+		#{rewardAttach.score},
+		#{rewardAttach.coefficient},
+		#{rewardAttach.businessreward},
+		#{rewardAttach.otherreward},
+		#{rewardAttach.totalreward},
+		#{rewardAttach.remark}
+		)
+		</foreach>
+	</insert>
+
+
+	<update id="batchUpdate">
+		<foreach collection="adrewardAttachList" item="adrewardAttach" index="index" open="" close="" separator=";">
+		UPDATE ad_reward_attach
+		SET
+		REWARD_ID=#{adrewardAttach.rewardId},
+		USER_ID=#{adrewardAttach.userId},
+		USER_BARGIN_ID=#{adrewardAttach.userBarginId},
+		wages=#{adrewardAttach.wages},
+		score=#{adrewardAttach.score},
+		COEFFICIENT=#{adrewardAttach.coefficient},
+		BUSINESSREWARD=#{adrewardAttach.businessreward},
+		OTHERREWARD=#{adrewardAttach.otherreward},
+		TOTALREWARD=#{adrewardAttach.totalreward},
+		REMARK=#{adrewardAttach.remark}
+		WHERE ID = #{adrewardAttach.id}
+		</foreach>
+	</update>
+
+
+	<!-- 关联查询 Begin -->
+	<select id="findRecordByUserId" resultType="AdRecord">
+		SELECT * FROM ad_record WHERE user_id = #{id}
+	</select>
+	<select id="findSalaryByUserId" resultType="AdRecordSalaryHistory">
+		SELECT * FROM ad_record_salary_history WHERE user_id = #{id} AND is_deleted != "1" AND end_time is null;
+	</select>
+	<!-- 关联查询 End -->
+
+	<delete id="deleteById">
+		DELETE FROM ad_reward_attach WHERE ID = #{id}
+	</delete>
+
+	<delete id="deleteByIdList">
+		DELETE FROM ad_reward_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

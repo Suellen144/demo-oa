@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISaleBarginUserAnnualAttachDao">
+	
+	<resultMap id="saleBarginUserAnnualAttachResult" type="saleBarginUserAnnualAttach">
+		<id property="id" column="id" />
+		<result property="annualId" column="annual_id" />
+		<result property="barginId" column="bargin_id" />
+		<result property="commissionId" column="commission_id"/>
+		<result property="barginAnnualCommissionPercent" column="bargin_annual_commission_percent"/>
+		<result property="barginAnnualCommission" column="bargin_annual_commission" />
+		<result property="barginAnnualIncome" column="bargin_annual_income" />
+		<result property="barginAnnualPay" column="bargin_annual_pay" />
+		<result property="barginAnnual" column="bargin_annual" />
+		<result property="userId" column="user_id" />
+		<result property="userCommission" column="user_commission" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<association property="saleBarginManage" column="bargin_id" javaType="saleBarginManage" select="findBarginById" />
+	</resultMap>
+
+	<resultMap id="saleBarginManageResult" type="saleBarginManage">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="title" column="title" />
+		<result property="deptId" column="dept_id" />
+		<result property="userId" column="user_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="barginName" column="bargin_name" />
+		<result property="barginCode" column="bargin_code" />
+		<result property="barginType" column="bargin_type" />
+		<result property="barginDescribe" column="bargin_describe" />
+		<result property="company" column="company" />
+		<result property="totalMoney" column="total_money" />
+		<result property="receivedMoney" column="received_money" />
+		<result property="unreceivedMoney" column="unreceived_money" />
+		<!-- <result property="receivedInvoice" column="received_invoice" />
+		<result property="unreceivedInvoice" column="unreceived_invoice" /> -->
+		<result property="payReceivedInvoice" column="pay_received_invoice" />
+		<result property="payUnreceivedInvoice" column="pay_unreceived_invoice" />
+		<result property="invoiceMoney" column="invoice_Money" />
+		<result property="advancesReceived" column="advances_Received" />
+		<result property="accountReceived" column="account_Received" />
+		<result property="payMoney" column="PAY_MONEY" />
+		<result property="unpayMoney" column="UNPAY_MONEY" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="attachName" column="attach_name" />
+		<result property="attachments" column="attachments" />
+		<result property="status" column="status" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	<!--联合查询开始-->
+	<select id="findBarginById" resultType="saleBarginManage">
+		SELECT * FROM sale_bargin_manage WHERE ID = #{id}
+	</select>
+	<!--联合查询结束-->
+	
+	<select id="findAll" resultMap="saleBarginUserAnnualAttachResult">
+		SELECT * FROM sale_bargin_user_annual_attach
+	</select>
+	
+	<select id="findById" resultMap="saleBarginUserAnnualAttachResult">
+		SELECT * FROM sale_bargin_user_annual_attach WHERE ID = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE sale_bargin_user_annual_attach 
+			SET
+			  	ANNUAL_ID=#{annualId},
+			  	BARGIN_ID=#{barginId},
+			  	COMMISSION_ID=#{commissionId},
+			  	BARGIN_ANNUAL_COMMISSION_PERCENT=#{barginAnnualCommissionPercent},
+			  	BARGIN_ANNUAL_COMMISSION=#{barginAnnualCommission},
+			  	BARGIN_ANNUAL_INCOME=#{barginAnnualIncome},
+			  	BARGIN_ANNUAL_PAY=#{barginAnnualPay},
+			  	BARGIN_ANNUAL=#{barginAnnual},
+			  	USER_ID=#{userId},
+			  	USER_COMMISSION=#{userCommission},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+
+	<update id="updateList" >
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			UPDATE sale_bargin_user_annual_attach
+				SET
+					ANNUAL_ID=#{item.annualId},
+					BARGIN_ID=#{item.barginId},
+					COMMISSION_ID=#{item.commissionId},
+					BARGIN_ANNUAL_COMMISSION_PERCENT=#{item.barginAnnualCommissionPercent},
+					BARGIN_ANNUAL_COMMISSION=#{item.barginAnnualCommission},
+					BARGIN_ANNUAL_INCOME=#{item.barginAnnualIncome},
+					BARGIN_ANNUAL_PAY=#{item.barginAnnualPay},
+					BARGIN_ANNUAL=#{item.barginAnnual},
+					USER_ID=#{item.userId},
+					USER_COMMISSION=#{item.userCommission},
+					CREATE_BY=#{item.createBy},
+					CREATE_DATE=#{item.createDate},
+					UPDATE_BY=#{item.updateBy},
+					UPDATE_DATE=#{item.updateDate}
+			WHERE ID = #{item.id}
+		</foreach>
+	</update>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_bargin_user_annual_attach(
+			  	ANNUAL_ID,
+			  	BARGIN_ID,
+			  	COMMISSION_ID,
+			  	BARGIN_ANNUAL_COMMISSION_PERCENT,
+			  	BARGIN_ANNUAL_COMMISSION,
+			  	BARGIN_ANNUAL_INCOME,
+			  	BARGIN_ANNUAL_PAY,
+			  	BARGIN_ANNUAL,
+			  	USER_ID,
+			  	USER_COMMISSION,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{annualId},
+			  	#{barginId},
+			  	#{commissionId},
+			  	#{barginAnnualCommissionPercent},
+			  	#{barginAnnualCommission},
+			  	#{barginAnnualIncome},
+			  	#{barginAnnualPay},
+			  	#{barginAnnual},
+			  	#{userId},
+			  	#{userCommission},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+
+	<insert id="saveList" parameterType="java.util.List">
+		INSERT INTO sale_bargin_user_annual_attach(
+			  	ANNUAL_ID,
+			  	BARGIN_ID,
+				COMMISSION_ID,
+				BARGIN_ANNUAL_COMMISSION_PERCENT,
+			  	BARGIN_ANNUAL_COMMISSION,
+			  	BARGIN_ANNUAL_INCOME,
+			  	BARGIN_ANNUAL_PAY,
+			  	BARGIN_ANNUAL,
+			  	USER_ID,
+			  	USER_COMMISSION,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			)
+			VALUES
+			<foreach collection="list" item="item" index="index" separator=",">
+				(
+					#{item.annualId},
+					#{item.barginId},
+					#{item.commissionId},
+					#{item.barginAnnualCommissionPercent},
+					#{item.barginAnnualCommission},
+					#{item.barginAnnualIncome},
+					#{item.barginAnnualPay},
+					#{item.barginAnnual},
+					#{item.userId},
+					#{item.userCommission},
+					#{item.createBy},
+					#{item.createDate},
+					#{item.updateBy},
+					#{item.updateDate}
+				)
+			</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM sale_bargin_user_annual_attach WHERE ID = #{id}
+	</delete>
+
+	<select id="findAllBySale" resultMap="saleBarginUserAnnualAttachResult">
+		SELECT * FROM sale_bargin_user_annual_attach AS attach
+		JOIN sale_bargin_manage AS bargin ON attach.BARGIN_ID = bargin.id
+		WHERE bargin.bargin_type = 'S'
+		AND bargin.status = '5'
+	</select>
+
+	<select id="findByAnnualId" resultMap="saleBarginUserAnnualAttachResult">
+		SELECT * FROM sale_bargin_user_annual_attach
+		WHERE annual_id = #{id}
+	</select>
+</mapper>

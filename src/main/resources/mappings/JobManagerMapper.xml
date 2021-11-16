@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.JobManagerDao">
+	
+	<select id="getJobOff" parameterType="string" resultType="int">
+        SELECT count(1) FROM job_manager
+        WHERE job_name = #{jobName} AND on_off = 'off' AND update_date &lt; now()
+    </select>
+ 
+    <update id="updateJobStatus" parameterType="map">
+        UPDATE job_manager
+        SET on_off = #{status},server_ip=#{serverIp},update_date=now()
+        WHERE job_name = #{jobName}
+    </update>
+	
+</mapper>

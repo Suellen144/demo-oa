@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IOffReplyDao">
+	
+	<resultMap id="offReplyResult" type="com.reyzar.oa.domain.OffReply">
+		<id property="id" column="id" />
+		<result property="userId" column="userId" />
+		<result property="postId" column="postId" />
+		<result property="content" column="content" />
+		<result property="replyTime" column="replyTime" />
+		<result property="inReplyCount" column="inReplyCount" />
+		<result property="isDeleted" column="Is_delete" />
+		<association property="user" column="userId" javaType="sysUser" select="findUserByUserId" />
+		<collection property="inReplies" column="id"  select="findInReplieList" /> 
+	</resultMap>
+	
+	<resultMap id="offInReplyResult" type="com.reyzar.oa.domain.OffInReply">
+		<id property="id" column="id" />
+		<result property="replyId" column="replyId" />
+		<result property="userId" column="userId" />
+		<result property="unickName" column="unickName" />
+		<result property="avaUrl" column="avaUrl" />
+		<result property="ruserId" column="ruserId" />
+		<result property="runickname" column="runickname" />
+		<result property="content" column="content" />
+		<result property="replyTime" column="replyTime" />
+		<result property="isDeleted" column="Is_delete" />
+	</resultMap>
+	
+	<select id="findInReplieList" resultMap="offInReplyResult">
+		SELECT * FROM off_inreply WHERE replyId = #{id} AND is_delete is null
+	</select>
+	
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id} AND IS_DELETED is null
+	</select>
+	
+	<select id="findByPostId" resultMap="offReplyResult">
+		SELECT * FROM off_reply WHERE postId = #{postId} AND Is_delete is null
+	</select>
+	
+	<select id="findById" resultMap="offReplyResult">
+		SELECT * FROM off_reply WHERE id = #{id} AND Is_delete is null
+	</select>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO off_reply(
+			  	userId,
+			  	postId,
+			  	content,
+			  	replyTime,
+			  	inReplyCount,
+			  	Is_delete
+			) 
+			VALUES (
+			  	#{userId},
+			  	#{postId},
+			  	#{content},
+			  	#{replyTime},
+			  	#{inReplyCount},
+			  	#{isDeleted}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE off_reply 
+			SET
+			  	userId=#{userId},
+			  	postId=#{postId},
+			  	content=#{content},
+			  	replyTime=#{replyTime},
+			  	inReplyCount=#{inReplyCount},
+			  	Is_delete=#{isDeleted}
+		WHERE ID = #{id}
+	</update>
+
+	<update id="batchUpdate">
+		<foreach collection="offReplies" item="reply" index="index" open="" close="" separator=";">
+			UPDATE off_reply 
+				SET
+				  	Is_delete = #{reply.isDeleted}
+			WHERE id = #{reply.id}
+		</foreach>
+	</update>
+	
+
+
+</mapper>

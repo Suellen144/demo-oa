@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdSalaryAttachDao">
+	
+	<resultMap id="adSalaryAttachResult" type="adSalaryAttach">
+		<id property="id" column="id" />
+		<result property="salaryId" column="salary_id" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="lastdate" column="last_date" />
+		<result property="personAmplitude" column="person_amplitude" />
+		<result property="manageAmplitude" column="manage_amplitude" />
+		<result property="finallyAmplitude" column="finally_amplitude" />
+		<result property="finallySalary" column="finally_salary" />
+		<result property="oldSalary" column="old_salary" />
+		<result property="score" column="score" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<association property="record" column="user_id" javaType="AdRecord" select="findRecordByUserId" />
+		<association property="salary" column="user_id" javaType="AdRecordSalaryHistory" select="findSalaryByUserId" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="adSalaryAttachResult">
+		SELECT * FROM ad_salary_attach
+	</select>
+	
+	
+	<!-- 关联查询 Begin -->
+	<select id="findRecordByUserId" resultType="AdRecord">
+		SELECT * FROM ad_record WHERE user_id = #{id}
+	</select>
+	<select id="findSalaryByUserId" resultType="AdRecordSalaryHistory">
+		SELECT * FROM ad_record_salary_history WHERE user_id = #{id} AND is_deleted != "1" AND end_time is null;
+	</select>
+	<!-- 关联查询 End -->
+	
+	
+	
+	<select id="findBySalaryId" resultMap="adSalaryAttachResult">
+		SELECT * FROM ad_salary_attach WHERE salary_id = #{id}
+	</select>
+	
+	<select id="findById" resultMap="adSalaryAttachResult">
+		SELECT * FROM ad_salary_attach WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByIds" resultType="adSalaryAttach">
+		SELECT * FROM ad_salary_attach WHERE ID IN
+		<foreach item="id" index="index" collection="ids" open="(" close=")"  separator=",">  
+			 #{id}
+		</foreach>
+	</select>
+	
+	<update id="update">
+		UPDATE ad_salary_attach 
+			SET
+			  	SALARY_ID=#{salaryId},
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	last_date=#{lastdate},
+			  	PERSON_AMPLITUDE=#{personAmplitude},
+			  	OLD_SALARY=#{oldSalary},
+			  	MANAGE_AMPLITUDE=#{manageAmplitude},
+			  	FINALLY_AMPLITUDE=#{finallyAmplitude},
+			  	FINALLY_SALARY=#{finallySalary},
+			  	SCORE=#{score},
+			  	REMARK=#{remark},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_salary_attach(
+			  	SALARY_ID,
+			  	USER_ID,
+			  	DEPT_ID,
+			  	last_date,
+			  	OLD_SALARY,
+			  	PERSON_AMPLITUDE,
+			  	MANAGE_AMPLITUDE,
+			  	FINALLY_AMPLITUDE,
+			  	FINALLY_SALARY,
+			  	SCORE,
+			  	REMARK,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{salaryId},
+			  	#{userId},
+			  	#{deptId},
+			  	#{lastdate},
+			  	#{oldSalary},
+			  	#{personAmplitude},
+			  	#{manageAmplitude},
+			  	#{finallyAmplitude},
+			  	#{finallySalary},
+			  	#{score},
+			  	#{remark},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO ad_salary_attach(
+			  	SALARY_ID,
+			  	USER_ID,
+			  	DEPT_ID,
+			  	last_date,
+				OLD_SALARY,
+			  	PERSON_AMPLITUDE,
+			  	MANAGE_AMPLITUDE,
+			  	FINALLY_AMPLITUDE,
+			  	FINALLY_SALARY,
+			  	SCORE,
+			  	REMARK,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES 
+		<foreach item="salaryAttach" index="index" collection="list" separator=",">  
+			 (
+			 	#{salaryAttach.salaryId},
+			  	#{salaryAttach.userId},
+			  	#{salaryAttach.deptId},
+			  	#{salaryAttach.lastdate},
+				#{salaryAttach.oldSalary},
+			  	#{salaryAttach.personAmplitude},
+			  	#{salaryAttach.manageAmplitude},
+			  	#{salaryAttach.finallyAmplitude},
+			  	#{salaryAttach.finallySalary},
+			  	#{salaryAttach.score},
+			  	#{salaryAttach.remark},
+			  	#{salaryAttach.createBy},
+			  	#{salaryAttach.createDate},
+			  	#{salaryAttach.updateBy},
+			  	#{salaryAttach.updateDate}
+		
+			)
+		</foreach>
+	</insert>
+	
+	<update id="batchUpdate">
+		<foreach collection="salaryAttachList" item="salaryAttach" index="index" open="" close="" separator=";">
+			UPDATE ad_salary_attach 
+				SET
+					SALARY_ID=#{salaryAttach.salaryId},
+				  	USER_ID=#{salaryAttach.userId},
+				  	DEPT_ID=#{salaryAttach.deptId},
+				  	last_date=#{salaryAttach.lastdate},
+					OLD_SALARY=#{salaryAttach.oldSalary},
+				  	PERSON_AMPLITUDE=#{salaryAttach.personAmplitude},
+				  	MANAGE_AMPLITUDE=#{salaryAttach.manageAmplitude},
+				  	FINALLY_AMPLITUDE=#{salaryAttach.finallyAmplitude},
+				  	FINALLY_SALARY=#{salaryAttach.finallySalary},
+				  	SCORE=#{salaryAttach.score},
+				  	REMARK=#{salaryAttach.remark},
+				  	CREATE_BY=#{salaryAttach.createBy},
+				  	CREATE_DATE=#{salaryAttach.createDate},
+				  	UPDATE_BY=#{salaryAttach.updateBy},
+				  	UPDATE_DATE=#{salaryAttach.updateDate}
+			WHERE ID = #{salaryAttach.id}
+		</foreach>
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_salary_attach WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_salary_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

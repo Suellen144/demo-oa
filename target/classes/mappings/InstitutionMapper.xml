@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IInstitutionDao">
+	
+	<resultMap id="institutionResult" type="institution">
+		<id property="id" column="id" />
+		<result property="parentId" column="parent_id" />
+		<result property="name" column="name" />
+		<result property="code" column="code" />
+		<result property="sort" column="sort" />
+		<result property="role_id" column="role_id" />
+		<result property="is_undo" column="is_undo" />
+		<result property="is_dept" column="is_dept" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		
+		<collection property="children" column="id" select="getChildrenById" />
+	</resultMap>
+	
+	<select id="findByParentid" parameterType="java.lang.String" resultMap="institutionResult">
+		SELECT
+			*
+		FROM
+			t_institutions
+		WHERE
+			PARENT_ID =#{parentId}
+		AND (is_deleted = '0' OR is_deleted IS NULL)
+		ORDER BY SORT ASC, UPDATE_DATE ASC
+	</select>
+	
+	<select id="getChildrenById" parameterType="java.lang.String" resultMap="institutionResult">
+		SELECT
+			*
+		FROM
+			t_institutions
+		WHERE
+			PARENT_ID =#{id}
+		AND (is_deleted = '0' OR is_deleted IS NULL)
+		ORDER BY SORT ASC, UPDATE_DATE ASC
+	</select>
+	
+	<!-- ===================================================================================================== -->
+	<resultMap id="ognResult" type="com.reyzar.oa.domain.Organization">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+	</resultMap>
+	
+	<select id="organizationList" resultMap="ognResult">
+		SELECT
+			*
+		FROM
+			(
+				(
+					SELECT
+						*
+					FROM
+						t_organization
+					WHERE
+						1 = 1
+					AND (ZXRQ IS NULL OR ZXRQ = '')
+					AND (SCRQ IS NULL OR SCRQ = '')
+					ORDER BY
+						CLRQ ASC
+					LIMIT 99999999
+				)
+				UNION ALL
+					(
+						SELECT
+							*
+						FROM
+							t_organization
+						WHERE
+							1 = 1
+						AND ZXRQ IS NOT NULL
+						AND ZXRQ != ''
+						AND (SCRQ IS NULL OR SCRQ = '')
+						ORDER BY
+							CLRQ ASC
+						LIMIT 99999999
+					)
+				UNION ALL
+					(
+						SELECT
+							*
+						FROM
+							t_organization
+						WHERE
+							1 = 1
+						AND (ZXRQ IS NULL OR ZXRQ = '')
+						AND SCRQ IS NOT NULL
+						AND SCRQ != ''
+						ORDER BY
+							CLRQ ASC
+						LIMIT 99999999
+					)
+			) t
+		WHERE
+			t.id != '0'
+		AND t.id != '1'
+	</select>
+	
+	<select id="organizationList2" resultMap="ognResult">
+		SELECT
+			*
+		FROM
+			t_organization
+		WHERE
+			ID != '0'
+		AND ID != '1'
+		AND (ZXRQ IS NULL OR ZXRQ = '')
+		AND (SCRQ IS NULL OR SCRQ = '')
+		ORDER BY
+			CLRQ ASC
+		LIMIT 99999999
+	</select>
+	
+	<select id="queryOrganizationById23" parameterType="java.util.Map" resultMap="ognResult">
+		SELECT
+			*
+		FROM
+			t_organization
+		WHERE
+		ID=#{id}
+	</select>
+	
+	<select id="queryOrganization" parameterType="String" resultMap="institutionResult">
+		SELECT
+			t.ID,
+			t.PARENT_ID,
+			y.`NAME`
+		FROM
+			t_institutions t
+		JOIN t_organization y ON t.ID = y.ID
+		WHERE
+			t.ID =#{id}
+	</select>
+	
+	<insert id="saveOrganization" parameterType="java.util.Map">
+		INSERT INTO t_institutions (ID,PARENT_ID,`NAME`,IS_DEPT) values(#{id},#{pid},#{name},#{is_dept})
+	</insert>
+	
+	<select id="queryInstitutionById" parameterType="java.util.Map" resultMap="institutionResult">
+		SELECT * FROM t_institutions WHERE ID=#{id}
+	</select>
+	
+	<select id="queryInstitutionById2" parameterType="java.util.Map" resultMap="institutionResult">
+		SELECT * FROM t_institutions WHERE ID=#{id}
+	</select>
+	
+	<insert id="saveInstitution" parameterType="java.util.Map">
+		INSERT INTO t_institutions (ID,PARENT_ID,ROLE_ID,`NAME`,SORT,IS_DEPT) values(#{id},#{parentId},#{position},#{name},#{sort},#{is_dept})
+	</insert>
+	
+	<delete id="delInstitutionByParentId" parameterType="java.util.Map">
+		DELETE t FROM t_institutions t WHERE t.PARENT_ID=#{parentId}
+	</delete>
+	
+	<delete id="delInstitutionById" parameterType="java.util.Map">
+		DELETE t FROM t_institutions t WHERE t.ID=#{id}
+	</delete>
+	
+	<select id="queryInstitutionListByParentId" parameterType="java.util.Map" resultMap="institutionResult">
+		SELECT * FROM t_institutions WHERE PARENT_ID=#{parentId}
+	</select>
+	
+	<update id="updateInstitutionById" parameterType="java.util.Map">
+		UPDATE t_institutions
+			SET IS_UNDO=#{isUndo}
+		WHERE ID=#{id}	
+	</update>
+	
+	<update id="updateInstitutionById2" parameterType="java.util.Map">
+		UPDATE t_institutions
+			SET ROLE_ID=#{position},
+			`NAME`=#{name},
+			SORT=#{sort},
+			IS_DEPT=#{is_dept}
+		WHERE ID=#{id}	
+	</update>
+	
+	<update id="updateInstitutionById3" parameterType="java.util.Map">
+		UPDATE t_institutions
+			SET GWZZ=#{gwzz}
+		WHERE ID=#{id}	
+	</update>
+	
+	<update id="moveUpOrDownById" parameterType="java.util.Map">
+		UPDATE t_institutions
+			SET SORT=#{sort}
+		WHERE ID=#{id}	
+	</update>
+	<!-- ==================================权限定义====================================== -->
+	<resultMap id="roleResult" type="sysRole">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+	</resultMap>
+	<select id="getRoleList" resultMap="roleResult">
+		SELECT ID, NAME
+		FROM sys_role WHERE 1 = 1
+	</select>
+	<select id="querySysRoleById" parameterType="String" resultMap="roleResult">
+		SELECT ID, NAME
+		FROM sys_role WHERE 1 = 1
+		AND ID=#{id}
+	</select>
+	
+</mapper>

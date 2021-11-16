@@ -1,0 +1,58 @@
+/*小方块*/
+.blockBox{ width: 100%; height: auto; padding: 20px; background-color: #fff; border: 1px solid #c1c1c1; margin-bottom: 30px;}
+.blockBoxL{ width: 50%; height: 80px; float: left;}
+.blockBoxTit{ width: 100%; line-height: 18px; font-size: 18px; margin-bottom: 20px;}
+.blockBoxNum{ width: 100%; line-height: 42px; font-size: 42px;}
+.blockBoxTit.orange,.blockBoxNum.orange{ color: #f9ae35;}
+.blockBoxTit.red,.blockBoxNum.red{ color: #f75757;}
+.blockBoxTit.green,.blockBoxNum.green{ color: #609d5b;}
+.blockBoxTit.blue,.blockBoxNum.blue{ color: #1b6294;}
+.blockBoxR{ width: 50%; margin-left: 50%; height: 80px; line-height: 80px; text-align: right;}
+.blockBoxR img{ height: 74px;}
+/*窗口*/
+.iconFBox{ width: 100%; height: auto; background-color: #fff; border: 1px solid #c1c1c1; margin-bottom: 30px;}
+.shortcutBox{ width: 100%; line-height: 34px; height: 35px; border-bottom: 1px solid #c1c1c1; padding: 0 10px;}
+.shortcutBoxR{ width: auto; height: 34px; line-height: 34px; float: right; font-size: 18px; color: #ededed;}
+.shortcutBoxR span{ margin-left: 10px;}
+.iconFBody{ width: 100%; height: auto; padding: 30px;}
+.iconFConn{ width: 97px; height: 97px; line-height: 97px; text-align: center; background-color: #ededed; margin: 0 auto; margin-bottom: 15px;}
+.iconFConn img{ width: auto;}
+.iconFName{ width: 100%; line-height: 12px; text-align: center; color: #5d5d5d; font-size: 12px; margin-bottom: 50px;}
+
+/*移动端*/
+.mForm{ width: 100%; height: auto; padding: 0; margin: 0;}
+.mForm li{ width: 100%; height: auto; list-style: none;}
+.mFormName,.mFormXSName{ width: 70px; line-height: 40px; font-size: 14px; color: #000; float: left;}
+.mFormMsg,.mFormXSMsg{ width: 100%; padding-left: 70px; height: auto; border-bottom: 1px solid #e9e9e9;}
+.longInput,.mSelect{ width: 100%; line-height: 40px; height: 39px; text-align: right; font-size: 14px; color: #666; border: none; outline: none;}
+.longInput[disabled]{ background: #fff;}
+.mSelect,.mFormXSMsg .mSelect{ width: auto; appearance: none; -moz-appearance: none; -webkit-appearance: none; float: right;}
+.mFormSeconMsg{ width: auto; line-height: 40px; font-size: 12px; color: #999; display: inline-block; margin-right: 10px;}
+.mFormShow{ width: 100%; height: auto;min-height: 40px;}
+.mFormArr,.mFormOpe{ float: right; margin-top: 10px;}
+.mFormArr.current img{ transform: rotate(90deg);}
+.mFormOpe{ margin-right: 10px;}
+.mFormToggle{ margin-left: -70px; height: auto;}
+.mFormToggleConn{ width: 100%; height: 30px;}
+.mFormToggleConn:last-of-type{ margin-bottom: 5px;}
+.mFormXSToggleConn{ width: 50%; height: auto; float: left;}
+.mFormXSName{ width: 65px; line-height: 30px; font-size: 12px;}
+.mFormXSMsg{ padding-left: 65px; border: none;}
+.mFormXSMsg .longInput,.mFormXSMsg .mSelect{ width: 100%; line-height: 30px; height: 30px; text-align: left; font-size: 12px; color: #666; border: none; outline: none;}
+.mformBtnBox{ width: 100%; line-height: 40px; padding: 15px; text-align: center;}
+.content-header{text-align: center;}
+
+span{
+    white-space: nowrap;
+}
+
+/*报销*/
+.blue{ color: #3c8dbc;}
+.expenseBox{ margin-left: 4px; border-left: 1px dashed #ddd; height: auto; padding-left: 20px; padding-bottom: 15px; position: relative;}
+.expenseDel{ width: 16px; height: auto; position: absolute; top: 0; left: -8px;}
+.expenseDel img{ width: 100%; display: block;}
+.expenseLi{ width: 100%; height: auto;}
+.expenseLi-half{ width: 50%; height: auto; float: left;}
+.expenseName{ width: 60px; line-height: 24px; font-size: 12px; color: #333; float: left;}
+.expenseConn{ width: 100%; line-height: 24px; font-size: 12px; color: #666; padding-left: 60px;}
+.expenseConn .longInput,.expenseConn .mSelect{ width: 100%; line-height: 24px; height: 24px; text-align: left; font-size: 12px; color: #666; border: none; outline: none;}

@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdKpiAttachDao">
+	
+	<resultMap id="adKpiAttachResult" type="adKpiAttach">
+		<id property="id" column="id" />
+		<result property="kpiId" column="kpi_id" />
+		<result property="userId" column="user_id" />
+		<result property="userName" column="user_name" />
+		<result property="deptId" column="dept_id" />
+		<result property="deptName" column="dept_name" />
+		<result property="status" column="status" />
+		<result property="userEvaluation" column="user_evaluation" />
+		<result property="userScore" column="user_score" />
+		<result property="userTime" column="user_time" />
+		<result property="managerScore" column="manager_score" />
+		<result property="managerEvaluation" column="manager_evaluation" />
+		<result property="ceoScore" column="ceo_score" />
+		<result property="ceoEvaluation" column="ceo_evaluation" />
+		<result property="ceoPraisedPunished" column="ceo_praisedpunished" />
+		<result property="date" column="date" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+	</resultMap>
+
+	<select id="findAllByDpetIdAndDate2" resultMap="adKpiAttachResult">
+		SELECT * FROM ad_kpi_attach kpiAttach
+		WHERE 1 = 1
+		<if test="date != null and date != ''">
+			and MONTH(kpiAttach.date) = MONTH(#{date})
+			and YEAR(kpiAttach.date) = YEAR (#{date})
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND kpiAttach.dept_id IN
+			<foreach item="deptId" index="index" collection="deptIdSet"
+					 open="(" separator="," close=")">
+				#{deptId}
+			</foreach>
+		</if>
+		order by kpiAttach.dept_id asc
+	</select>
+	
+	<select id="findAllByDpetIdAndDate" resultMap="adKpiAttachResult">
+		SELECT * FROM ad_kpi_attach 
+			WHERE `ad_kpi_attach`.dept_id = #{deptId} AND MONTH(ad_kpi_attach.date) = MONTH(#{date})
+			AND  YEAR(ad_kpi_attach.date) = YEAR (#{date})
+	</select>
+
+
+	<select id="findByPage" parameterType="java.util.Map" resultMap="adKpiAttachResult">
+		SELECT `kpiattach`.* FROM ad_kpi_attach `kpiattach`
+		JOIN sys_user `user`
+		ON `user`.`ID` = `kpiattach`.USER_ID 
+		JOIN sys_dept dept
+		ON dept.`ID` = `user`.`DEPT_ID`  
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+				AND ( kpiattach.user_name LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR kpiattach.dept_name LIKE CONCAT('%',#{fuzzyContent},'%'))
+		</if>
+		<if test="beginDate != null and beginDate != ''">
+			AND kpiattach.`date` &gt;= #{beginDate} 
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND kpiattach.`date` &lt;= #{endDate} 
+		</if>
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND `kpiattach`.USER_ID = #{userId}
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND (dept.`ID` IN
+			<foreach item="deptId" index="index" collection="deptIdSet"
+				open="(" separator="," close=")">
+				#{deptId}
+			</foreach>
+			OR `kpiattach`.USER_ID = #{userId})
+		</if> 
+		<if test="no != null and no != ''.toString()">
+		AND (`user`.`IS_DELETED` is null OR `user`.`IS_DELETED` = 'n')
+		</if>
+		<if test="is != null and is != ''.toString()">
+		AND `user`.`IS_DELETED` =#{is}
+		</if>
+		ORDER BY dept.SORT DESC,`kpiattach`.date DESC
+	</select>
+	
+	<select id="findById" resultMap="adKpiAttachResult">
+		SELECT * FROM ad_kpi_attach WHERE ID = #{id}
+	</select> 
+	
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE `ID` = #{id}
+	</select>
+	
+	<select id="findByUserIdAndTime" resultMap="adKpiAttachResult">
+		SELECT user_id,AVG(ceo_score) AS ceoScore FROM ad_kpi_attach
+		WHERE user_id = #{userId} 
+		<if test="startTime != null and startTime != ''">
+			AND create_date &gt;= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND create_date &lt;= #{endTime}
+		</if>
+		<if test="(startTime == null or startTime == '') and (endTime == null or endTime == '')"  >
+			AND YEAR(create_date) = YEAR(date_sub(now(),interval 1 year))
+		</if> 
+	</select>
+	
+	<update id="update">
+		UPDATE ad_kpi_attach 
+			SET
+				STATUS = #{status},
+			  	USER_EVALUATION=#{userEvaluation},
+			  	USER_SCORE=#{userScore},
+			  	USER_TIME=#{userTime},
+			  	UPDATE_DATE=#{updateDate},
+			  	UPDATE_BY=#{updateBy}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_kpi_attach(
+			  	KPI_ID,
+			  	USER_ID,
+			  	USER_NAME,
+			  	DEPT_ID,
+			  	DEPT_NAME,
+			  	USER_EVALUATION,
+			  	USER_SCORE,
+			  	USER_TIME,
+			  	MANAGER_SCORE,
+			  	MANAGER_EVALUATION,
+			  	CEO_SCORE,
+			  	CEO_EVALUATION,
+			  	ceo_praisedpunished,
+			  	DATE,
+			  	CREATE_DATE,
+			  	CREATE_BY,
+			  	UPDATE_DATE,
+			  	UPDATE_BY
+			) 
+			VALUES (
+			  	#{kpiId},
+			  	#{userId},
+			  	#{userName},
+			  	#{deptId},
+			  	#{deptName},
+			  	#{userEvaluation},
+			  	#{userScore},
+			  	#{userTime},
+			  	#{managerScore},
+			  	#{managerEvaluation},
+			  	#{ceoScore},
+			  	#{ceoEvaluation},
+			  	#{ceoPraisedPunished},
+			  	#{date},
+			  	#{createDate},
+			  	#{createBy},
+			  	#{updateDate},
+			  	#{updateBy}
+			)
+	</insert>
+	
+		<insert id="insertAll">
+		INSERT INTO ad_kpi_attach(
+			   	KPI_ID,
+			  	USER_ID,
+			  	USER_NAME,
+			  	DEPT_ID,
+			  	DEPT_NAME,
+			  	USER_EVALUATION,
+			  	USER_SCORE,
+				USER_TIME,
+			  	MANAGER_SCORE,
+			  	MANAGER_EVALUATION,
+			  	CEO_SCORE,
+			  	CEO_EVALUATION,
+			  	ceo_praisedpunished,
+			  	DATE,
+			  	CREATE_DATE,
+			  	CREATE_BY,
+			  	UPDATE_DATE,
+			  	UPDATE_BY
+			) 
+			VALUES 
+		<foreach item="kpiAttach" index="index" collection="list" separator=",">  
+			 (
+			  	#{kpiAttach.kpiId},
+			  	#{kpiAttach.userId},
+			  	#{kpiAttach.userName},
+			  	#{kpiAttach.deptId},
+			  	#{kpiAttach.deptName},
+			  	#{kpiAttach.userEvaluation},
+			  	#{kpiAttach.userScore},
+				#{kpiAttach.userTime},
+			  	#{kpiAttach.managerScore},
+			  	#{kpiAttach.managerEvaluation},
+			  	#{kpiAttach.ceoScore},
+			  	#{kpiAttach.ceoEvaluation},
+			  	#{kpiAttach.ceoPraisedPunished},
+			  	#{kpiAttach.date},
+			  	#{kpiAttach.createDate},
+			  	#{kpiAttach.createBy},
+			  	#{kpiAttach.updateDate},
+			  	#{kpiAttach.updateBy}
+			)
+		</foreach>
+	</insert>
+
+
+	<update id="batchUpdate">
+		<foreach collection="kpiAttachList" item="kpiAttach"
+			index="index" open="" close="" separator=";">
+			UPDATE ad_kpi_attach
+			SET
+			  	USER_EVALUATION=#{kpiAttach.userEvaluation},
+			  	USER_SCORE=#{kpiAttach.userScore},
+			  	<!--MANAGER_SCORE=#{kpiAttach.managerScore},-->
+			  	MANAGER_EVALUATION=#{kpiAttach.managerEvaluation},
+			  	CEO_SCORE=#{kpiAttach.ceoScore},
+			  	CEO_EVALUATION=#{kpiAttach.ceoEvaluation},
+			  	ceo_praisedpunished = #{kpiAttach.ceoPraisedPunished},
+			  	UPDATE_DATE=#{kpiAttach.updateDate},
+			  	UPDATE_BY=#{kpiAttach.updateBy}
+			   <!-- USER_TIME=#{kpiAttach.userTime}-->
+			WHERE ID = #{kpiAttach.id}
+		</foreach>
+	</update>
+
+    <update id="batchUpdate2">
+        <foreach collection="kpiAttachList" item="kpiAttach"
+                 index="index" open="" close="" separator=";">
+            UPDATE ad_kpi_attach
+            SET
+            USER_EVALUATION=#{kpiAttach.userEvaluation},
+            USER_SCORE=#{kpiAttach.userScore},
+            MANAGER_SCORE=#{kpiAttach.managerScore},
+            MANAGER_EVALUATION=#{kpiAttach.managerEvaluation},
+            CEO_SCORE=#{kpiAttach.ceoScore},
+            CEO_EVALUATION=#{kpiAttach.ceoEvaluation},
+            ceo_praisedpunished = #{kpiAttach.ceoPraisedPunished},
+            UPDATE_DATE=#{kpiAttach.updateDate},
+            UPDATE_BY=#{kpiAttach.updateBy},
+            USER_TIME=#{kpiAttach.userTime}
+            WHERE ID = #{kpiAttach.id}
+        </foreach>
+    </update>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_kpi_attach WHERE ID = #{id}
+	</delete>
+	
+	<select id="findByKpiId" resultMap="adKpiAttachResult">
+		SELECT * FROM ad_kpi_attach WHERE KPI_ID = #{id}
+	</select>
+
+
+	<delete id="deleteByIdList">
+		DELETE FROM ad_kpi_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="("
+			close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteByDeptIdList">
+		DELETE FROM ad_kpi_attach WHERE DEPT_ID inz
+		<foreach item="deptId" index="index" collection="list" open="("
+			close=")" separator=",">
+			#{deptId}
+		</foreach>
+	</delete>
+</mapper>

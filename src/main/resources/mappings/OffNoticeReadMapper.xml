@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IOffNoticeReadDao">
+	
+	<resultMap id="offNoticeReadResult" type="offNoticeRead">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="noticeId" column="notice_id" />
+		<result property="readTime" column="read_time" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="offNoticeReadResult">
+		SELECT * FROM off_notice_read
+	</select>
+	
+	<select id="findById" resultMap="offNoticeReadResult">
+		SELECT * FROM off_notice_read WHERE ID = #{id}
+	</select> 
+	
+	<!-- 获取已读取的公告ID -->
+	<select id="getReadNotice" resultType="java.util.Map">
+		SELECT NOTICE_ID FROM off_notice_read WHERE USER_ID = #{params.userId} 
+		<if test="params.noticeIdList != null and params.noticeIdList.size > 0">
+			AND NOTICE_ID IN
+			<foreach item="noticeId" index="index" collection="params.noticeIdList" open="(" separator="," close=")">  
+				#{noticeId}
+			</foreach> 
+		</if>
+	</select>
+	
+	<select id="getCountByUserIdWithNoticeId" resultType="int">
+		SELECT COUNT(1) FROM off_notice_read WHERE USER_ID = #{userId} AND NOTICE_ID = #{noticeId} 
+	</select>
+	
+	<update id="update">
+		UPDATE off_notice_read 
+			SET
+			  	USER_ID=#{userId},
+			  	NOTICE_ID=#{noticeId},
+			  	READ_TIME=#{readTime}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO off_notice_read(
+			  	USER_ID,
+			  	NOTICE_ID,
+			  	READ_TIME
+			) 
+			VALUES (
+			  	#{userId},
+			  	#{noticeId},
+			  	#{readTime}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM off_notice_read WHERE ID = #{id}
+	</delete>
+	
+</mapper>

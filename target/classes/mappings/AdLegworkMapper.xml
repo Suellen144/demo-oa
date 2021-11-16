@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdLegworkDao">
+	
+	<resultMap id="adLegworkResult" type="com.reyzar.oa.domain.AdLegwork">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="place" column="place" />
+		<result property="reason" column="reason" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="applyPeople" column="apply_people" />
+		<result property="categorize" column="categorize" />
+		<result property="deptName" column="dept_name" />
+		<result property="deleted" column="is_deleted" />
+	</resultMap>
+	 
+	 <select id="findByPage" resultMap="adLegworkResult">
+		SELECT t.* FROM (
+			SELECT legwork.*,`user`.NAME AS username, `dept`.name as dept_name FROM ad_legwork legwork
+				JOIN sys_user `user`
+					ON `user`.`ID` = legwork.user_id AND `user`.`is_deleted` is null
+				JOIN sys_dept dept
+					ON dept.`ID` = `user`.`DEPT_ID`
+			WHERE legwork.is_deleted is null
+			<if test="deptIdSet == null or deptIdSet.size == 0">
+				<choose>
+					<when test="userSet !=null and userSet.size > 0">
+						AND (legwork.user_id IN
+						<foreach collection="userSet" item="principalId" index="index" open="(" separator=",">
+							#{principalId}
+						</foreach>
+						,#{userId}))
+					</when>
+					<otherwise>
+						AND legwork.user_id = #{userId}
+					</otherwise>
+				</choose>
+			</if>
+			<if test="deptIdSet != null and deptIdSet.size > 0">
+				AND (dept.`ID` IN 
+				<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+					#{deptId}
+				</foreach>
+				OR legwork.user_id = #{userId})
+			</if>
+			<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')) 
+			</if>
+			GROUP BY CATEGORIZE
+		) t
+		WHERE 1 = 1
+		ORDER BY t.ID DESC
+	</select>
+	
+	
+	<select id="findByParam" resultMap="adLegworkResult">
+		select * from ad_legwork  where (date_format(start_time,'%Y-%m')  LIKE CONCAT('%',#{generalMonth},'%') 
+			or date_format(end_time,'%Y-%m')  LIKE CONCAT('%',#{generalMonth},'%')
+		) and is_deleted is null
+		<if test="userIds != null and userIds.size > 0">
+				AND user_id IN 
+				<foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">  
+					#{userId}
+				</foreach>
+			</if>
+	</select>
+	
+	<select id="findByAdAttendance" resultMap="adLegworkResult">
+	select ID,USER_ID,MIN(START_TIME) as START_TIME,MAX(END_TIME) as END_TIME,PLACE,REASON,APPLY_PEOPLE,CATEGORIZE,CREATE_BY,CREATE_DATE,IS_DELETED from ad_legwork  where (date_format(start_time,'%Y-%m-%d')  LIKE CONCAT('%',#{generalMonth},'%') 
+		or date_format(end_time,'%Y-%m-%d')  LIKE CONCAT('%',#{generalMonth},'%')
+	) and is_deleted is null and USER_ID=#{userId}
+		GROUP BY user_id,DATE_FORMAT(start_time, '%Y%m%d'),DATE_FORMAT(end_time, '%Y%m%d')
+		ORDER BY start_time
+	</select>
+	<select id="findByCategorize" resultMap="adLegworkResult">
+		SELECT * FROM ad_legwork
+		WHERE CATEGORIZE = #{categorize}
+	</select>
+	
+	
+<!-- 批量插入 -->
+	<insert id="insertAll">
+		INSERT INTO ad_legwork(
+		  `user_id`,
+		  `start_time`,
+		  `end_time`,
+		  `place`,
+		  `reason`,
+		  `apply_people`,
+		  `categorize`,
+		  `create_date`,
+		  `create_by`
+		)
+		VALUES
+		<foreach collection="legworksList" item="legwork" index="index" separator=",">
+		(
+			#{legwork.userId},#{legwork.startTime},#{legwork.endTime},#{legwork.place},
+			#{legwork.reason},#{legwork.applyPeople},#{legwork.categorize},#{legwork.createDate},#{legwork.createBy}
+		)
+		</foreach>
+	</insert>
+	
+	
+	<select id="findById" resultMap="adLegworkResult">
+		SELECT * FROM ad_legwork WHERE id = #{id}
+	</select>
+	
+	<update id="update">
+			UPDATE ad_legwork
+			SET 
+				is_deleted = #{deleted}
+			WHERE categorize = #{categorize}
+	</update>
+	
+	<delete id="deleteBycategorize">
+		DELETE FROM ad_legwork WHERE categorize = #{categorize}
+	</delete>
+	
+</mapper>

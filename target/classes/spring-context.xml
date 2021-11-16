@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd"
+		default-lazy-init="true">
+
+	<!-- 优先初始化对象  -->
+	<bean class="com.reyzar.oa.common.util.SpringContextUtils" lazy-init="false" />
+	<bean class="com.reyzar.oa.common.util.MailUtils" lazy-init="false" />
+
+	<!-- 加载配置属性文件 -->
+	<!-- <context:property-placeholder ignore-unresolvable="true" location="classpath:oa.properties" /> -->
+	<bean id="propertyPlaceholder" class="com.reyzar.oa.common.encrypt.CustomPropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:oa.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 使用Annotation自动注册Bean，在主容器中不扫描@Controller注解，在SpringMvc中只扫描@Controller注解。  -->
+	<context:component-scan base-package="com.reyzar.oa">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	<!-- MyBatis BEGIN -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="com.reyzar.oa"/>
+        <property name="mapperLocations" value="classpath:/mappings/**/*.xml"/>
+        <property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+    </bean>
+    
+    <!-- 扫描basePackage下所有以@MyBatisDao注解的接口 -->
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <property name="basePackage" value="com.reyzar.oa"/>
+        <property name="annotationClass" value="com.reyzar.oa.common.annotation.MyBatisDao"/>
+    </bean>
+    <!-- MyBatis END -->
+    
+	<!-- 数据库连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close"> 
+	    <property name="driverClassName" value="${db.driver}" />
+		<property name="url" value="${db.url}" />
+		<property name="username" value="${db.username}" />
+		<property name="password" value="${db.password}" />
+		
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${db.pool.initSize}" />
+		<property name="minIdle" value="${db.pool.minIdle}" /> 
+		<property name="maxActive" value="${db.pool.maxActive}" />
+		
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${db.pool.maxWait}" />
+		
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		
+		<!-- <property name="validationQuery" value="${jdbc.testSql}" /> -->
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+	</bean>
+
+	<!-- 事务管理 BEGIN -->
+    <!-- 定义事务 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 配置 Annotation 驱动，扫描@Transactional注解的类定义事务  -->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+	<!-- 事务管理 END -->
+	
+	<!-- 配置事务通知属性 -->  
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">  
+        <!-- 定义事务传播属性 -->  
+        <tx:attributes>  
+            <tx:method name="get*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="find*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="load*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="*" propagation="REQUIRED" rollback-for="Exception,RuntimeException" />  
+        </tx:attributes>  
+    </tx:advice>  
+
+    <!-- 配置事务切面 -->  
+    <aop:config proxy-target-class="true"> 
+        <aop:pointcut id="serviceOperation"
+            expression="execution(* com.reyzar.oa.service..*.*(..)) and execution(* com.reyzar.oa.common.util.ActivitiUtils.*(..))" />  
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceOperation" />  
+    </aop:config>
+    
+    <!-- Spring Task -->
+    <task:executor id="executor" pool-size="5" />      
+    <task:scheduler id="scheduler" pool-size="10" />    
+    <task:annotation-driven executor="executor" scheduler="scheduler" />
+    
+</beans>

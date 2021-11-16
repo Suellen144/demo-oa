@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdTravelDao">
+	
+	<resultMap id="adTravelResult" type="adTravel">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="userId" column="user_id" />
+		<result property="travelerName" column="traveler_name" />
+		<result property="title" column="title" />
+		<result property="applyTime" column="apply_time" />
+		<result property="budget" column="budget" />
+		<result property="status" column="status" />
+		<result property="attachName" column="attach_name" />
+		<result property="attachments" column="attachments" />
+		<result property="comment" column="comment" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="travelResult" column="travel_result" />
+		<result property="isProcess" column="is_process" />
+		<association property="applicant" column="user_id" javaType="sysUser" resultMap="sysUserResult" />
+		<collection property="travelAttachList" column="id" select="findTravelAttachInList" />
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="user_id" />
+		<result property="name" column="user_name" />
+		<result property="nickname" column="user_nickname" />
+		<result property="account" column="user_account" />
+		<result property="password" column="user_password" />
+		<result property="deptId" column="user_dept_id" />
+		<result property="telphone" column="user_telphone" />
+		<result property="mobilephone" column="user_mobilephone" />
+		<result property="email" column="user_email" />
+		<result property="qq" column="user_qq" />
+		<result property="photo" column="user_photo" />
+		<result property="inJob" column="user_in_job" />
+		<result property="createBy" column="user_create_by" />
+		<result property="createDate" column="user_create_date" />
+		<result property="updateBy" column="user_update_by" />
+		<result property="updateDate" column="user_update_date" />
+		<result property="remark" column="user_remark" />
+		<result property="isDeleted" column="user_is_deleted" />
+		
+		<association property="dept" column="user_dept_id" javaType="sysDept" resultMap="sysDeptResult" />
+	</resultMap>
+	
+	<resultMap id="sysDeptResult" type="sysDept">
+		<id property="id" column="dept_id" />
+		<result property="parentId" column="dept_parent_id" />
+		<result property="name" column="dept_name" />
+		<result property="code" column="dept_code" />
+		<result property="userId" column="dept_user_id" />
+		<result property="assistantId" column="dept_assistant_id" />
+		<result property="createBy" column="dept_create_by" />
+		<result property="createDate" column="dept_create_date" />
+		<result property="updateBy" column="dept_update_by" />
+		<result property="updateDate" column="dept_update_date" />
+	</resultMap>
+
+	<update id="updateTravelResult">
+		update ad_travel set travel_result = #{travelResult} where id = #{id};
+	</update>
+	
+	<select id="findAll" resultMap="adTravelResult">
+		SELECT * FROM ad_travel
+	</select>
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="adTravelResult">
+		SELECT `travel`.*, 
+			`user`.`NAME` AS user_name,
+			`user`.`NICKNAME` AS user_nickname,
+			`user`.`ACCOUNT` AS user_account,
+			`user`.`PASSWORD` AS user_password,
+			`user`.`TELPHONE` AS user_telphone,
+			`user`.`MOBILEPHONE` AS user_mobilephone,
+			`user`.`EMAIL` AS user_email,
+			`user`.`QQ` AS user_qq,
+			`user`.`PHOTO` AS user_photo,
+			`user`.`IN_JOB` AS user_in_jon,
+			`user`.`CREATE_BY` AS user_create_by,
+			`user`.`CREATE_DATE` AS user_create_date,
+			`user`.`UPDATE_BY` AS user_update_by,
+			`user`.`UPDATE_DATE` AS user_update_date,
+			`user`.`REMARK` AS user_remark,
+			`user`.`IS_DELETED` AS user_is_deleted,
+			`user`.`DEPT_ID` AS user_dept_id,
+			`dept`.id AS dept_id,
+			`dept`.`PARENT_ID` AS dept_parent_id,
+			`dept`.`NAME` AS dept_name,
+			`dept`.`CODE` AS dept_code,
+			`dept`.`USER_ID` AS dept_user_id,
+			`dept`.`ASSISTANT_ID` AS dept_assistant_id,
+			`dept`.`CREATE_BY` AS dept_create_by,
+			`dept`.`CREATE_DATE` AS dept_create_date,
+			`dept`.`UPDATE_BY` AS dept_update_by,
+			`dept`.`UPDATE_DATE` AS dept_update_date 
+		FROM ad_travel `travel` 
+		JOIN sys_user `user`
+			ON `user`.`ID` = `travel`.USER_ID
+		JOIN sys_dept `dept`
+			ON `dept`.`ID` = `user`.`DEPT_ID`
+		JOIN ad_travel_attach `attach`
+			ON `attach`.`TRAVEL_ID` = `travel`.`ID`
+		WHERE travel.status != 3
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			<choose>
+				<when test="userIdSet !=null and userIdSet.size > 0">
+					AND (`travel`.USER_ID IN
+					<foreach collection="userIdSet" item="principalId" index="index" open="(" separator=",">
+						#{principalId}
+					</foreach>
+					,#{userId}))
+				</when>
+				<otherwise>
+					AND `travel`.USER_ID = #{userId}
+				</otherwise>
+			</choose>
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND (`dept`.`ID` IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach>
+			OR `travel`.USER_ID = #{userId})
+		</if>
+		<if test="status != null">
+			AND `travel`.`STATUS` = #{status}
+		</if>
+		<if test="beginDate != null">
+			AND `attach`.`BEGIN_DATE` &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null">
+			AND `attach`.`END_DATE` &lt;= #{endDate}
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%'))
+		</if>
+		GROUP BY `travel`.`ID`
+		ORDER BY `travel`.ID DESC
+	</select>
+	
+	<select id="findById" resultMap="adTravelResult">
+		SELECT `travel`.*, 
+			`user`.`NAME` AS user_name,
+			`user`.`NICKNAME` AS user_nickname,
+			`user`.`ACCOUNT` AS user_account,
+			`user`.`PASSWORD` AS user_password,
+			`user`.`TELPHONE` AS user_telphone,
+			`user`.`MOBILEPHONE` AS user_mobilephone,
+			`user`.`EMAIL` AS user_email,
+			`user`.`QQ` AS user_qq,
+			`user`.`PHOTO` AS user_photo,
+			`user`.`IN_JOB` AS user_in_jon,
+			`user`.`CREATE_BY` AS user_create_by,
+			`user`.`CREATE_DATE` AS user_create_date,
+			`user`.`UPDATE_BY` AS user_update_by,
+			`user`.`UPDATE_DATE` AS user_update_date,
+			`user`.`REMARK` AS user_remark,
+			`user`.`IS_DELETED` AS user_is_deleted,
+			`user`.`DEPT_ID` AS user_dept_id,
+			`dept`.id AS dept_id,
+			`dept`.`PARENT_ID` AS dept_parent_id,
+			`dept`.`NAME` AS dept_name,
+			`dept`.`CODE` AS dept_code,
+			`dept`.`USER_ID` AS dept_user_id,
+			`dept`.`ASSISTANT_ID` AS dept_assistant_id,
+			`dept`.`CREATE_BY` AS dept_create_by,
+			`dept`.`CREATE_DATE` AS dept_create_date,
+			`dept`.`UPDATE_BY` AS dept_update_by,
+			`dept`.`UPDATE_DATE` AS dept_update_date 
+		FROM ad_travel `travel`
+		JOIN sys_user `user`
+			ON `user`.`ID` = `travel`.USER_ID
+		JOIN sys_dept `dept` 
+			ON `dept`.`ID` = `user`.`DEPT_ID`
+		WHERE `travel`.`ID` = #{id} 
+	</select> 
+	
+	<select id="findByIds" resultMap="adTravelResult">
+		SELECT * FROM ad_travel where id in
+		<foreach collection="ids" index="index" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</select>
+	
+	<select id="findTravelAttachInList" resultType="adTravelAttach">
+		SELECT * FROM ad_travel_attach WHERE `TRAVEL_ID` = #{id}
+	</select>
+	
+	<resultMap id="adAtravelDTOResult" type="com.reyzar.oa.common.dto.AdAtravelDto">
+		<result property="userName" column="TRAVELER_NAME" />
+		<result property="beginDate" column="BEGIN_DATE" />
+		<result property="endDate" column="END_DATE" />
+	</resultMap>
+	
+	<select id="findByParam" resultMap="adAtravelDTOResult">
+	select t1.TRAVELER_NAME  TRAVELER_NAME,t2.BEGIN_DATE BEGIN_DATE,t2.END_DATE END_DATE from (
+		select at.id id, at.`STATUS`,su.`NAME` TRAVELER_NAME from ad_travel at,sys_user su where 1=1
+		<if test="userIds != null and userIds.size > 0">
+				AND USER_ID IN 
+				<foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">  
+					#{userId}
+				</foreach>
+		</if>
+		and at.USER_ID=su.ID
+)t1 , 
+(select * from ad_travel_attach where  date_format(BEGIN_DATE,'%Y-%m') LIKE CONCAT('%',#{generalMonth},'%') 
+		or  date_format(END_DATE,'%Y-%m') LIKE CONCAT('%',#{generalMonth},'%'))t2 
+		where t1.id=t2.TRAVEL_ID
+		and t1.`STATUS`!='3'
+	</select>
+	
+	<select id="findByAdAttendance" resultMap="adAtravelDTOResult">
+	select t1.TRAVELER_NAME  TRAVELER_NAME,t2.BEGIN_DATE BEGIN_DATE,t2.END_DATE END_DATE from (
+		select at.id id, at.`STATUS`,su.`NAME` TRAVELER_NAME from ad_travel at,sys_user su where USER_ID = #{userId}
+		and at.USER_ID=su.ID
+		)t1 , 
+		(select * from ad_travel_attach where  date_format(BEGIN_DATE,'%Y-%m-%d') LIKE CONCAT('%',#{generalMonth},'%') 
+				or  date_format(END_DATE,'%Y-%m-%d') LIKE CONCAT('%',#{generalMonth},'%'))t2 
+				where t1.id=t2.TRAVEL_ID
+				and t1.`STATUS`!='3'
+	</select>
+	<select id="findByAdAttendanceName" resultMap="adAtravelDTOResult">
+	select t1.TRAVELER_NAME  TRAVELER_NAME,t2.BEGIN_DATE BEGIN_DATE,t2.END_DATE END_DATE from (
+		select at.id id, at.`STATUS`,su.`NAME` TRAVELER_NAME from ad_travel at,sys_user su where TRAVELER_NAME = #{userName}
+		and at.USER_ID=su.ID
+		)t1 , 
+		(select * from ad_travel_attach where  date_format(BEGIN_DATE,'%Y-%m-%d') LIKE CONCAT('%',#{generalMonth},'%') 
+				or  date_format(END_DATE,'%Y-%m-%d') LIKE CONCAT('%',#{generalMonth},'%'))t2 
+				where t1.id=t2.TRAVEL_ID
+				and t1.`STATUS`!='3'
+	</select>
+	
+	<update id="update">
+		UPDATE ad_travel 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	USER_ID=#{userId},
+			  	TRAVELER_NAME=#{travelerName},
+			  	TITLE=#{title},
+			  	APPLY_TIME=#{applyTime},
+			  	BUDGET=#{budget},
+			  	STATUS=#{status},
+			  	ATTACH_NAME=#{attachName},
+			  	ATTACHMENTS=#{attachments},
+			  	COMMENT=#{comment},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	travel_result=#{travelResult}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_travel(
+			  	PROCESS_INSTANCE_ID,
+			  	USER_ID,
+			  	TRAVELER_NAME,
+			  	TITLE,
+			  	APPLY_TIME,
+			  	BUDGET,
+			  	STATUS,
+			  	ATTACH_NAME,
+			  	ATTACHMENTS,
+			  	COMMENT,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	travel_result,
+			  	is_process
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{userId},
+			  	#{travelerName},
+			  	#{title},
+			  	#{applyTime},
+			  	#{budget},
+			  	#{status},
+			  	#{attachName},
+			  	#{attachments},
+			  	#{comment},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{travelResult},
+		  		#{isProcess}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_travel WHERE ID = #{id}
+	</delete>
+	
+	
+	
+	
+	<select id="getTraveData" resultType="java.util.HashMap">
+		SELECT T1.* FROM (
+			SELECT T.* FROM (
+				SELECT `user`.`ID`, `user`.`NAME`, `travel`.`APPLY_TIME` FROM ad_travel `travel`
+					JOIN sys_user `user` ON `user`.`ID` = `travel`.`USER_ID`  AND `user`.`IS_DELETED` IS NULL
+					JOIN sys_dept `dept` ON `dept`.`ID` = `user`.`DEPT_ID`
+				WHERE 1 = 1 AND `travel`.`STATUS` = 2
+				<if test="yearWithMonth != null and yearWithMonth != ''">
+					AND DATE_FORMAT(`travel`.`APPLY_TIME`, '%Y-%m') = #{yearWithMonth}
+				</if>
+				<if test="userId != null">
+					AND `user`.ID = #{userId}
+				</if>
+				<if test="deptIdList != null and deptIdList.size > 0">
+					AND `dept`.`ID` IN
+					<foreach item="deptId" index="index" collection="deptIdList" open="(" separator="," close=")">  
+		  				#{deptId}
+		  			</foreach>
+				</if>
+			) T 
+		) T1
+	</select>
+	
+</mapper>

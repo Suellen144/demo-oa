@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysPermissionDao">
+	
+	<resultMap id="permissionResult" type="sysPermission">
+		<id property="id" column="id" />
+		<result property="menuId" column="menu_id" />
+		<result property="code" column="code" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+	</resultMap>
+	
+	<!-- 通过菜单ID查询权限 -->
+	<select id="findByMenuid" resultMap="permissionResult">
+		SELECT ID, MENU_ID, CODE, CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED 
+			FROM sys_permission WHERE MENU_ID = #{menuid}
+	</select>
+	
+	<!-- 批量插入权限 -->
+	<insert id="insertAll">
+		INSERT INTO sys_permission(MENU_ID, CODE, CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED) 
+			VALUES 
+			<foreach collection="list" item="permiss" index="index" separator=",">
+				(
+					#{permiss.menuId}, #{permiss.code}, #{permiss.createBy},
+					#{permiss.createDate}, #{permiss.updateBy}, #{permiss.updateDate},
+					#{permiss.remark}, #{permiss.isDeleted}
+				)
+			</foreach>
+	</insert>
+	
+	<!-- 删除指定菜单下的所有权限 -->
+	<delete id="deleteByMenuid">
+		DELETE FROM sys_permission WHERE MENU_ID = #{menuid}
+	</delete>
+	
+	<!-- 删除菜单范围内所有的权限 -->
+	<delete id="deleteByMenuids">
+		DELETE FROM sys_permission WHERE MENU_ID IN 
+			<foreach item="id" index="index" collection="list" open="(" separator="," close=")">  
+  				#{id}
+  			</foreach>
+	</delete>
+	
+	<!-- 删除ID集合内的所有权限 -->
+	<delete id="deleteByIds">
+		DELETE FROM sys_permission WHERE ID IN 
+			<foreach item="id" index="index" collection="list" open="(" separator="," close=")">  
+  				#{id}
+  			</foreach>
+	</delete>
+</mapper>

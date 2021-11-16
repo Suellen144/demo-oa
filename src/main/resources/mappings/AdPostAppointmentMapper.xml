@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdPostAppointmentDao">
+	
+	<resultMap id="adPostAppointmentResult" type="com.reyzar.oa.domain.AdPostAppointment">
+		<id property="id" column="id" />
+		<result property="recordId" column="record_id" />
+		<result property="company" column="company" />
+		<result property="dept" column="dept" />
+		<result property="projectTeam" column="project_Team" />
+		<result property="station" column="station" />
+		<result property="appoint" column="appoint" />
+		<result property="postReason" column="post_Reason" />
+		<result property="postDate" column="post_Date" />
+	</resultMap>
+
+	<select id="findByRecordId" resultMap="adPostAppointmentResult">
+		SELECT * FROM ad_post_appointment WHERE record_id = #{recordId} order by post_Date desc
+	</select> 
+	
+	
+	<update id="update">
+		UPDATE ad_post_appointment 
+			SET
+			  	RECORD_ID=#{recordId},
+			  	COMPANY=#{company},
+			  	DEPT=#{dept},
+			  	PROJECT_TEAM=#{projectTeam},
+			  	STATION=#{station},
+			  	APPOINT=#{appoint},
+			  	POST_REASON=#{postReason},
+			  	POST_DATE=#{postDate},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="postAppointmentList" item="postAppointment" index="index" open="" close="" separator=";">
+			UPDATE ad_post_appointment 
+				SET
+					RECORD_ID=#{postAppointment.recordId},
+			  		COMPANY=#{postAppointment.company},
+			  		DEPT=#{postAppointment.dept},
+			  		PROJECT_TEAM=#{postAppointment.projectTeam},
+			  		STATION=#{postAppointment.station},
+			  		APPOINT=#{postAppointment.appoint},
+			  		POST_REASON=#{postAppointment.postReason},
+			  		POST_DATE=#{postAppointment.postDate},
+			  		CREATE_BY=#{postAppointment.createBy},
+			  		CREATE_DATE=#{postAppointment.createDate},
+			  		UPDATE_BY=#{postAppointment.updateBy},
+			  		UPDATE_DATE=#{postAppointment.updateDate}
+			WHERE ID = #{postAppointment.id}
+		</foreach>
+	</update>
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_post_appointment(
+			  	RECORD_ID,
+			  	COMPANY,
+			  	DEPT,
+			  	PROJECT_TEAM,
+			  	STATION,
+			  	APPOINT,
+			  	POST_REASON,
+			  	POST_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{recordId},
+			  	#{company},
+			  	#{dept},
+			  	#{projectTeam},
+			  	#{station},
+			  	#{appoint},
+			  	#{postReason},
+			  	#{postDate},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO ad_post_appointment(
+			  	RECORD_ID,
+			  	COMPANY,
+			  	DEPT,
+			  	PROJECT_TEAM,
+			  	STATION,
+			  	APPOINT,
+			  	POST_REASON,
+			  	POST_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES
+		<foreach item="postAppointment" index="index" collection="list" separator=",">  
+			 (
+			  		#{postAppointment.recordId},
+			  		#{postAppointment.company},
+			  		#{postAppointment.dept},
+			  		#{postAppointment.projectTeam},
+			  		#{postAppointment.station},
+			  		#{postAppointment.appoint},
+			  		#{postAppointment.postReason},
+			  		#{postAppointment.postDate},
+			  		#{postAppointment.createBy},
+			  		#{postAppointment.createDate},
+			  		#{postAppointment.updateBy},
+			  		#{postAppointment.updateDate}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_post_appointment WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

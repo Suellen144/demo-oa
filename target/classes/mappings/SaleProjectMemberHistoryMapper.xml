@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISaleProjectMemberHistoryDao">
+	
+	<resultMap id="saleProjectMemberHistoryResult" type="saleProjectMemberHistory">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="resultsProportion" column="RESULTS_PROPORTION" />
+		<result property="commissionProportion" column="commission_proportion" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="sorting" column="sorting" />
+		
+		<association property="principal" column="user_id" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+
+	<update id="updateIsDelete">
+		update sale_project_member_history set is_deleted = 0;
+	</update>
+	
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findByProjectId" resultMap="saleProjectMemberHistoryResult">
+		SELECT * FROM sale_project_member_history WHERE PROJECT_MANAGE_ID = #{projectId} AND (IS_DELETED != 1 or IS_DELETED is null) order by sorting
+	</select>
+	
+	<select id="findById" resultType="saleProjectMemberHistory">
+		SELECT * FROM sale_project_member_history WHERE id = #{id} order by sorting
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_project_member_history (
+		   USER_ID,
+		   RESULTS_PROPORTION,
+		   COMMISSION_PROPORTION,
+		   PROJECT_MANAGE_ID,
+		   CREATE_BY,
+		   CREATE_DATE,
+		   UPDATE_BY,
+		   UPDATE_DATE,
+		   sorting,
+		   IS_DELETED
+		) 
+		VALUES (
+			#{userId},#{resultsProportion},#{commissionProportion},#{projectManageId},
+			#{createBy},#{createDate},#{updateBy},#{updateDate},#{sorting},#{isDeleted}
+		)
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO sale_project_member_history (
+		   USER_ID,
+		   RESULTS_PROPORTION,
+		   COMMISSION_PROPORTION,
+		   PROJECT_MANAGE_ID,
+		   CREATE_BY,
+		   CREATE_DATE,
+		   UPDATE_BY,
+		   UPDATE_DATE,
+		   sorting,
+		   IS_DELETED
+		) 
+			VALUES
+		<foreach item="saleProjectMemberHistoryList" index="index" collection="list" separator=",">  
+			 (
+			  	#{saleProjectMemberHistoryList.userId},
+			  	#{saleProjectMemberHistoryList.resultsProportion},
+			  	#{saleProjectMemberHistoryList.commissionProportion},
+			  	#{saleProjectMemberHistoryList.projectManageId},
+			  	#{saleProjectMemberHistoryList.createBy},
+			  	#{saleProjectMemberHistoryList.createDate},
+			  	#{saleProjectMemberHistoryList.updateBy},
+			  	#{saleProjectMemberHistoryList.updateDate},
+			  	#{saleProjectMemberHistoryList.sorting},
+			  	#{saleProjectMemberHistoryList.isDeleted}
+			)
+		</foreach>
+	</insert>
+
+	<insert id="insertAll2">
+		INSERT INTO sale_project_member_history (
+		USER_ID,
+		RESULTS_PROPORTION,
+		COMMISSION_PROPORTION,
+		PROJECT_MANAGE_ID,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE,
+		sorting,
+		IS_DELETED
+		)
+		VALUES
+		<foreach item="saleProjectMemberHistoryList" index="index" collection="list" separator=",">
+			(
+			#{saleProjectMemberHistoryList.userId},
+			#{saleProjectMemberHistoryList.resultsProportion},
+			#{saleProjectMemberHistoryList.commissionProportion},
+			#{saleProjectMemberHistoryList.projectManageId},
+			#{saleProjectMemberHistoryList.createBy},
+			#{saleProjectMemberHistoryList.createDate},
+			#{saleProjectMemberHistoryList.updateBy},
+			#{saleProjectMemberHistoryList.updateDate},
+			#{saleProjectMemberHistoryList.sorting},
+			#{saleProjectMemberHistoryList.isDeleted}
+			)
+		</foreach>
+	</insert>
+		
+	<update id="update">
+			UPDATE sale_project_member_history 
+				SET
+					USER_ID=#{userId},
+				  	RESULTS_PROPORTION=#{resultsProportion},
+				  	COMMISSION_PROPORTION=#{commissionProportion},
+				  	PROJECT_MANAGE_ID=#{projectManageId},
+				  	CREATE_BY=#{createBy},
+				  	CREATE_DATE=#{createDate},
+				  	UPDATE_BY=#{updateBy},
+				  	UPDATE_DATE=#{updateDate},
+				  	sorting=#{sorting},
+				  	IS_DELETED=#{isDeleted}
+			WHERE ID = #{id}
+	</update>
+
+	<update id="update2">
+			UPDATE sale_project_member_history
+				SET
+				  	RESULTS_PROPORTION=#{resultsProportion},
+				  	COMMISSION_PROPORTION=#{commissionProportion},
+				  	PROJECT_MANAGE_ID=#{projectHistoryId},
+				  	CREATE_BY=#{createBy},
+				  	CREATE_DATE=#{createDate},
+				  	UPDATE_BY=#{updateBy},
+				  	UPDATE_DATE=#{updateDate},
+				  	sorting=#{sorting},
+				  	IS_DELETED=0
+			WHERE project_manage_id = #{projectHistoryId} and USER_ID = #{userId}
+	</update>
+		
+	<update id="batchUpdate">
+		<foreach collection="saleProjectMemberHistoryList" item="saleProjectMemberHistory" index="index" open="" close="" separator=";">
+			UPDATE sale_project_member_history 
+				SET
+					USER_ID=#{saleProjectMemberHistory.userId},
+				  	RESULTS_PROPORTION=#{saleProjectMemberHistory.resultsProportion},
+				  	COMMISSION_PROPORTION=#{saleProjectMemberHistory.commissionProportion},
+				  	PROJECT_MANAGE_ID=#{saleProjectMemberHistory.projectManageId},
+				  	CREATE_BY=#{saleProjectMemberHistory.createBy},
+				  	CREATE_DATE=#{saleProjectMemberHistory.createDate},
+				  	UPDATE_BY=#{saleProjectMemberHistory.updateBy},
+				  	UPDATE_DATE=#{saleProjectMemberHistory.updateDate},
+				  	sorting=#{saleProjectMemberHistory.sorting},
+				  	IS_DELETED=#{saleProjectMemberHistory.isDeleted}
+			WHERE ID = #{saleProjectMemberHistory.id}
+		</foreach>
+	</update>
+	
+	<delete id="deleteByProjectId">
+		DELETE FROM sale_project_member_history
+		WHERE PROJECT_MANAGE_ID = #{id}
+	</delete>
+
+	<delete id="delete">
+		DELETE FROM sale_project_member_history
+		WHERE id = #{id}
+	</delete>
+</mapper>

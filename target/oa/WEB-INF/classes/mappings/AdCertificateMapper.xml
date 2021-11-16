@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdCertificateDao">
+	
+	<resultMap id="adCertificateResult" type="com.reyzar.oa.domain.AdCertificate">
+		<id property="id" column="id" />
+		<result property="recordId" column="record_id" />
+		<result property="date" column="date" />
+		<result property="issuingUnit" column="issuing_Unit" />
+		<result property="honor" column="honor" />
+		<result property="validity" column="validity" />
+		<result property="scannings" column="scanning" />
+		<result property="scanningName" column="scanning_name" />
+	</resultMap>
+
+	<select id="findByRecordId" resultMap="adCertificateResult">
+		SELECT * FROM ad_certificate WHERE record_id = #{recordId} order by id desc
+	</select> 
+	
+	
+	<update id="update">
+		UPDATE ad_certificate 
+			SET
+			  	RECORD_ID=#{recordId},
+			  	DATE=#{date},
+			  	ISSUING_UNIT=#{issuingUnit},
+			  	HONOR=#{honor},
+			  	VALIDITY=#{validity},
+			  	ISVALIDITY=#{isValidity},
+			  	SCANNING=#{scannings},
+			  	SCANNING_NAME=#{scanningName},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="certificateList" item="certificate" index="index" open="" close="" separator=";">
+			UPDATE ad_certificate 
+				SET
+					RECORD_ID=#{certificate.recordId},
+			  		DATE=#{certificate.date},
+			  		ISSUING_UNIT=#{certificate.issuingUnit},
+			  		HONOR=#{certificate.honor},
+			  		VALIDITY=#{certificate.validity},
+			  		ISVALIDITY=#{certificate.isValidity},
+			  		SCANNING=#{certificate.scannings},
+			  		SCANNING_NAME=#{certificate.scanningName},
+			  		CREATE_BY=#{certificate.createBy},
+			  		CREATE_DATE=#{certificate.createDate},
+			  		UPDATE_BY=#{certificate.updateBy},
+			  		UPDATE_DATE=#{certificate.updateDate}
+			WHERE ID = #{certificate.id}
+		</foreach>
+	</update>
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_certificate(
+			  	RECORD_ID,
+			  	DATE,
+			  	ISSUING_UNIT,
+			  	HONOR,
+			  	VALIDITY,
+			  	ISVALIDITY,
+			  	SCANNING,
+			  	SCANNING_NAME,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{recordId},
+			  	#{date},
+			  	#{issuingUnit},
+			  	#{honor},
+			  	#{validity},
+			  	#{isValidity},
+			  	#{scannings},
+			  	#{scanningName},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO ad_certificate(
+			  	RECORD_ID,
+			  	DATE,
+			  	ISSUING_UNIT,
+			  	HONOR,
+			  	VALIDITY,
+			  	ISVALIDITY,
+			  	SCANNING,
+			  	SCANNING_NAME,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES
+		<foreach item="certificate" index="index" collection="list" separator=",">  
+			 (
+			  		#{certificate.recordId},
+			  		#{certificate.date},
+			  		#{certificate.issuingUnit},
+			  		#{certificate.honor},
+			  		#{certificate.validity},
+			  		#{certificate.isValidity},
+			  		#{certificate.scannings},
+			  		#{certificate.scanningName},
+			  		#{certificate.createBy},
+			  		#{certificate.createDate},
+			  		#{certificate.updateBy},
+			  		#{certificate.updateDate}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_certificate WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

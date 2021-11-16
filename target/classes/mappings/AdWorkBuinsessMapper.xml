@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdWorkBuinsessDao">
+	
+	<resultMap id="adWorkBuinsessResult" type="adWorkBuinsess">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="deptId" column="dept_id" />
+		<result property="type" column="type" />
+		<result property="status" column="status" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" />
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<collection property="buinsessAttachsList" column="id" select="findWorkBusinessAttachToList" />
+		<collection property="buinsessBacksList" column="id" select="findWorkBusinessBackToList" />
+	</resultMap>
+	
+	<!-- 附加表 resultMap -->
+	<resultMap id="adWorkBuinsessAttachResult" type="adWorkBuinsessAttach">
+		<id property="id" column="id" />
+		<result property="workBusinessId" column="work_business_id" />
+		<result property="responsibleUserId" column="responsible_user_id" />
+		<result property="responsibleUserName" column="responsible_user_name" />
+		<result property="workDate" column="work_date" />
+		<result property="workTime" column="work_time" />
+		<result property="payDate" column="pay_date" />
+		<result property="content" column="content" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+<!-- 		<association property="principal" column="responsible_user_id" javaType="sysUser" select="findUserByUserid" /> -->
+	</resultMap>
+	
+	
+	<resultMap id="WorkManageResult" type="com.reyzar.oa.common.dto.WorkManageDTO">
+		<result property="id" column="id" />	
+		<result property="userId" column="user_Id" />
+		<result property="createDate" column="create_date" />
+		<result property="type" column="type" />
+		<result property="applyTime" column="apply_time" />
+		<result property="status" column="status" />
+		<result property="workDate" column="work_date" />
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" /> 
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+	</resultMap>
+	
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+	</resultMap>
+	
+	<!-- 退回附表 -->
+	<resultMap id="adWorkBuinsessBackResult" type="adWorkBuinsessBack">
+		<id property="id" column="id" />
+		<result property="userId" column="USER_ID" />
+		<result property="workBusinessId" column="WORK_BUSINESS_ID" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="content" column="CONTENT" />
+		<association property="sysUser" column="user_id" javaType="sysUser" select="findUserByUserId" /> 
+	</resultMap>
+	
+	<select id="findWorkBusinessBackToList" resultMap="adWorkBuinsessBackResult">
+		SELECT * FROM ad_work_business_back WHERE WORK_BUSINESS_ID = #{id}
+	</select> 
+	
+	
+	<select id="findAll" resultMap="adWorkBuinsessResult">
+		SELECT * FROM ad_work_business
+	</select>
+	
+	<select id="findAllByPage" resultMap="WorkManageResult">
+	SELECT  z.id,z.user_id,z.dept_id,z.type,z.status,z.apply_time,z.create_date,z.work_date ,`dept`.name as dept_name FROM (
+		SELECT t.id,t.user_id,t.dept_id,t.type,t.status,t.apply_time,t.create_date,t.work_date
+		FROM (SELECT * FROM ad_work_business business
+				JOIN (SELECT business_attach.work_date,business_attach.work_business_id FROM ad_work_business_attach business_attach)t1 
+				ON t1.work_business_id = business.id GROUP BY business.id
+					)t
+		UNION ALL
+		SELECT y.id,y.user_id,y.dept_id,y.type,y.status,y.apply_time,y.create_date,y.work_date FROM
+			(SELECT * FROM ad_work_market market
+				JOIN (SELECT market_attach.work_date,market_attach.WORK_MARKET_ID FROM ad_work_market_attach market_attach)t2
+				ON t2.WORK_MARKET_ID = market.id GROUP BY market.id
+				)y
+	)z
+	JOIN sys_user `user`
+	ON `user`.`ID` = `z`.USER_ID 
+	JOIN sys_dept dept
+	ON dept.`ID` = `user`.`DEPT_ID`
+	
+		<if test="type != null and type != ''">
+			AND `z`.TYPE = #{type}
+		</if>
+		
+		<if test="workDate != null and workDate != ''">
+			AND `z`.`WORK_DATE` = #{workDate}
+		</if>
+		
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%'))
+
+		</if>
+		
+		<if test="deptIdSet == null or deptIdSet.size == 0 " >
+			AND `z`.user_id = #{userId}
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND (dept.`ID` IN
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId} 
+			</foreach>
+				OR  `z`.user_id = #{userId})
+		</if>
+	 WHERE  z.status ="1" OR z.status = "3" OR (z.status = "" AND z.user_id = #{userId})
+	 ORDER BY `z`.apply_time DESC
+	</select>
+	
+	<select id="findById" resultMap="adWorkBuinsessResult">
+		SELECT * FROM ad_work_business WHERE ID = #{id} 
+	</select> 
+	
+	<update id="update">
+		UPDATE ad_work_business 
+			SET
+			  	USER_ID=#{userId},
+			  	APPLY_TIME=#{applyTime},
+			  	DEPT_ID=#{deptId},
+			  	TYPE=#{type},
+			  	STATUS=#{status},
+			  	IS_DELETED=#{isDeleted},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="setSstatus">
+		UPDATE ad_work_business 
+			SET
+			  	STATUS=#{status}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_work_business(
+			  	USER_ID,
+			  	APPLY_TIME,
+			  	DEPT_ID,
+			  	TYPE,
+			  	STATUS,
+			  	IS_DELETED,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{userId},
+			  	#{applyTime},
+			  	#{deptId},
+			  	#{type},
+			  	#{status},
+			  	#{isDeleted},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}	
+			)
+	</insert>
+	
+	<!-- 关联查询 Begin -->
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	<select id="findUserByUserId" resultType="sysUser">
+			SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	<select id="findWorkBusinessAttachToList" resultMap="adWorkBuinsessAttachResult">
+		SELECT * FROM ad_work_business_attach WHERE WORK_BUSINESS_ID = #{id}
+	</select>
+	<!-- 关联查询 End -->
+	
+	
+	<delete id="deleteById">
+		DELETE FROM ad_work_business WHERE ID = #{id}
+	</delete>
+	
+</mapper>

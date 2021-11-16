@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdDirectoryManageDao">
+	
+	<resultMap id="adDirectoryManageResult" type="adDirectoryManage">
+		<id property="id" column="id" />
+		<result property="parentId" column="parent_id" />
+		<result property="parentsId" column="parents_id" />
+		<result property="name" column="name" />
+		<result property="deptIds" column="dept_ids" />
+		<result property="comment" column="comment" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="isDeleted" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="adDirectoryManageResult">
+		SELECT * FROM ad_directory_manage WHERE IS_DELETED != 'y' OR IS_DELETED IS NULL
+	</select>
+	
+	<select id="findById" resultMap="adDirectoryManageResult">
+		SELECT * FROM ad_directory_manage WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByDeptId" parameterType="java.util.Map" resultMap="adDirectoryManageResult">
+		SELECT * FROM ad_directory_manage WHERE (IS_DELETED != 'y' OR IS_DELETED IS NULL)
+		<if test="deptId ==2">
+				and 1=1
+		</if>
+		<if test="deptId !=2">
+				and dept_ids IN (#{deptId},'1','')
+		</if>
+		
+	</select> 
+	
+	<select id="findParentById" resultType="int">
+		SELECT PARENT_ID FROM ad_directory_manage WHERE ID = #{id} 
+	</select> 
+	
+	<select id="findChild" resultType="int">
+		SELECT COUNT(1) FROM ad_directory_manage 
+			WHERE PARENT_ID = #{parentId}
+	</select>
+	
+	<select id="dirExists" resultType="int">
+		SELECT COUNT(1) FROM ad_directory_manage 
+			WHERE PARENT_ID = #{parentId} AND NAME = #{name} and IS_DELETED != 'y'
+	</select>
+	
+	<update id="update">
+		UPDATE ad_directory_manage 
+			SET
+			  	PARENT_ID=#{parentId},
+			  	PARENTS_ID=#{parentsId},
+			  	NAME=#{name},
+			  	DEPT_IDS=#{deptIds},
+			  	COMMENT=#{comment},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	IS_DELETED=#{isDeleted}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="updateByParentId">
+		UPDATE ad_directory_manage 
+			SET
+			  	DEPT_IDS=#{deptIds}
+		WHERE PARENT_ID = #{id} OR PARENTS_ID LIKE CONCAT('%,' ,#{id}, ',%') 
+				OR PARENTS_ID LIKE CONCAT(#{id}, ',%') 
+				OR PARENTS_ID LIKE CONCAT('%,', #{id}) 
+	</update>
+	
+	
+	
+	<update id="deleteDirByParentId">
+		UPDATE ad_directory_manage SET IS_DELETED = 'y'
+			WHERE PARENTS_ID LIKE CONCAT('%,' ,#{id}, ',%') 
+				OR PARENTS_ID LIKE CONCAT(#{id}, ',%') 
+				OR PARENTS_ID LIKE CONCAT('%,', #{id})
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_directory_manage(
+			  	PARENT_ID,
+			  	PARENTS_ID,
+			  	NAME,
+			  	DEPT_IDS,
+			  	COMMENT,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_DELETED
+			) 
+			VALUES (
+			  	#{parentId},
+			  	#{parentsId},
+			  	#{name},
+			  	#{deptIds},
+			  	#{comment},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isDeleted}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_directory_manage WHERE ID = #{id}
+	</delete>
+	
+</mapper>

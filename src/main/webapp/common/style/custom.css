@@ -1,0 +1,22 @@
+/* JQuery validator error style */
+.error {
+	color: red;
+}
+
+.tip-label {
+	color: #7e7e7e;
+}
+
+/* .breadcrumb {background-color:#ededed;border-bottom:1px solid #ccc;} */
+.breadcrumb { background-color:inherit;margin-bottom:0px; }
+.breadcrumb li { display:none; }
+
+body{background-color:#ecf0f5 !important;}
+
+div.content>div.row{background-color:#ecf0f5;}
+
+.rlspace{padding: 0px 13px !important;}
+
+.tbspace{padding: 12px 0px !important;}
+
+.tip {color: #808080;}

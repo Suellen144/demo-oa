@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdRecordPositionHistoryDao">
+	
+	<resultMap id="adRecordPositionHistoryResult" type="adRecordPositionHistory">
+		<id property="id" column="id" />
+		<result property="position" column="position" />
+		<result property="userId" column="user_id" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		
+		<association property="sysUser" column="USER_ID" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id} 
+	</select>
+	
+	<select id="findAll" resultMap="adRecordPositionHistoryResult">
+		SELECT * FROM ad_record_position_history
+	</select>
+	
+	<select id="findById" resultMap="adRecordPositionHistoryResult">
+		SELECT * FROM ad_record_position_history WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByUserId" resultMap="adRecordPositionHistoryResult">
+		SELECT * FROM ad_record_position_history WHERE user_id = #{userId}
+	</select> 
+	
+	
+	<select id="findActivePosition" resultMap="adRecordPositionHistoryResult">
+	   SELECT * FROM  ad_record_position_history WHERE user_id = #{userId} AND END_TIME IS NULL
+	</select>
+	
+	<update id="update">
+		UPDATE ad_record_position_history 
+			SET
+				user_id=#{userId},
+			  	position=#{position},
+			  	start_time=#{startTime},
+			  	end_time=#{endTime},
+			  	remark=#{remark},
+				create_by=#{createBy},
+			  	create_date=#{createDate},
+			  	update_by=#{updateBy},
+			  	update_date=#{updateDate},
+			  	is_deleted=#{isDeleted}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_record_position_history(
+				user_id,
+				position,
+				start_time,
+				end_time,
+				remark,
+				create_by,
+				create_date,
+				update_by,
+				update_date,
+				is_deleted
+			) 
+				VALUES (
+				#{userId},
+				#{position},
+				#{startTime},
+				#{endTime},
+				#{remark},
+				#{createBy},
+				#{createDate},
+				#{updateBy},
+				#{updateDate},
+				#{isDeleted}
+				)	
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO ad_record_position_history(
+			user_id,
+			position,
+			start_time,
+			end_time,
+			remark,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			is_deleted
+		) 
+		VALUES 
+			<foreach item="adRecordPositionHistories" index="index" collection="list" separator=",">  
+			(
+				#{adRecordPositionHistories.userId},
+				#{adRecordPositionHistories.position},
+				#{adRecordPositionHistories.startTime},
+				#{adRecordPositionHistories.endTime},
+				#{adRecordPositionHistories.remark},
+				#{adRecordPositionHistories.createBy},
+				#{adRecordPositionHistories.createDate},
+				#{adRecordPositionHistories.updateBy},
+				#{adRecordPositionHistories.updateDate},
+				#{adRecordPositionHistories.isDeleted}
+				)
+			</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_record_position_history WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByIds">
+		DELETE FROM ad_record_position_history WHERE ID in
+		<foreach collection="list" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach> 
+	</delete>
+	
+</mapper>

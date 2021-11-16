@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdAttendanceDao">
+	<resultMap id="adAttendanceResult" type="adAttendance">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="dept" column="dept" />
+		<result property="date" column="date" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="latetime" column="late_time" />
+		<result property="beforlateTime" column="beforlate_time" />
+		<result property="isFlag" column="is_flag" />
+		<result property="leave_time" column="leaveTime" />
+		<result property="isFlag" column="is_flag" />
+		<result property="leaveTime" column="leave_Time" />
+		<result property="leaveType" column="leave_Type" />
+		<result property="leaveFlag" column="leave_Flag" />
+	</resultMap>
+	
+	<resultMap id="attendanceDTOResult" type="com.reyzar.oa.common.dto.AttendanceRecordDTO">
+		<result property="userId" column="userId" />
+		<result property="userNmae" column="userNmae" />
+		<result property="deptName" column="deptName" />
+		<result property="entryTime" column="entryTime" />
+		<result property="becomeDate" column="become_date" />
+		<result property="entryStatus" column="entry_status" />
+	</resultMap>
+	
+	<select id="getAdattendance" resultMap="adAttendanceResult">
+		select * from ad_attendance order by `name`, date asc
+	</select>
+	
+	<select id="getAdattendanceByFlag" resultMap="adAttendanceResult">
+		select * from ad_attendance <!-- where is_flag in('4','5','3') --> order by `name`, date asc
+	</select>
+	
+	<select id="getAdAttendanceName" resultType="String">
+		select name from ad_attendance  group by name	
+	</select>
+	
+	<select id="getAdAttendanceDTO" resultMap="attendanceDTOResult">
+		select u.id userId,u.name userNmae,d.`NAME` deptName,r.entry_time entryTime ,r.become_date become_date, r.entry_status entry_status from sys_user u,sys_dept d ,ad_record r
+		where u.DEPT_ID=d.ID and u.id=r.user_id and u.is_deleted is null
+		<if test="userNames != null and userNames.size > 0">
+		AND u.name IN
+		<foreach item="userName" index="index" collection="userNames" open="(" separator="," close=")">
+			#{userName}
+		</foreach>
+		GROUP BY u.name order BY u.id
+	</if>
+	</select>
+	
+	<select id="getAdAttendanceDTO2" resultMap="attendanceDTOResult">
+		select  u.id userId,u.name userNmae,d.`NAME` deptName,r.entry_time entryTime ,r.become_date become_date, r.entry_status entry_status from sys_user u,sys_dept d ,ad_record r
+		where u.DEPT_ID=d.ID and u.id=r.user_id 
+		AND u.name IN (#{userName}) limit 1
+	</select>
+	
+	<resultMap id="sysUserResult" type="com.reyzar.oa.domain.SysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+	</resultMap>
+	
+	<select id="findUser" resultMap="sysUserResult">
+		select * from sys_user su where id in(
+			select USER_ID from sys_user_position where POSITION_ID in (
+	select id from ad_position where `NAME` in ('市场策划','销售助理') and DEPT_ID=3) group by USER_ID) 
+	</select>
+	
+	 <insert id="save">
+	 	 insert into ad_attendance(	
+	 	 		 `name`,
+	 	 		 `dept`,
+			 	 `date`,
+			 	 `start_time`,
+			 	 `end_time`,
+			  	 `late_time`,
+			  	 `beforlate_time`,
+			  	 `is_flag`
+			  	)
+	  	VALUES
+	  	<foreach collection="list" item="attendance" index="index" separator=",">
+	  	 (#{attendance.name},#{attendance.dept},#{attendance.date},#{attendance.startTime},#{attendance.endTime},#{attendance.latetime},#{attendance.beforlateTime},#{attendance.isFlag})
+	  	</foreach>
+	</insert>
+  
+	<insert id="save2">
+	 	 insert into ad_attendance(	
+	 	 		 `name`,
+	 	 		 `dept`,
+			 	 `date`,
+			 	 `start_time`,
+			 	 `end_time`,
+			  	 `late_time`,
+			  	 `beforlate_time`,
+			  	 `is_flag`
+			  	)
+	  	VALUES (
+		  	#{name},
+		  	#{dept},
+		  	#{date},
+		  	#{startTime},
+		  	#{endTime},
+		  	#{latetime},
+		  	#{beforlateTime},
+		  	#{isFlag}
+	  	)
+	</insert>
+	  
+    <delete id="delete">
+		delete from    ad_attendance 
+    </delete>
+    
+    <update id="batchUpdate">
+    	<foreach collection="adAttendances" item="adAttendance" index="index" open="" close="" separator=";">
+			UPDATE ad_attendance 
+				SET
+					late_time=#{adAttendance.latetime},
+					beforlate_time=#{adAttendance.beforlateTime},
+				  	is_flag=#{adAttendance.isFlag},
+				  	leave_Time=#{adAttendance.leaveTime},
+				  	leave_Type=#{adAttendance.leaveType},
+				  	leave_Flag=#{adAttendance.leaveFlag}
+			WHERE ID = #{adAttendance.id}
+		</foreach>
+    </update>
+    
+    <select id="queryAttendanceData" resultMap="adAttendanceResult">
+		select * from ad_attendance
+	</select>
+    
+</mapper>

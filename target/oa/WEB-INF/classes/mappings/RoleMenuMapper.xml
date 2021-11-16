@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IRoleMenuDao">
+	
+	<select id="findRoleMenu" resultType="Integer">
+		SELECT MENU_ID 
+			FROM sys_role_menu
+		WHERE ROLE_ID = #{roleId}
+	</select>
+	
+	<delete id="delete">
+		DELETE FROM sys_role_menu WHERE ROLE_ID = #{roleId}
+		<if test="menuidList != null and menuidList.size > 0">
+			 AND MENU_ID NOT IN 
+			<foreach item="menuId" index="index" collection="menuidList" open="(" separator="," close=")">  
+				#{menuId}
+			</foreach>
+		</if>
+	</delete>
+	
+	<delete id="delByRoleid">
+		DELETE FROM sys_role_menu WHERE ROLE_ID = #{roleId}
+	</delete>
+	
+	<delete id="delByMenuids">
+		DELETE FROM sys_role_menu WHERE MENU_ID IN
+			<foreach item="id" index="index" collection="list" open="(" separator="," close=")">  
+  				#{id}
+  			</foreach>
+	</delete>
+	
+	<!-- 批量插入 -->
+	<insert id="insertAll">
+		INSERT INTO sys_role_menu(ROLE_ID, MENU_ID) 
+			VALUES
+			<foreach collection="menuidList" item="menuId" index="index" separator=",">
+				(
+					#{roleId}, #{menuId}
+				)
+			</foreach>
+	</insert>
+	
+</mapper>

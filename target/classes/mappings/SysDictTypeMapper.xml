@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysDictTypeDao">
+	<resultMap id="DictTypeResult" type="com.reyzar.oa.domain.SysDictType">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="remark" column="remark" />
+		<result property="parentId" column="parent_id" />
+	</resultMap> 
+	
+	<select id="findAll" resultMap="DictTypeResult">
+		SELECT *
+			FROM sys_dicttype
+	</select>
+	
+	
+ 	<select id="findByPage" resultMap="DictTypeResult">
+		SELECT id,name,remark
+			FROM sys_dicttype WHERE 1 = 1
+	</select> 
+		
+	
+	<select id="findById" resultMap="DictTypeResult">
+		SELECT id,name,remark,parent_id
+			FROM sys_dicttype WHERE ID = #{id}
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sys_dicttype(name,remark,parent_id) 
+			VALUES(
+				#{name},#{remark},#{parentId}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_dicttype 
+			SET name=#{name}, remark=#{remark}, parent_id=#{parentId}
+		WHERE ID = #{id}
+	</update> 
+	
+	<delete id="delete">
+		DELETE FROM sys_dicttype WHERE ID = #{id}
+	</delete>
+</mapper>

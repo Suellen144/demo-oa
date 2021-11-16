@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdEducationDao">
+	
+	<resultMap id="adEducationResult" type="com.reyzar.oa.domain.AdEducation">
+		<id property="id" column="id" />
+		<result property="recordId" column="record_id" />
+		<result property="beginDate" column="begin_date" />
+		<result property="endDate" column="end_Date" />
+		<result property="school" column="school" />
+		<result property="department" column="department" />
+		<result property="major" column="major" />
+		<result property="education" column="education" />
+	</resultMap>
+
+	<select id="findByRecordId" resultMap="adEducationResult">
+		SELECT * FROM ad_education WHERE record_id = #{recordId} order by id desc
+	</select> 
+	
+	
+	<update id="update">
+		UPDATE ad_education 
+			SET
+			  	RECORD_ID=#{recordId},
+			  	BEGIN_DATE=#{beginDate},
+			  	END_DATE=#{endDate},
+			  	SCHOOL=#{school},
+			  	DEPARTMENT=#{department},
+			  	MAJOR=#{major},
+			  	EDUCATION=#{education},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="educationList" item="education" index="index" open="" close="" separator=";">
+			UPDATE ad_education 
+				SET
+					RECORD_ID=#{education.recordId},
+			  		BEGIN_DATE=#{education.beginDate},
+			  		END_DATE=#{education.endDate},
+			  		SCHOOL=#{education.school},
+			  		DEPARTMENT=#{education.department},
+			  		MAJOR=#{education.major},
+			  		EDUCATION=#{education.education},
+			  		CREATE_BY=#{education.createBy},
+			  		CREATE_DATE=#{education.createDate},
+			  		UPDATE_BY=#{education.updateBy},
+			  		UPDATE_DATE=#{education.updateDate}
+			WHERE ID = #{education.id}
+		</foreach>
+	</update>
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_education(
+			  	RECORD_ID,
+			  	BEGIN_DATE,
+			  	END_DATE,
+			  	SCHOOL,
+			  	DEPARTMENT,
+			  	MAJOR,
+			  	EDUCATION,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{recordId},
+			  	#{beginDate},
+			  	#{endDate},
+			  	#{school},
+			  	#{department},
+			  	#{major},
+			  	#{education},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO ad_education(
+			  	RECORD_ID,
+			  	BEGIN_DATE,
+			  	END_DATE,
+			  	SCHOOL,
+			  	DEPARTMENT,
+			  	MAJOR,
+			  	EDUCATION,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES
+		<foreach item="education" index="index" collection="list" separator=",">  
+			 (
+			  		#{education.recordId},
+			  		#{education.beginDate},
+			  		#{education.endDate},
+			  		#{education.school},
+			  		#{education.department},
+			  		#{education.major},
+			  		#{education.education},
+			  		#{education.createBy},
+			  		#{education.createDate},
+			  		#{education.updateBy},
+			  		#{education.updateDate}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_education WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

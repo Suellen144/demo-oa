@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinResultsRecognitionDao">
+	
+	<resultMap id="finResultsRecognitionResult" type="finResultsRecognition">
+		<id property="id" column="id" />
+		<result property="confirmAmount" column="confirm_amount" />
+		<result property="resultsAmount" column="results_amount" />
+		<result property="revenueRecognitionId" column="revenue_recognition_id" />
+		<result property="shareDate" column="share_date" />
+		<result property="isShown" column="is_shown" />
+		<result property="confirmPeople" column="confirm_people" />
+		<result property="finInvoicedId" column="fin_invoiced_id" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_DATE" />
+		<result property="updateBy" column="UPDATE_BY" />
+		<result property="updateDate" column="UPDATE_DATE" />
+		
+		<collection property="saleBarginManage" column="sale_bargin_manage_id" select="saleBarginManageId" />  
+	</resultMap>
+	
+	<resultMap id="saleBarginManageResult" type="saleBarginManage">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="title" column="title" />
+		<result property="deptId" column="dept_id" />
+		<result property="userId" column="user_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="barginName" column="bargin_name" />
+		<result property="barginCode" column="bargin_code" />
+		<result property="barginType" column="bargin_type" />
+		<result property="barginDescribe" column="bargin_describe" />
+		<result property="company" column="company" />
+		<result property="totalMoney" column="total_money" />
+		<result property="receivedMoney" column="received_money" />
+		<result property="unreceivedMoney" column="unreceived_money" />
+		<!-- <result property="receivedInvoice" column="received_invoice" />
+		<result property="unreceivedInvoice" column="unreceived_invoice" /> -->
+		<result property="payReceivedInvoice" column="pay_received_invoice" />
+		<result property="payUnreceivedInvoice" column="pay_unreceived_invoice" />
+		<result property="invoiceMoney" column="invoice_Money" />
+		<result property="advancesReceived" column="advances_Received" />
+		<result property="accountReceived" column="account_Received" />
+		<result property="payMoney" column="PAY_MONEY" />
+		<result property="unpayMoney" column="UNPAY_MONEY" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="attachName" column="attach_name" />
+		<result property="attachments" column="attachments" />
+		<result property="status" column="status" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<!-- 项目管理模块添加 -->
+		<result property="isNewProject" column="is_new_project" />
+		<result property="channelExpense" column="channel_expense" />
+		<result property="contribution" column="contribution" />
+		<result property="commissionAmount" column="commission_amount" />
+		
+	</resultMap>
+	
+	<select id="findAll" resultMap="finResultsRecognitionResult">
+		SELECT * FROM fin_results_recognition
+	</select>
+	
+	<select id="findById" resultMap="finResultsRecognitionResult">
+		SELECT * FROM fin_results_recognition WHERE ID = #{id}
+	</select> 
+	
+	<select id="saleBarginManageId" resultMap="saleBarginManageResult">
+		SELECT * FROM sale_bargin_manage WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="finResultsRecognitionResult">
+		SELECT * FROM fin_results_recognition WHERE sale_bargin_manage_id = #{barginManageId}
+	</select>
+	
+	<select id="findByFinInvoicedId" resultMap="finResultsRecognitionResult">
+		SELECT * FROM fin_results_recognition WHERE fin_invoiced_id =#{finInvoicedId}
+	</select>
+	
+	<update id="update">
+		UPDATE fin_results_recognition 
+			SET
+			  	confirm_amount=#{confirmAmount},
+			  	results_amount=#{resultsAmount},
+			  	revenue_recognition_id=#{revenueRecognitionId},
+			  	share_date=#{shareDate},
+			  	sale_bargin_manage_id=#{saleBarginManageId},
+			  	is_shown=#{isShown},
+			  	confirm_people=#{confirmPeople},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	fin_invoiced_id=#{finInvoicedId}
+		WHERE ID = #{id}
+	</update>
+	
+		<update id="updateByShareDate">
+		UPDATE fin_results_recognition 
+			SET
+			  	is_shown=1
+		WHERE share_date &gt;=#{shareDate} and share_date &lt;= #{endShareDate}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_results_recognition(
+			  	confirm_amount,
+			  	results_amount,
+			  	revenue_recognition_id,
+			  	share_date,
+			  	sale_bargin_manage_id,
+			  	is_shown,
+			  	confirm_people,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	fin_invoiced_id
+			) 
+			VALUES (
+			  	#{confirmAmount},
+			  	#{resultsAmount},
+			  	#{revenueRecognitionId},
+			  	#{shareDate},
+			  	#{saleBarginManageId},
+			  	#{isShown},
+			  	#{confirmPeople},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{finInvoicedId}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_results_recognition WHERE ID = #{id}
+	</delete>
+	
+</mapper>

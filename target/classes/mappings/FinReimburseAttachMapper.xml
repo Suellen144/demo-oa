@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinReimburseAttachDao">
+	
+	<resultMap id="finReimburseAttachResult" type="finReimburseAttach">
+		<id property="id" column="id" />
+		<result property="reimburseId" column="reimburse_id" />
+		<result property="date" column="date" />
+		<result property="place" column="place" />
+		<result property="projectId" column="project_id" />
+		<result property="reason" column="reason" />
+		<result property="type" column="type" />
+		<result property="money" column="money" />
+		<result property="actReimburse" column="act_reimburse" />
+		<result property="detail" column="detail" />
+		<result property="investId" column="invest_id" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="investIdStr" column="invest_id_str" />
+		
+		<association property="project" column="project_id" javaType="saleProjectManage" select="findProjectByProjectId" /> 
+		<association property="invest" column="invest_id" javaType="finInvest" select="findInvestByInvestId" /> 
+	</resultMap>
+
+	<resultMap id="singleDetail" type="com.reyzar.oa.domain.SingleDetail">
+	<id property="id" column="id" />
+	<result property="processInstanceId" column="processInstanceId"/>
+	<result property="orderNo" column="orderNo"/>
+	<result property="userName" column="name"/>
+	<result property="date" column="date"/>
+	<result property="projectName" column="projectName"/>
+	<result property="reason" column="reason"/>
+	<result property="money" column="money"/>
+</resultMap>
+
+	<select id="findAll" resultMap="finReimburseAttachResult">
+		SELECT * FROM fin_reimburse_attach
+	</select>
+	
+	<select id="findPageByProjectId" resultMap="finReimburseAttachResult">
+		SELECT * FROM fin_reimburse_attach 
+			WHERE 1=1
+			<if test="projectId != null and projectId != '' ">
+				AND PROJECT_ID = #{projectId}
+			</if>
+	</select>
+	
+	
+	<select id="findByReimburseId" resultMap="finReimburseAttachResult">
+		SELECT * FROM fin_reimburse_attach WHERE REIMBURSE_ID = #{reimburseId}
+	</select>
+	
+	<select id="findById" resultMap="finReimburseAttachResult">
+		SELECT * FROM fin_reimburse_attach WHERE ID = #{id}
+	</select> 
+	
+	
+	<select id="findByProjectId" resultMap="finReimburseAttachResult">
+		SELECT * FROM fin_reimburse_attach WHERE project_id = #{projectId}
+	</select> 
+	
+	<select id="findByIds" resultType="finReimburseAttach">
+		SELECT * FROM fin_reimburse_attach WHERE ID IN
+		<foreach item="id" index="index" collection="ids" open="(" close=")"  separator=",">  
+			 #{id}
+		</foreach>
+	</select>
+	
+	<!-- 关联查询 Begin -->
+	<select id="findProjectByProjectId" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id}
+	</select>
+	<select id="findInvestByInvestId" resultType="finInvest">
+		SELECT * FROM fin_invest WHERE ID = #{id}
+	</select>
+	<!-- 关联查询 End -->
+	
+	<update id="update">
+		UPDATE fin_reimburse_attach 
+			SET
+			  	REIMBURSE_ID=#{reimburseId},
+			  	DATE=#{date},
+			  	PLACE=#{place},
+			  	PROJECT_ID=#{projectId},
+			  	REASON=#{reason},
+			  	TYPE=#{type},
+			  	MONEY=#{money},
+			  	ACT_REIMBURSE=#{actReimburse},
+			  	DETAIL=#{detail},
+			  	INVEST_ID=#{investId},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	INVEST_ID_STR=#{investIdStr}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="batchUpdate">
+		<foreach collection="reimburseAttachList" item="reimburseAttach" index="index" open="" close="" separator=";">
+			UPDATE fin_reimburse_attach 
+				SET
+				  	REIMBURSE_ID=#{reimburseAttach.reimburseId},
+				  	DATE=#{reimburseAttach.date},
+				  	PLACE=#{reimburseAttach.place},
+				  	PROJECT_ID=#{reimburseAttach.projectId},
+				  	REASON=#{reimburseAttach.reason},
+				  	TYPE=#{reimburseAttach.type},
+				  	MONEY=#{reimburseAttach.money},
+				  	ACT_REIMBURSE=#{reimburseAttach.actReimburse},
+				  	DETAIL=#{reimburseAttach.detail},
+				  	INVEST_ID=#{reimburseAttach.investId},
+				  	UPDATE_BY=#{reimburseAttach.updateBy},
+				  	UPDATE_DATE=#{reimburseAttach.updateDate},
+			  		INVEST_ID_STR=#{reimburseAttach.investIdStr}
+			WHERE ID = #{reimburseAttach.id}
+		</foreach>
+	</update>
+	
+	
+	<update id="unbound">
+		<foreach collection="list" item="reimburseAttach" index="index" open="" close="" separator=";">
+			UPDATE fin_reimburse_attach 
+				SET
+				  	PROJECT_ID=#{reimburseAttach.projectId}
+			WHERE ID = #{reimburseAttach.id} and REIMBURSE_ID=#{reimburseAttach.reimburseId}
+		</foreach>
+	</update>
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_reimburse_attach(
+			  	REIMBURSE_ID,
+			  	DATE,
+			  	PLACE,
+			  	PROJECT_ID,
+			  	REASON,
+			  	TYPE,
+			  	MONEY,
+			  	ACT_REIMBURSE,
+			  	DETAIL,
+			  	INVEST_ID,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	INVEST_ID_STR
+			) 
+			VALUES (
+			  	#{reimburseId},
+			  	#{date},
+			  	#{place},
+			  	#{projectId},
+			  	#{reason},
+			  	#{type},
+			  	#{money},
+			  	#{actReimburse},
+			  	#{detail},
+			  	#{investId},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{investIdStr}
+			)
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO fin_reimburse_attach(
+			  	REIMBURSE_ID,
+			  	DATE,
+			  	PLACE,
+			  	PROJECT_ID,
+			  	REASON,
+			  	TYPE,
+			  	MONEY,
+			  	ACT_REIMBURSE,
+			  	DETAIL,
+			  	INVEST_ID,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	INVEST_ID_STR
+			) 
+			VALUES 
+		<foreach item="reimburseAttach" index="index" collection="list" separator=",">  
+			 (
+			  	#{reimburseAttach.reimburseId},
+			  	#{reimburseAttach.date},
+			  	#{reimburseAttach.place},
+			  	#{reimburseAttach.projectId},
+			  	#{reimburseAttach.reason},
+			  	#{reimburseAttach.type},
+			  	#{reimburseAttach.money},
+			  	#{reimburseAttach.actReimburse},
+			  	#{reimburseAttach.detail},
+			  	#{reimburseAttach.investId},
+			  	#{reimburseAttach.createBy},
+			  	#{reimburseAttach.createDate},
+			  	#{reimburseAttach.updateBy},
+			  	#{reimburseAttach.updateDate},
+			  	#{reimburseAttach.investIdStr}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_reimburse_attach WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByreimburseId">
+		DELETE FROM fin_reimburse_attach WHERE reimburse_id = #{reimburseId}
+	</delete>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM fin_reimburse_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+
+
+	<select id="findReimburseByStatistics" resultMap="finReimburseAttachResult">
+		SELECT attach.id,attach.project_id,case attach.type when 5 then 36 when 6 then 37 end as type,attach.ATTACH_INVEST_ID AS invest_id,attach.act_reimburse,1 as state FROM fin_travelreimburse_attach AS attach
+		JOIN fin_travelreimburse AS travelreimburse ON attach.travelreimburse_id = travelreimburse.id 
+		<if test="(zBeginDate != null and zBeginDate != '') or (cBeginDate != null and cBeginDate != '')">
+			LEFT JOIN ACT_HI_ACTINST ON travelreimburse.PROCESS_INSTANCE_ID = ACT_HI_ACTINST.PROC_INST_ID_
+		</if>
+		<if test="investId != null and investId != '' and investId != '-2'">
+			JOIN fin_invest AS invest ON attach.attach_invest_id = invest.id
+		</if>
+		WHERE  attach.type in(5,6)
+		<choose>
+			<when test="status == '' or status == null ">
+				AND travelreimburse.status='6'
+			</when>
+			<when test="status == 6">
+				AND travelreimburse.status='6'
+			</when>
+			<when test="status != null and status != ''">
+				AND travelreimburse.status &gt; #{status}
+				AND travelreimburse.status &lt; 7
+			</when>
+		</choose>
+		<if test="investId != null and investId != '' and  investId != '-2'">
+			AND (attach.attach_invest_id = #{investId} or CONCAT(',',attach.attach_invest_id_str,',') LIKE '%,${investId},%')
+		</if>
+		<if test="investId != null and investId != '' and  investId == '-2'">
+			AND attach.attach_invest_id is not null AND attach.attach_invest_id !='-1'
+		</if>
+		<if test="userName !=null and userName !='' and userName != 'null'">
+			AND travelreimburse.name = #{userName}
+		</if>
+		<if test="deptId !=null and deptId !=''">
+			AND travelreimburse.dept_id=#{deptId}
+		</if>
+		<if test="payCompany !=null and payCompany !=''">
+			AND travelreimburse.title=#{payCompany}
+		</if>
+		<if test="projectId !=null and projectId != '' ">
+			AND attach.project_id=#{projectId}
+		</if>
+		<if test="beginDate != null and beginDate!=''">
+			AND attach.date &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			AND attach.date &lt;= #{endDate}
+		</if>
+		<if test="zBeginDate != null and zBeginDate != '' and zEndDate != null and zEndDate != ''">
+			AND travelreimburse.PROCESS_INSTANCE_ID in (SELECT PROC_INST_ID_ FROM ACT_HI_ACTINST WHERE ACT_NAME_ = #{actName} 
+			AND (START_TIME_ &gt;= #{zBeginDate} AND END_TIME_ &lt;= #{zEndDate}))
+		</if>
+		<if test="cBeginDate != null and cBeginDate != '' and cEndDate != null and cEndDate != ''">
+			AND travelreimburse.PROCESS_INSTANCE_ID in (SELECT PROC_INST_ID_ FROM ACT_HI_ACTINST WHERE ACT_NAME_ = #{actName} 
+			AND (START_TIME_ &gt;= #{cBeginDate} AND END_TIME_ &lt;= #{cEndDate}))
+		</if>
+		
+		union all
+		SELECT attach.id,attach.project_id,attach.type,attach.invest_id,attach.act_reimburse,2 as state FROM fin_reimburse_attach AS attach
+		JOIN fin_reimburse AS reimburse ON attach.reimburse_id = reimburse.id
+		<if test="(zBeginDate != null and zBeginDate != '') or (cBeginDate != null and cBeginDate != '')">
+			LEFT JOIN ACT_HI_ACTINST ON reimburse.PROCESS_INSTANCE_ID = ACT_HI_ACTINST.PROC_INST_ID_
+		</if>
+		<if test="investId != null and investId != '' and investId != '-2'">
+			JOIN fin_invest AS invest ON attach.invest_id = invest.id
+		</if>
+		WHERE 1=1
+		<choose>
+			<when test="status == '' or status == null ">
+				AND reimburse.status='6'
+			</when>
+			<when test="status == 6">
+				AND reimburse.status='6'
+			</when>
+			<when test="status != null and status != ''">
+				AND reimburse.status &gt; #{status}
+				AND reimburse.status &lt; 7
+			</when>
+		</choose>
+		<if test="investId != null and investId != '' and  investId != '-2'">
+			AND (attach.invest_id = #{investId} or CONCAT(',',attach.invest_id_str,',') LIKE '%,${investId},%')
+		</if>
+		<if test="investId != null and investId != '' and  investId == '-2'">
+			AND attach.invest_id is not null AND attach.invest_id !='-1'
+		</if>
+		<if test="userName !=null and userName !='' and userName != 'null'">
+			AND reimburse.name = #{userName}
+		</if>
+		<if test="deptId !=null and deptId !=''">
+			AND reimburse.dept_id=#{deptId}
+		</if>
+		<if test="payCompany !=null and payCompany !=''">
+			AND reimburse.title=#{payCompany}
+		</if>
+		<if test="generalReimbursType != null and generalReimbursType != ''">
+			AND attach.type=#{generalReimbursType}
+		</if>
+		<if test="projectId !=null and projectId != '' ">
+			AND attach.project_id=#{projectId}
+		</if>
+		<if test="beginDate != null and beginDate!=''">
+			AND attach.date &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			AND attach.date &lt;= #{endDate}
+		</if>
+		<if test="zBeginDate != null and zBeginDate != '' and zEndDate != null and zEndDate != ''">
+			AND reimburse.PROCESS_INSTANCE_ID in (SELECT PROC_INST_ID_ FROM ACT_HI_ACTINST WHERE ACT_NAME_ = #{actName} 
+			AND (START_TIME_ &gt;= #{zBeginDate} AND END_TIME_ &lt;= #{zEndDate}))
+		</if>
+		<if test="cBeginDate != null and cBeginDate != '' and cEndDate != null and cEndDate != ''">
+			AND reimburse.PROCESS_INSTANCE_ID in (SELECT PROC_INST_ID_ FROM ACT_HI_ACTINST WHERE ACT_NAME_ = #{actName} 
+			AND (START_TIME_ &gt;= #{cBeginDate} AND END_TIME_ &lt;= #{cEndDate}))
+		</if>
+		GROUP BY attach.id
+	</select>
+
+	<select id="findReimburseByStatisticsAndTitle" resultMap="finReimburseAttachResult">
+	SELECT attach.id,attach.project_id,case attach.type when 5 then 36 when 6 then 37 end as type,attach.ATTACH_INVEST_ID AS invest_id,attach.act_reimburse,1 as state FROM fin_travelreimburse_attach AS attach
+		JOIN fin_travelreimburse AS travelreimburse ON attach.travelreimburse_id = travelreimburse.id 
+		<if test="(zBeginDate != null and zBeginDate != '') or (cBeginDate != null and cBeginDate != '')">
+			LEFT JOIN ACT_HI_ACTINST ON travelreimburse.PROCESS_INSTANCE_ID = ACT_HI_ACTINST.PROC_INST_ID_
+		</if>
+		<if test="investId != null and investId != '' and investId != '-2'">
+			JOIN fin_invest AS invest ON attach.attach_invest_id = invest.id
+		</if>
+		WHERE  attach.type in(5,6)
+		<choose>
+			<when test="status == '' or status == null ">
+				AND travelreimburse.status='6'
+			</when>
+			<when test="status == 6">
+				AND travelreimburse.status='6'
+			</when>
+			<when test="status != null and status != ''">
+				AND travelreimburse.status &gt; #{status}
+				AND travelreimburse.status &lt; 7
+			</when>
+		</choose>
+		<if test="investId != null and investId != '' and  investId != '-2'">
+			AND (attach.attach_invest_id = #{investId} or CONCAT(',',attach.attach_invest_id_str,',') LIKE '%,${investId},%')
+		</if>
+		<if test="investId != null and investId != '' and  investId == '-2'">
+			AND attach.attach_invest_id is not null AND attach.attach_invest_id !='-1'
+		</if>
+		<if test="userName !=null and userName !='' and userName != 'null'">
+			AND travelreimburse.name = #{userName}
+		</if>
+		<if test="deptId !=null and deptId !=''">
+			AND travelreimburse.dept_id=#{deptId}
+		</if>
+		<if test="payCompany !=null and payCompany !=''">
+			AND travelreimburse.title=#{payCompany}
+		</if>
+		<if test="projectId !=null and projectId != '' ">
+			AND attach.project_id=#{projectId}
+		</if>
+		<if test="beginDate != null and beginDate!=''">
+			AND attach.date &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			AND attach.date &lt;= #{endDate}
+		</if>
+		<if test="zBeginDate != null and zBeginDate != '' and zEndDate != null and zEndDate != ''">
+			AND travelreimburse.PROCESS_INSTANCE_ID in (SELECT PROC_INST_ID_ FROM ACT_HI_ACTINST WHERE ACT_NAME_ = #{actName} 
+			AND (START_TIME_ &gt;= #{zBeginDate} AND END_TIME_ &lt;= #{zEndDate}))
+		</if>
+		<if test="cBeginDate != null and cBeginDate != '' and cEndDate != null and cEndDate != ''">
+			AND travelreimburse.PROCESS_INSTANCE_ID in (SELECT PROC_INST_ID_ FROM ACT_HI_ACTINST WHERE ACT_NAME_ = #{actName} 
+			AND (START_TIME_ &gt;= #{cBeginDate} AND END_TIME_ &lt;= #{cEndDate}))
+		</if>
+		
+		union all
+		
+		SELECT attach.id,attach.project_id,attach.type,attach.invest_id,attach.act_reimburse,2 as state FROM fin_reimburse_attach AS attach
+		JOIN fin_reimburse AS reimburse ON attach.reimburse_id = reimburse.id
+		<if test="investId != null and investId != '' and investId != '-2'" >
+			JOIN fin_invest AS invest ON attach.invest_id = invest.id
+		</if>
+		WHERE 1=1
+		<choose>
+			<when test="status == '' or status == null">
+				AND reimburse.status='6'
+			</when>
+			<when test="status == 6">
+				AND reimburse.status='6'
+			</when>
+			<when test="status != null and status != ''">
+				AND reimburse.status &gt; #{status}
+				AND reimburse.status &lt; 7
+			</when>
+		</choose>
+		<if test="investId != null and investId != '' and investId != '-2'">
+			AND (attach.invest_id = #{investId} or CONCAT(',',attach.invest_id_str,',') LIKE '%,${investId},%')
+		</if>
+		<if test="investId != null and investId != '' and investId == '-2'">
+			AND attach.invest_id is not null AND attach.invest_id !='-1'
+		</if>
+		<if test="userName !=null and userName !='' and userName != 'null'">
+			AND reimburse.name = #{userName}
+		</if>
+		<if test="deptId !=null and deptId !=''">
+			AND reimburse.dept_id=#{deptId}
+		</if>
+		<if test="payCompany !=null and payCompany !=''">
+			AND (reimburse.title=#{payCompany} OR  reimburse.title='0')
+		</if>
+		<if test="generalReimbursType != null and generalReimbursType != ''">
+			AND attach.type=#{generalReimbursType}
+		</if>
+		<if test="projectId !=null and projectId != '' ">
+			AND attach.project_id=#{projectId}
+		</if>
+		<if test="beginDate != null and beginDate!=''">
+			AND attach.date &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			AND attach.date &lt;= #{endDate}
+		</if>
+	</select>
+
+
+	<select id="findReimburseByIdList" resultMap="singleDetail">
+		SELECT reimburse.name AS name,reimburse.process_instance_id AS processInstanceId,project.`NAME` AS projectName,
+			reimburse.order_no AS orderNo,attach.date AS date,attach.reason AS reason,attach.act_reimburse AS money
+			FROM fin_reimburse_attach AS attach
+			JOIN fin_reimburse AS reimburse ON attach.reimburse_id = reimburse.id
+			JOIN sys_user AS sysuser ON reimburse.user_id=sysuser.id
+			JOIN sale_project_manage AS project ON project.ID=attach.PROJECT_ID
+			WHERE attach.id IN
+			<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<select id="findReimburseByProjectId" resultMap="singleDetail">
+		SELECT reimburse.name AS name,reimburse.process_instance_id AS processInstanceId,project.`NAME` AS projectName,
+			reimburse.order_no AS orderNo,attach.date AS date,attach.reason AS reason,attach.act_reimburse AS money
+			FROM fin_reimburse_attach AS attach
+			JOIN fin_reimburse AS reimburse ON attach.reimburse_id = reimburse.id
+			JOIN sys_user AS sysuser ON reimburse.user_id = sysuser.id
+			JOIN sale_project_manage AS project ON project.ID = attach.PROJECT_ID
+			WHERE attach.id IN
+			(SELECT attach.ID FROM fin_reimburse_attach attach 
+			JOIN fin_reimburse reimburse ON attach.reimburse_id = reimburse.id
+			WHERE reimburse.status = '6' AND attach.TYPE != '3' AND attach.PROJECT_ID = #{projectId})
+	</select>
+</mapper>

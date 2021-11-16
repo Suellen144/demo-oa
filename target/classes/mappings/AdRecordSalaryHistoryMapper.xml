@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdRecordSalaryHistoryDao">
+	
+	<resultMap id="adRecordSalaryHistoryResult" type="adRecordSalaryHistory">
+		<id property="id" column="id" />
+		<result property="salary" column="salary" />
+		<result property="userId" column="user_id" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		
+		<association property="sysUser" column="USER_ID" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptid" /> 
+	</resultMap>
+	
+	<select id="findUserByUserId" resultMap="sysUserResult">
+		SELECT * FROM sys_user WHERE ID = #{id} 
+	</select>
+	
+	<select id="findDeptByDeptid" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<select id="findAll" resultMap="adRecordSalaryHistoryResult">
+		SELECT * FROM ad_record_salary_history
+	</select>
+
+	<select id="findByOne" resultMap="adRecordSalaryHistoryResult">
+		SELECT * FROM ad_record_salary_history AS  salary WHERE user_id = #{id} AND salary.is_deleted != "1" AND salary.end_time is null;
+	</select>
+
+	<select id="findById" resultMap="adRecordSalaryHistoryResult">
+		SELECT * FROM ad_record_salary_history WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByUserId" resultMap="adRecordSalaryHistoryResult">
+		SELECT * FROM ad_record_salary_history WHERE user_id = #{userId} and (is_deleted IS NULL or is_deleted = '0') ORDER BY start_time ASC
+	</select> 
+	
+	<select id="findNewSalary" resultMap="adRecordSalaryHistoryResult">
+		SELECT * FROM   ad_record_salary_history  WHERE id =  
+	   	(SELECT MAX(id) FROM   ad_record_salary_history WHERE start_time = 
+	   		(  SELECT MAX(start_time) FROM  ad_record_salary_history WHERE user_id = #{userId} ))
+	</select> 
+	
+	<select id="findByPage" resultMap="adRecordSalaryHistoryResult">
+		SELECT t.* FROM (
+			SELECT history.*,`user`.NAME AS username,`user`.is_deleted AS isDeleted, dept.`NAME` as DEPT_NAME ,dept.SORT as SORT FROM ad_record_salary_history history 
+				INNER JOIN 
+					(SELECT user_id,MAX(start_time) start_time FROM ad_record_salary_history GROUP BY user_id)b 
+				ON history.user_id=b.user_id AND history.start_time=b.start_time 
+
+				JOIN sys_user `user`
+						ON `user`.`ID` = history.user_id
+				JOIN sys_dept dept
+						ON dept.`ID` = `user`.`DEPT_ID`
+				<if test="deptIdSet == null or deptIdSet.size == 0">
+					AND history.user_id = #{userId}
+				</if>
+				<if test="deptIdSet != null and deptIdSet.size > 0">
+					AND (dept.`ID` IN 
+					<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+						#{deptId}
+					</foreach>
+					OR history.user_id = #{userId})
+				</if>
+		)t
+		WHERE 1 = 1 AND t.isDeleted is null
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND (t.username LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.DEPT_NAME LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR DATE_FORMAT(t.start_time, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")  
+				)
+		</if>
+		
+		ORDER BY t.SORT DESC
+	</select> 
+	
+	<update id="update">
+		UPDATE ad_record_salary_history 
+			SET
+				user_id=#{userId},
+			  	salary=#{salary},
+			  	start_time=#{startTime},
+			  	end_time=#{endTime},
+			  	remark=#{remark},
+				create_by=#{createBy},
+			  	create_date=#{createDate},
+			  	update_by=#{updateBy},
+			  	update_date=#{updateDate},
+			  	is_deleted=#{isDeleted}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="recordSalaryHistories" item="adRecordSalaryHistory" index="index" open="" close="" separator=";">
+			UPDATE ad_record_salary_history 
+			SET
+				user_id=#{adRecordSalaryHistory.userId},
+			  	salary=#{adRecordSalaryHistory.salary},
+			  	start_time=#{adRecordSalaryHistory.startTime},
+			  	end_time=#{adRecordSalaryHistory.endTime},
+			  	remark=#{adRecordSalaryHistory.remark},
+				create_by=#{adRecordSalaryHistory.createBy},
+			  	create_date=#{adRecordSalaryHistory.createDate},
+			  	update_by=#{adRecordSalaryHistory.updateBy},
+			  	update_date=#{adRecordSalaryHistory.updateDate},
+			  	is_deleted=#{adRecordSalaryHistory.isDeleted}
+		WHERE ID = #{adRecordSalaryHistory.id}
+		</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_record_salary_history(
+				user_id,
+				salary,
+				start_time,
+				end_time,
+				remark,
+				create_by,
+				create_date,
+				update_by,
+				update_date,
+				is_deleted
+			) 
+				VALUES (
+				#{userId},
+				#{salary},
+				#{startTime},
+				#{endTime},
+				#{remark},
+				#{createBy},
+				#{createDate},
+				#{updateBy},
+				#{updateDate},
+				#{isDeleted}
+				)	
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO ad_record_salary_history(
+			user_id,
+			salary,
+			start_time,
+			end_time,
+			remark,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			is_deleted
+		) 
+		VALUES 
+			<foreach item="adRecordSalaryHistories" index="index" collection="list" separator=",">  
+			(
+				#{adRecordSalaryHistories.userId},
+				#{adRecordSalaryHistories.salary},
+				#{adRecordSalaryHistories.startTime},
+				#{adRecordSalaryHistories.endTime},
+				#{adRecordSalaryHistories.changeDate},
+				#{adRecordSalaryHistories.remark},
+				#{adRecordSalaryHistories.createBy},
+				#{adRecordSalaryHistories.createDate},
+				#{adRecordSalaryHistories.updateBy},
+				#{adRecordSalaryHistories.updateDate},
+				#{adRecordSalaryHistories.isDeleted}
+				)
+			</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_record_salary_history WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByIds">
+		UPDATE ad_record_salary_history 
+			SET
+			  	is_deleted='1'
+		 WHERE ID in
+		<foreach collection="list" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach> 
+	</delete>
+</mapper>

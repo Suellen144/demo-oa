@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdKpiDao">
+	
+	<resultMap id="adKpiResult" type="adKpi">
+		<id property="id" column="id" />
+		<result property="deptId" column="dept_id" />
+		<result property="date" column="date" />
+		<result property="time" column="time" />
+		<result property="status" column="status" />
+		<result property="createDate" column="create_date" />
+		<result property="updateDate" column="update_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateBy" column="update_by" />
+		
+		<collection property="kpiAttachsList" column="id" select="findKpiAttachInList" />
+	</resultMap>
+	
+	
+
+	<resultMap id="adKpiAttachResult" type="adKpiAttach">
+		<id property="id" column="id" />
+		<result property="kpiId" column="kpi_id" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="userEvaluation" column="user_evaluation" />
+		<result property="userScore" column="user_score" />
+		<result property="managerScore" column="manager_score" />
+		<result property="managerEvaluation" column="manager_evaluation" />
+		<result property="ceoScore" column="ceo_score" />
+		<result property="date" column="date" />
+		<result property="createDate" column="create_date" />
+		<result property="createBy" column="create_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="updateBy" column="update_by" />
+	</resultMap> 
+	
+	<select id="findAll" resultMap="adKpiResult">
+		SELECT * FROM ad_kpi
+	</select>
+	
+	<select id="findById" resultMap="adKpiResult">
+		SELECT * FROM ad_kpi WHERE ID = #{id}
+	</select> 
+	
+	<select id="findBydeptIdAndDate" resultMap="adKpiResult">
+		SELECT * FROM ad_kpi WHERE dept_id = #{deptId} AND  time = #{time}
+	</select> 
+	
+	<update id="update">
+		UPDATE ad_kpi 
+			SET
+			  	DEPT_ID=#{deptId},
+			  	TIME=#{time},
+			  	DATE=#{date},
+			  	STATUS=#{status},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_DATE=#{updateDate},
+			  	CREATE_BY=#{createBy},
+			  	UPDATE_BY=#{updateBy}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_kpi(
+			  	DEPT_ID,
+			  	DATE,
+			  	TIME,
+			  	CREATE_DATE,
+			  	UPDATE_DATE,
+			  	CREATE_BY,
+			  	UPDATE_BY
+			) 
+			VALUES (
+			  	#{deptId},
+			  	#{date},
+			  	#{time},
+			  	#{createDate},
+			  	#{updateDate},
+			  	#{createBy},
+			  	#{updateBy}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_kpi WHERE ID = #{id}
+	</delete>
+	
+	<!-- 关联查询 Begin -->
+	<select id="findKpiAttachInList" resultMap="adKpiAttachResult">
+		SELECT * FROM ad_kpi_attach WHERE `KPI_ID` = #{id} 
+		ORDER BY USER_ID
+	</select> 
+	<!-- 关联查询 End -->
+	
+	<select id="queryIsRepeatKpi" resultMap="adKpiAttachResult">
+		SELECT * FROM ad_kpi WHERE time=#{date} FOR UPDATE
+	</select> 
+	
+</mapper>

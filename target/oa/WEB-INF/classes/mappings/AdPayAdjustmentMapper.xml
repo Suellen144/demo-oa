@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdPayAdjustmentDao">
+	
+	<resultMap id="adPayAdjustmentResult" type="com.reyzar.oa.domain.AdPayAdjustment">
+		<id property="id" column="id" />
+		<result property="recordId" column="record_id" />
+		<result property="basePay" column="base_Pay" />
+		<result property="meritPay" column="merit_Pay" />
+		<result property="agePay" column="age_Pay" />
+		<result property="lunchSubsidy" column="lunch_Subsidy" />
+		<result property="computerSubsidy" column="computer_Subsidy" />
+		<result property="accumulationFund" column="accumulationfund" />
+		<result property="total" column="total" />
+		<result property="payReason" column="pay_Reason" />
+		<result property="changeDate" column="change_Date" />
+	</resultMap>
+
+	<select id="findAll" resultMap="adPayAdjustmentResult">
+		SELECT * FROM ad_pay_adjustment 
+	</select> 
+	
+
+	<select id="findByRecordId" resultMap="adPayAdjustmentResult">
+		SELECT * FROM ad_pay_adjustment WHERE record_id = #{recordId} order by id desc
+	</select> 
+	
+	
+	<update id="update">
+		UPDATE ad_pay_adjustment 
+			SET
+			  	RECORD_ID=#{recordId},
+			  	BASE_PAY=#{basePay},
+			  	MERIT_PAY=#{meritPay},
+			  	AGE_PAY=#{agePay},
+			  	LUNCH_SUBSIDY=#{lunchSubsidy},
+			  	COMPUTER_SUBSIDY=#{computerSubsidy},
+			  	ACCUMULATIONFUND=#{accumulationFund},
+			  	TOTAL=#{total},
+			  	PAY_REASON=#{payReason},
+			  	CHANGE_DATE=#{changeDate},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="payAdjustmentList" item="payAdjustment" index="index" open="" close="" separator=";">
+			UPDATE ad_pay_adjustment 
+				SET
+					RECORD_ID=#{payAdjustment.recordId},
+			  		BASE_PAY=#{payAdjustment.basePay},
+			  		MERIT_PAY=#{payAdjustment.meritPay},
+			  		AGE_PAY=#{payAdjustment.agePay},
+			  		LUNCH_SUBSIDY=#{payAdjustment.lunchSubsidy},
+			  		COMPUTER_SUBSIDY=#{payAdjustment.computerSubsidy},
+			  		ACCUMULATIONFUND=#{payAdjustment.accumulationFund},
+			  		TOTAL=#{payAdjustment.total},
+			  		PAY_REASON=#{payAdjustment.payReason},
+			  		CHANGE_DATE=#{payAdjustment.changeDate},
+			  		CREATE_BY=#{payAdjustment.createBy},
+			  		CREATE_DATE=#{payAdjustment.createDate},
+			  		UPDATE_BY=#{payAdjustment.updateBy},
+			  		UPDATE_DATE=#{payAdjustment.updateDate}
+			WHERE ID = #{payAdjustment.id}
+		</foreach>
+	</update>
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_pay_adjustment(
+			  	RECORD_ID,
+			  	BASE_PAY,
+			  	MERIT_PAY,
+			  	AGE_PAY,
+			  	LUNCH_SUBSIDY,
+			  	COMPUTER_SUBSIDY,
+			  	ACCUMULATIONFUND,
+			  	TOTAL,
+			  	PAY_REASON,
+			  	CHANGE_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{recordId},
+			  	#{basePay},
+			  	#{meritPay},
+			  	#{agePay},
+			  	#{lunchSubsidy},
+			  	#{computerSubsidy},
+			  	#{accumulationFund},
+			  	#{total},
+			  	#{payReason},
+			  	#{changeDate},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO ad_pay_adjustment(
+			  	RECORD_ID,
+			  	BASE_PAY,
+			  	MERIT_PAY,
+			  	AGE_PAY,
+			  	LUNCH_SUBSIDY,
+			  	COMPUTER_SUBSIDY,
+			  	ACCUMULATIONFUND,
+			  	TOTAL,
+			  	PAY_REASON,
+			  	CHANGE_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES
+		<foreach item="payAdjustment" index="index" collection="list" separator=",">  
+			 (
+			  	#{payAdjustment.recordId},
+			  	#{payAdjustment.basePay},
+			  	#{payAdjustment.meritPay},
+			  	#{payAdjustment.agePay},
+			  	#{payAdjustment.lunchSubsidy},
+			  	#{payAdjustment.computerSubsidy},
+			  	#{payAdjustment.accumulationFund},
+			  	#{payAdjustment.total},
+			  	#{payAdjustment.payReason},
+			  	#{payAdjustment.changeDate},
+			  	#{payAdjustment.createBy},
+			  	#{payAdjustment.createDate},
+			  	#{payAdjustment.updateBy},
+			  	#{payAdjustment.updateDate}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_pay_adjustment WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

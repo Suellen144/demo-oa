@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISaleTicketConfirmationDao">
+	
+	<resultMap id="saleTicketConfirmationResult" type="saleTicketConfirmation">
+		<id property="id" column="id" />
+		<result property="ticketDate" column="ticket_date" />
+		<result property="ticketLines" column="ticket_lines" />
+		<result property="rate" column="rate" />
+		<result property="deductionLines" column="deduction_lines" />
+		<result property="barginManageId" column="bargin_manage_id" />
+		<result property="issubmit" column="issubmit" />
+		<result property="ticketUserId" column="ticket_userId" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_DATE" />
+		<result property="updateBy" column="UPDATE_BY" />
+		<result property="updateDate" column="UPDATE_DATE" />
+		
+		<collection property="sysUser" column="ticket_userId" select="sysUserById" />  
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+	</resultMap>
+	
+	<select id="findAll" resultMap="saleTicketConfirmationResult">
+		SELECT * FROM sale_ticket_confirmation
+	</select>
+	
+	<select id="findById" resultMap="saleTicketConfirmationResult">
+		SELECT * FROM sale_ticket_confirmation WHERE ID = #{id}
+	</select> 
+	
+	<select id="sysUserById" resultMap="sysUserResult">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="saleTicketConfirmationResult">
+		SELECT *,(select name from sys_user where id=ticket_userId) as userName FROM sale_ticket_confirmation WHERE bargin_manage_id = #{barginManageId}
+	</select>
+	
+	<update id="update">
+		UPDATE sale_ticket_confirmation 
+			SET
+			  	ticket_date=#{ticketDate},
+			  	ticket_lines=#{ticketLines},
+			  	rate=#{rate},
+			  	deduction_lines=#{deductionLines},
+			  	bargin_manage_id=#{barginManageId},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	issubmit = #{issubmit},
+			  	ticket_userId = #{ticketUserId}
+			  	
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_ticket_confirmation(
+			  	ticket_date,
+			  	ticket_lines,
+			  	rate,
+			  	deduction_lines,
+			  	bargin_manage_id,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	issubmit,
+			  	ticket_userId
+			) 
+			VALUES (
+			  	#{ticketDate},
+			  	#{ticketLines},
+			  	#{rate},
+			  	#{deductionLines},
+			  	#{barginManageId},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{issubmit},
+			  	#{ticketUserId}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM sale_ticket_confirmation WHERE ID = #{id}
+	</delete>
+	
+</mapper>

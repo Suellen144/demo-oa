@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IUserPositionDao">
+	
+	<select id="findByDeptAndLevel" resultType="SysUserPosition">
+		SELECT * FROM sys_user_position WHERE POSITION_ID = (SELECT ID FROM ad_position WHERE `LEVEL` = '3' AND DEPT_ID = #{deptId} AND `NAME` NOT LIKE '%助理%' and `NAME` NOT LIKE '%助手%' LIMIT 0,1) 
+	</select>
+	
+	<select id="findByDeptAndLevel2" resultType="SysUserPosition">
+		SELECT a.* FROM sys_user_position a inner join sys_user b on a.user_id=b.id where (b.IS_DELETED is null or b.IS_DELETED=0)  and a.POSITION_ID =(SELECT ID FROM ad_position WHERE `LEVEL` = '3'
+ 			AND DEPT_ID = #{deptId} AND `NAME` NOT LIKE '%助理%' and `NAME` NOT LIKE '%助手%' LIMIT 0,1) 
+	</select>
+
+	<delete id="delByPositionId">
+		DELETE FROM sys_user_position WHERE POSITION_ID = #{positionId}
+	</delete>
+	
+	<delete id="delByUserId">
+		DELETE FROM sys_user_position WHERE USER_ID = #{userId}
+	</delete>
+	
+	<select id="findbypostionId"  resultType="Map">
+		select * from sys_user_position WHERE POSITION_ID = #{positionId}
+	</select>
+	<!-- 批量插入 -->
+	<insert id="insertAll">
+		INSERT INTO sys_user_position(USER_ID, POSITION_ID) 
+			VALUES
+			<foreach collection="positionIdList" item="positionId" index="index" separator=",">
+				(
+					#{userId}, #{positionId}
+				)
+			</foreach>
+	</insert>
+</mapper>

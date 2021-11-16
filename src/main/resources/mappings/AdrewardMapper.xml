@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdrewardDao">
+	
+	<resultMap id="adrewardResult" type="adreward">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="title" column="title" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="status" column="status" />
+		<result property="encrypted" column="encrypted" />
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" />
+		<collection property="adrewardAttachList" column="id" select="findAdrewardAttachInList" />
+	</resultMap>
+
+	<resultMap id="adrewardAttachResult" type="adrewardAttach">
+		<id property="id" column="id" />
+		<result property="rewardId" column="reward_id" />
+		<result property="userId" column="user_id" />
+		<result property="dpetId" column="dept_id" />
+		<result property="userBarginId" column="user_bargin_id" />
+		<result property="coefficient" column="coefficient" />
+		<result property="businessreward" column="businessreward" />
+		<result property="otherreward" column="otherreward" />
+		<result property="totalreward" column="totalreward" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<association property="record" column="user_id" javaType="AdRecord" select="findRecordByUserId" />
+		<!-- <association property="salary" column="user_id" javaType="AdRecordSalaryHistory" select="findSalaryByUserId" /> -->
+	</resultMap>
+	
+	<select id="findAll" resultMap="adrewardResult">
+		SELECT * FROM ad_reward
+	</select>
+
+	<select id="findByPage" parameterType="java.util.Map" resultMap="adrewardResult">
+		SELECT `reward`.* FROM ad_reward `reward`
+		JOIN sys_user `user`
+		ON `user`.`ID` = `reward`.USER_ID
+		JOIN sys_dept dept
+		ON dept.`ID` = `user`.`DEPT_ID`
+		ORDER BY `reward`.ID DESC
+	</select>
+	
+	<select id="findById" resultMap="adrewardResult">
+		SELECT * FROM ad_reward WHERE ID = #{id}
+	</select>
+
+	<select id="findByEncrypted" resultMap="adrewardResult">
+		SELECT * FROM ad_reward WHERE ENCRYPTED = #{encrypted}
+	</select>
+
+
+	<!-- 关联查询 Begin -->
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	<select id="findAdrewardAttachInList" resultMap="adrewardAttachResult">
+		SELECT * FROM ad_reward_attach WHERE reward_id = #{id}
+	</select>
+	<select id="findRecordByUserId" resultType="AdRecord">
+		SELECT * FROM ad_record WHERE user_id = #{id}
+	</select>
+	<select id="findSalaryByUserId" resultType="AdRecordSalaryHistory">
+		SELECT * FROM ad_record_salary_history WHERE user_id = #{id} AND is_deleted != "1" AND end_time is null;
+	</select>
+	<!-- 关联查询 End -->
+	
+	<update id="update">
+		UPDATE ad_reward 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	title=#{title},
+			  	REMARK=#{remark},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	STATUS=#{status},
+			  	ENCRYPTED=#{encrypted}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_reward(
+			  	PROCESS_INSTANCE_ID,
+			  	USER_ID,
+			  	DEPT_ID,
+			  	title,
+			  	REMARK,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	STATUS,
+			  	ENCRYPTED
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{userId},
+			  	#{deptId},
+			  	#{title},
+			  	#{remark},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{status},
+			  	#{encrypted}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_reward WHERE ID = #{id}
+	</delete>
+	
+</mapper>

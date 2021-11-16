@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdRulesRegulationDao">
+	
+	<resultMap id="adRulesRegulationResult" type="adRulesRegulation">
+		<id property="id" column="id" />
+		<result property="outlineId" column="outline_id" />
+		<result property="publicContent" column="public_content" />
+		<result property="unpublicContent" column="unpublic_content" />
+		<result property="publicStatus" column="public_status" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="adRulesRegulationResult">
+		SELECT * FROM ad_rules_regulation
+	</select>
+	
+	<select id="findById" resultMap="adRulesRegulationResult">
+		SELECT * FROM ad_rules_regulation WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByOutlinId" resultMap="adRulesRegulationResult">
+		SELECT * FROM ad_rules_regulation WHERE outline_id = #{outlineId}
+	</select> 
+	
+	<select id="countUnpublic" resultType="int">
+		SELECT COUNT(1) FROM ad_rules_regulation regulation
+			RIGHT JOIN ad_rules_regulation_outline outline
+			ON outline.`ID` = regulation.`OUTLINE_ID`
+		WHERE regulation.`PUBLIC_STATUS` = 'n' OR outline.`PUBLIC_STATUS` = 'n'
+	</select>
+	
+	<update id="update">
+		UPDATE ad_rules_regulation 
+			SET
+			  	OUTLINE_ID=#{outlineId},
+			  	PUBLIC_CONTENT=#{publicContent},
+			  	UNPUBLIC_CONTENT=#{unpublicContent},
+			  	PUBLIC_STATUS=#{publicStatus},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_rules_regulation(
+			  	OUTLINE_ID,
+			  	PUBLIC_CONTENT,
+			  	UNPUBLIC_CONTENT,
+			  	PUBLIC_STATUS,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{outlineId},
+			  	#{publicContent},
+			  	#{unpublicContent},
+			  	#{publicStatus},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_rules_regulation WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByOutlineId">
+		DELETE FROM ad_rules_regulation WHERE OUTLINE_ID = #{id}
+	</delete>
+</mapper>

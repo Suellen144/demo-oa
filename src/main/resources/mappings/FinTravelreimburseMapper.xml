@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinTravelreimburseDao">
+	
+	<resultMap id="finTravelreimburseResult" type="finTravelreimburse">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="userId" column="user_id" />
+		<result property="orderNo" column="order_no" />
+		<result property="title" column="title" />
+		<result property="applyTime" column="apply_time" />
+		<result property="deptId" column="dept_id" />
+		<result property="name" column="name" />
+		<result property="payee" column="payee" />
+		<result property="bankAccount" column="bank_account" />
+		<result property="bankAddress" column="bank_address" />
+		<result property="total" column="total" />
+		<result property="travelId" column="travel_id" />
+		<result property="attachName" column="attach_name" />
+		<result property="attachments" column="attachments" />
+		<result property="status" column="status" />
+		<result property="encrypted" column="encrypted" />
+		<result property="kind" column="kind" />
+		<result property="assistantStatus" column="assistant_status" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="initMoney" column="INIT_MONEY" />
+		<result property="isSend" column="IS_SEND" />
+		<result property="actReimburse" column="actReimburse" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" />
+		<association property="invest" column="invest_id" javaType="finInvest" select="findInvestByInvestId" />
+		<collection property="travelreimburseAttachList" column="id" select="findTravelreimburseAttachInList" />
+	</resultMap>
+	
+	<resultMap id="finTravelreimburseAttachResult" type="finTravelreimburseAttach">
+		<id property="id" column="id" />
+		<result property="travelreimburseId" column="travelreimburse_id" />
+		<result property="date" column="date" />
+		<result property="beginDate" column="begin_date" />
+		<result property="endDate" column="end_date" />
+		<result property="place" column="place" />
+		<result property="startPoint" column="start_point" />
+		<result property="destination" column="destination" />
+		<result property="cost" column="cost" />
+		<result property="actReimburse" column="act_reimburse" />
+		<result property="foodSubsidy" column="food_subsidy" />
+		<result property="trafficSubsidy" column="traffic_subsidy" />
+		<result property="reason" column="reason" />
+		<result property="detail" column="detail" />
+		<result property="remark" column="remark" />
+		<result property="projectId" column="project_id" />
+		<result property="conveyance" column="conveyance" />
+		<result property="dayRoom" column="day_room" />
+		<result property="type" column="type" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		
+		<association property="project" column="project_id" javaType="saleProjectManage" select="findProjectByProjectId" /> 
+	</resultMap>
+	
+	<resultMap id="saleProjectManageResult" type="saleProjectManage">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="type" column="type" />
+		<result property="code" column="code" />
+		<result property="nature" column="nature" />
+		<result property="location" column="location" />
+		<result property="describe" column="describe" />
+		<result property="userId" column="user_id" />
+		<result property="deptIds" column="dept_ids" />
+		
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		
+	</resultMap>
+	
+	<select id="findAll" resultMap="finTravelreimburseResult">
+		SELECT * FROM fin_travelreimburse
+	</select>
+	
+	<select id="findByIdAndUser" resultType="Double">
+	select sum(actReimburse) from (
+		select SUM(attach.ACT_REIMBURSE) as actReimburse  from  fin_travelreimburse travelreimburse inner join fin_travelreimburse_attach attach on travelreimburse.id=attach.TRAVELREIMBURSE_ID
+		where travelreimburse.DEPT_ID = ( select dept_id from sys_user where id=#{userId}) and attach.TYPE=5
+		and travelreimburse.apply_time &gt;= #{startDate} and travelreimburse.apply_time &lt; #{endDate}   and travelreimburse.`STATUS`!=7 
+		<if test="id != null and id != ''">
+		and travelreimburse.APPLY_TIME &lt; (select APPLY_TIME from fin_reimburse where id=#{id})
+		</if>
+		union all
+		select SUM(attach.ACT_REIMBURSE) as actReimburse  from fin_reimburse reimburse  inner join fin_reimburse_attach attach on reimburse.id=attach.REIMBURSE_ID 
+		where reimburse.DEPT_ID = ( select dept_id from sys_user where id=#{userId}) and attach.TYPE=36 
+		and reimburse.apply_time &gt;= #{startDate} and reimburse.apply_time &lt; #{endDate}   and reimburse.`STATUS`!=7 
+		) a
+	</select>
+	
+	<select id="findByProcessId" resultMap="finTravelreimburseResult">
+		SELECT * FROM fin_travelreimburse WHERE process_instance_id = #{processInstanceId}
+	</select> 
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="finTravelreimburseResult">
+		SELECT `travelreimburse`.* FROM fin_travelreimburse  `travelreimburse`
+		JOIN sys_user `user`
+				ON `user`.`ID` = `travelreimburse`.USER_ID AND `user`.`IS_DELETED` IS NULL
+			JOIN sys_dept dept
+				ON dept.`ID` = `user`.`DEPT_ID`
+		<if test="name != null and name != ''">
+			AND `travelreimburse`.`name` LIKE CONCAT('%',#{name},'%')
+		</if>
+		<if test="orderNo != null and orderNo != ''">
+			AND `travelreimburse`.`order_no` LIKE CONCAT('%',#{orderNo},'%')
+		</if>
+		<if test="status != null and status != ''">
+			AND `travelreimburse`.`status`= #{status}
+		</if>
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND `travelreimburse`.USER_ID = #{userId}
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND dept.`ID` IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach> WHERE  `travelreimburse`. `status` IS  NOT NULL
+			OR (`travelreimburse`. `status` IS  NULL AND `travelreimburse`.USER_ID = #{userId})
+		</if> 
+		ORDER BY `travelreimburse`.CREATE_DATE DESC
+	</select>
+	
+	<select id="findByPage1" parameterType="java.util.Map" resultMap="finTravelreimburseResult">
+		select a.kind,a.name,a.apply_time,a.order_no,sum(b.ACT_REIMBURSE) as actReimburse,a.`STATUS`,a.PROCESS_INSTANCE_ID,a.id
+		from fin_travelreimburse a inner join fin_travelreimburse_attach b on a.id=b.TRAVELREIMBURSE_ID where b.PROJECT_ID=#{projectManageId} and a.`STATUS` !=7  GROUP BY a.order_no 
+		union all
+		select a.kind,a.name,a.apply_time,a.order_no,sum(b.ACT_REIMBURSE) as actReimburse,a.`STATUS`,a.PROCESS_INSTANCE_ID,a.id
+	    from fin_reimburse a inner join fin_reimburse_attach b on a.id=b.REIMBURSE_ID where b.PROJECT_ID=#{projectManageId} and a.`STATUS` !=7  GROUP BY a.order_no
+	    union all
+		select 3 as kind,(select name from sys_user where id=a.USER_ID) as name,a.apply_time,'' as order_no,sum(b.PAY_BILL) as actReimburse,a.`STATUS`,a.PROCESS_INSTANCE_ID
+		,a.id from fin_pay a inner join fin_pay_attach b on a.id=b.PAY_ID where a.PROJECT_MANAGE_ID=#{projectManageId} and a.`STATUS` !=6 GROUP BY a.id order by apply_time desc
+	</select>
+	
+	<select id="findByExpenditure" resultMap="finTravelreimburseResult">
+		select sum(actReimburse) as actReimburse from (
+		select b.ACT_REIMBURSE as actReimburse
+		from fin_travelreimburse a inner join fin_travelreimburse_attach b on a.id=b.TRAVELREIMBURSE_ID where b.PROJECT_ID=#{projectId} and a.status = 6 GROUP BY b.id
+		union all
+		select b.ACT_REIMBURSE as actReimburse
+	    from fin_reimburse a inner join fin_reimburse_attach b on a.id=b.REIMBURSE_ID where b.PROJECT_ID=#{projectId} and a.status = 6 GROUP BY b.id
+	    union all
+		select a.pay_bill confirm_amount
+		from fin_pay_attach a inner join fin_pay b on a.PAY_ID=b.id where b.PROJECT_MANAGE_ID=#{projectId} and b.`STATUS` = 5 GROUP BY a.id
+	    ) a
+	</select>
+	
+	<select id="findByClearanceBeen" resultMap="finTravelreimburseResult">
+		select SUM(b.ACT_REIMBURSE) as actReimburse
+	    from fin_reimburse a inner join fin_reimburse_attach b on a.id=b.REIMBURSE_ID where b.PROJECT_ID=#{projectId} and a.status = 6 and b.type=37
+	</select>
+	
+	<select id="findByClearanceBeenTo" resultMap="finTravelreimburseResult">
+	select sum(actReimburse) as actReimburse from (
+		select SUM(b.ACT_REIMBURSE) as actReimburse
+	    from fin_reimburse a inner join fin_reimburse_attach b on a.id=b.REIMBURSE_ID where b.PROJECT_ID=#{projectId} 
+	    <if test="reimbursid != null and reimbursid != '' ">
+	    	and a.APPLY_TIME &lt; (select APPLY_TIME from fin_reimburse where id=#{reimbursid})
+	    </if>
+	    and b.type=37  and a.`STATUS`!=7 
+	    union all
+	    select SUM(b.ACT_REIMBURSE) as actReimburse
+	    from fin_travelreimburse a inner join fin_travelreimburse_attach b on a.id=b.TRAVELREIMBURSE_ID where b.PROJECT_ID=#{projectId} 
+	    <if test="travelreimburseid != null and travelreimburseid != '' ">
+	    	and a.APPLY_TIME &lt; (select APPLY_TIME from fin_travelreimburse where id=#{travelreimburseid})
+	    </if>
+	    and b.type=6  and a.`STATUS`!=7 ) a
+	</select>
+	
+	<select id="findById" resultMap="finTravelreimburseResult">
+		SELECT * FROM fin_travelreimburse WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByEncrypted" resultMap="finTravelreimburseResult">
+		SELECT * FROM fin_travelreimburse WHERE ENCRYPTED = #{encrypted}
+	</select>
+	
+	<select id="getMaxOrderNo" resultType="java.lang.String">
+		SELECT MAX(ORDER_NO) AS ORDER_NO FROM (
+			SELECT MAX(ORDER_NO) AS ORDER_NO FROM fin_travelreimburse
+			UNION ALL
+			SELECT MAX(ORDER_NO) AS ORDER_NO FROM fin_reimburse
+		) T
+	</select>
+	
+	<!-- 各类引用查询  BEGIN -->
+	<select id="findTravelreimburseAttachInList" resultMap="finTravelreimburseAttachResult">
+		SELECT * FROM fin_travelreimburse_attach WHERE TRAVELREIMBURSE_ID = #{id}
+		ORDER BY DATE, BEGIN_DATE
+	</select>
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id} AND IS_DELETED IS NULL
+	</select>
+	<select id="findInvestByInvestId" resultType="finInvest">
+		SELECT * FROM fin_invest WHERE ID = #{id}
+	</select>
+	<select id="findTravelByTravelId" resultType="adTravel">
+		SELECT * FROM ad_travel WHERE ID = #{id}
+	</select>
+	
+	<!-- 注销的项目在报销单不显示 -->
+	<select id="findProjectByProjectId" resultMap="saleProjectManageResult">
+		SELECT * FROM sale_project_manage WHERE ID = #{id} 
+	</select>
+	
+	
+	
+	<!-- 各类引用查询  END -->
+	
+	<update id="update">
+		UPDATE fin_travelreimburse 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	USER_ID=#{userId},
+			  	ORDER_NO = #{orderNo},
+			  	TITLE=#{title},
+			  	APPLY_TIME=#{applyTime},
+			  	DEPT_ID=#{deptId},
+			  	NAME=#{name},
+			  	PAYEE=#{payee},
+			  	BANK_ACCOUNT=#{bankAccount},
+			  	BANK_ADDRESS=#{bankAddress},
+			  	TOTAL=#{total},
+			  	TRAVEL_ID=#{travelId},
+			  	ATTACH_NAME=#{attachName},
+			  	ATTACHMENTS=#{attachments},
+			  	STATUS=#{status},
+			  	ENCRYPTED=#{encrypted},
+			  	ASSISTANT_STATUS=#{assistantStatus},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	INIT_MONEY=#{initMoney},
+			  	IS_SEND=#{isSend}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="setAssistantAffirm">
+		UPDATE fin_travelreimburse 
+			SET
+			  	ASSISTANT_STATUS=#{assistantStatus}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_travelreimburse(
+			  	PROCESS_INSTANCE_ID,
+			  	USER_ID,
+			  	ORDER_NO,
+			  	TITLE,
+			  	APPLY_TIME,
+			  	DEPT_ID,
+			  	NAME,
+			  	PAYEE,
+			  	BANK_ACCOUNT,
+			  	BANK_ADDRESS,
+			  	TOTAL,
+			  	TRAVEL_ID,
+			  	ATTACH_NAME,
+			  	ATTACHMENTS,
+			  	STATUS,
+			  	ENCRYPTED,
+			  	KIND,
+			  	ASSISTANT_STATUS,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	INIT_MONEY,
+			  	IS_SEND
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{userId},
+			  	#{orderNo},
+			  	#{title},
+			  	#{applyTime},
+			  	#{deptId},
+			  	#{name},
+			  	#{payee},
+			  	#{bankAccount},
+			  	#{bankAddress},
+			  	#{total},
+			  	#{travelId},
+			  	#{attachName},
+			  	#{attachments},
+			  	#{status},
+			  	#{encrypted},
+			  	#{kind},
+			  	#{assistantStatus},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{initMoney},
+			  	#{isSend}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_travelreimburse WHERE ID = #{id}
+	</delete>
+	
+</mapper>

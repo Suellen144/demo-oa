@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinCollectionDao">
+
+    <resultMap id="saleBarginManageResult" type="saleBarginManage">
+        <id property="id" column="id" />
+        <result property="processInstanceId" column="process_instance_id" />
+        <result property="projectManageId" column="project_manage_id" />
+        <result property="title" column="title" />
+        <result property="deptId" column="dept_id" />
+        <result property="userId" column="user_id" />
+        <result property="applyTime" column="apply_time" />
+        <result property="barginName" column="bargin_name" />
+        <result property="barginCode" column="bargin_code" />
+        <result property="barginType" column="bargin_type" />
+        <result property="barginDescribe" column="bargin_describe" />
+        <result property="company" column="company" />
+        <result property="totalMoney" column="total_money" />
+        <result property="receivedMoney" column="received_money" />
+        <result property="unreceivedMoney" column="unreceived_money" />
+        <!-- <result property="receivedInvoice" column="received_invoice" />
+        <result property="unreceivedInvoice" column="unreceived_invoice" /> -->
+        <result property="payReceivedInvoice" column="pay_received_invoice" />
+        <result property="payUnreceivedInvoice" column="pay_unreceived_invoice" />
+        <result property="invoiceMoney" column="invoice_Money" />
+        <result property="advancesReceived" column="advances_Received" />
+        <result property="accountReceived" column="account_Received" />
+        <result property="payMoney" column="PAY_MONEY" />
+        <result property="unpayMoney" column="UNPAY_MONEY" />
+        <result property="startTime" column="start_time" />
+        <result property="endTime" column="end_time" />
+        <result property="attachName" column="attach_name" />
+        <result property="attachments" column="attachments" />
+        <result property="status" column="status" />
+        <result property="isDeleted" column="is_deleted" />
+        <result property="createBy" column="create_by" />
+        <result property="createDate" column="create_date" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateDate" column="update_date" />
+        <!-- 项目管理模块添加 -->
+        <result property="isNewProject" column="is_new_project" />
+          <result property="isNewProcess" column="is_new_process" />
+        <result property="channelExpense" column="channel_expense" />
+        <result property="contribution" column="contribution" />
+        <result property="commissionAmount" column="commission_amount" />
+    </resultMap>
+
+	<resultMap id="finCollectionResult" type="finCollection">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="status" column="status" />
+		<result property="title" column="title" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="barginId" column="bargin_id" />
+		<result property="projectId" column="project_id" />
+		<result property="totalPay" column="total_pay" />
+		<result property="applyPay" column="apply_pay" />
+		<result property="applyProportion" column="apply_proportion" />
+		<result property="payCompany" column="pay_company" />
+		<result property="isInvoiced" column="is_invoiced" />
+		<result property="invoicedId" column="invoiced_id" />
+		<result property="bill" column="bill" />
+		<result property="billDate" column="bill_date" />
+		<result property="coollection" column="coollection" />
+		<result property="collectionType" column="collection_type" />
+		<result property="reason" column="reason" />
+		<result property="isSend" column="is_send" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="emailUid" column="email_uid" />
+		<result property="attachName" column="ATTACH_NAME" />
+		<result property="attachments" column="ATTACHMENTS" />
+		<!-- 项目管理模块 新增字段 -->
+		<result property="commissionBase" column="commission_base" />
+		<result property="commissionProportion" column="commission_proportion" />
+		<result property="allocations" column="allocations" />
+		<result property="channelCost" column="channel_cost" />
+		<result property="receiving" column="receiving" />
+		<result property="notReceiving" column="not_receiving" />
+		<result property="collectionDate" column="collection_date" />
+		<result property="isNewProject" column="is_new_project" />
+		 <result property="isNewProcess" column="is_new_process" />
+		 <result property="isOldData" column="is_old_data" />
+		<result property="purchase" column="purchase" />
+		<result property="taxes" column="taxes" />
+        <result property="relationship" column="relationship" />
+        <result property="other" column="other" />
+
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" />
+		<association property="invoiced" column="invoiced_id" javaType="FinInvoiced" select="findInvoicedByInvoicedId" />
+		<association property="barginManage" column="bargin_id" javaType="saleBarginManage" select="findBarginById" />
+		<association property="projectManage" column="project_id" javaType="saleProjectManage" select="findProjectById" /> 
+		<collection property="invoicedAttachList" column="invoiced_id" select="findInvoicedAttachInList" />  
+		<collection property="collectionAttachList" column="id" select="findCollectionAttachInList" />  
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		<result property="emailUid" column="email_uid" />
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+	</resultMap>
+	
+	
+	<resultMap id="finCollectionAttachResult" type="finCollectionAttach">
+		<id property="id" column="id" />
+		<result property="collectionId" column="collection_id" />
+		<result property="collectionBill" column="collection_bill" />
+		<result property="collectionDate" column="collection_date" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isSend" column="is_send" />
+	</resultMap>
+	
+	<resultMap id="finInvoicedAttachResult" type="finInvoicedAttach">
+		<id property="id" column="id" />
+		<result property="invoicedId" column="invoiced_id" />
+		<result property="name" column="name" />
+		<result property="model" column="model" />
+		<result property="unit" column="unit" />
+		<result property="number" column="number" />
+		<result property="price" column="price" />
+		<result property="money" column="money" />
+		<result property="excise" column="excise" />
+		<result property="levied" column="ldvied" />
+		<result property="exciseMoney" column="excise_money" />
+		<result property="totalMoney" column="total_money" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+
+    <select id="statisticsRelationship" resultType="finCollection">
+        select sum(f.relationship) relationship from (
+        select sum(fta.ACT_REIMBURSE) relationship from
+        (select * from fin_travelreimburse_attach where project_id = #{projectId} and type = 6) fta
+        INNER JOIN
+        (select * from fin_travelreimburse where status = 6) ft on fta.TRAVELREIMBURSE_ID = ft.id
+        union all
+        select sum(fra.ACT_REIMBURSE) relationship from
+        (select * from fin_reimburse_attach where project_id = #{projectId} and type = 37) fra
+        INNER JOIN
+        (select * from fin_reimburse where status = 6) fr on fra.REIMBURSE_ID = fr.id ) f
+    </select>
+
+	<update id="changeData">
+		update fin_collection set purchase=#{purchase},taxes=#{taxes},relationship=#{relationship},other=#{other},commission_base=#{commissionBase} where id = #{id}
+	</update>
+
+	<select id="findCollectionByProjectId" resultType="finCollection">
+       <!--  select * from fin_collection where project_id = #{id} -->
+        <!--select a.* from fin_collection a inner join fin_colletcion_attach b on a.id=b.collection_id where a.project_id = #{id} and STATUS =5-->
+		select ifnull(t.bill,0) bill,ifnull(t1.apply_pay,0) apply_pay from (
+		select * from fin_collection where project_id= #{id} and `status` != 6) t left join (
+		select COLLECTION_ID,sum(COLLECTION_BILL) apply_pay from fin_colletcion_attach group by COLLECTION_ID) t1
+		on t.id=t1.COLLECTION_ID
+	</select>
+
+	<select id="findRevenueRecognition" resultType="finRevenueRecognition">
+        select * from fin_revenue_recognition where fin_invoiced_id = #{id} and is_been_confirmed = 1
+    </select>
+
+    <select id="findInvoicedById" resultType="finInvoiced">
+        select * from fin_invoiced where bargin_manage_id = #{id} and STATUS = '6'
+    </select>
+
+    <select id="findInvoiceProjectMembersById" resultType="finInvoiceProjectMembers">
+        select * from fin_invoice_project_members where fin_invoiced_id = #{id} and (IS_DELETED = 0 or IS_DELETED is null)
+    </select>
+
+	<select id="findCommissionListById" resultType="finCollection">
+        select * from fin_collection where invoiced_id = #{id} and IS_DELETED = 0
+    </select>
+    
+   	<select id="findCommissionByProjectId" resultMap="finCollectionResult">
+        select * from fin_collection where project_id = #{projectId} and (status != 4 or status!=6) order by id
+    </select>
+
+    <select id="findUserById" resultType="sysUser">
+        select * from sys_user where id = #{id}
+    </select>
+    
+    <select id="findBarginByProjectId" resultType="saleBarginManage">
+        select * from sale_bargin_manage where project_manage_id = #{id} and STATUS = '5' AND BARGIN_TYPE='S'
+    </select>
+
+    <select id="findProjectId" resultType="saleProjectManage">
+        select * from sale_project_manage a where a.status_new = '5'
+		<if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+			AND a.PROJECT_DATE &gt;= #{startTime} AND a.PROJECT_DATE &lt;=#{endTime}
+		</if>
+		<if test="stopTime != null and stopTime != ''">
+			AND a.PROJECT_DATE &lt;= #{stopTime}
+		</if>
+    </select>
+
+    <select id="findAchievementListByPage" parameterType="java.util.Map" resultMap="finCollectionResult">
+			SELECT ID,PROCESS_INSTANCE_ID,status,title,user_id,dept_id,apply_time,project_id,bargin_id,total_pay,apply_pay,apply_proportion,pay_company,
+		is_invoiced,invoiced_id,bill,bill_date,coollection,(select name from sys_dictdata where value=fin_collection.collection_type and type_id=72) as collectionType,IS_SEND,reason,email_uid,IS_DELETED,CREATE_BY,CREATE_DATE,UPDATE_BY,
+		UPDATE_DATE,ATTACH_NAME,ATTACHMENTS,collection_date,commission_base,commission_proportion,allocations,channel_cost,receiving,not_receiving,
+		is_new_project
+		FROM fin_collection WHERE `status` != 6 AND is_new_project = 1
+		ORDER BY create_date DESC, project_id
+	</select>
+
+	<select id="findAll" resultMap="finCollectionResult">
+		SELECT * FROM fin_collection
+	</select>
+	
+	<select id="findById" resultMap="finCollectionResult">
+		SELECT * FROM fin_collection WHERE ID = #{id}
+	</select> 
+	
+	<select id="findCollectionInfo" resultMap="finCollectionResult">
+		SELECT * FROM fin_collection WHERE bargin_id = #{barginId} and status = #{status}
+	</select>
+	
+	<select id="findByBarginId" resultMap="finCollectionResult">
+		SELECT * FROM fin_collection WHERE bargin_id = #{barginId} 
+	</select>
+	
+	<select id="findByBarginIdAndCreateDate" resultMap="finCollectionResult">
+		SELECT * FROM fin_collection WHERE bargin_id = #{barginId} 
+		<if test="createDate != null and createDate != ''">
+			AND create_date &lt; #{createDate}
+		</if>
+	</select>
+	
+	<select id="findByPageNew" parameterType="java.util.Map" resultMap="finCollectionResult">
+		SELECT ID,PROCESS_INSTANCE_ID,status,title,user_id,dept_id,apply_time,project_id,bargin_id,total_pay,apply_pay,apply_proportion,pay_company,
+		is_invoiced,invoiced_id,bill,bill_date,coollection,(select name from sys_dictdata where value=fin_collection.collection_type and type_id=72) as collectionType,IS_SEND,reason,email_uid,IS_DELETED,CREATE_BY,CREATE_DATE,UPDATE_BY,
+		UPDATE_DATE,ATTACH_NAME,ATTACHMENTS,collection_date,commission_base,commission_proportion,allocations,channel_cost,receiving,not_receiving,
+		is_new_project,is_new_process
+		 FROM fin_collection  WHERE bargin_id = #{barginId} AND status !=6
+	</select>
+	
+	<select id="findListByPage" parameterType="java.util.Map" resultMap="finCollectionResult">
+		SELECT ID,PROCESS_INSTANCE_ID,status,title,user_id,dept_id,apply_time,project_id,bargin_id,total_pay,apply_pay,apply_proportion,pay_company,
+		is_invoiced,invoiced_id,bill,bill_date,coollection,(select name from sys_dictdata where value=fin_collection.collection_type and type_id=72) as collectionType,IS_SEND,reason,email_uid,IS_DELETED,CREATE_BY,CREATE_DATE,UPDATE_BY,
+		UPDATE_DATE,ATTACH_NAME,ATTACHMENTS,collection_date,commission_base,commission_proportion,allocations,channel_cost,receiving,not_receiving,
+		is_new_project,is_new_process
+		FROM fin_collection WHERE `status` != 6 AND is_new_project = 1
+		<if test="userIdCurrent !=null and userIdCurrent !=''">
+			AND ( (select APPLICANT from sale_project_manage where id=fin_collection.project_id)= #{userIdCurrent} or user_id = #{userIdCurrent})
+		</if>
+		<if test="idStr != null and idStr !=''">
+			AND ( (select APPLICANT from sale_project_manage where id=fin_collection.project_id) in
+			<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+			  #{item}
+			</foreach>
+			 or user_id in
+			<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+			  #{item}
+			</foreach>
+			)
+		</if>
+		<!--<if test="status != null and status != ''">
+			AND STATUS = #{status}
+		</if>-->
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( (select name from sale_project_manage where id=fin_collection.project_id limit 0,1) LIKE CONCAT('%',#{fuzzyContent},'%')
+			)
+		</if>
+		ORDER BY create_date DESC, project_id
+	</select>
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="finCollectionResult">
+		SELECT `collection`.ID,`collection`.PROCESS_INSTANCE_ID,`collection`.status,`collection`.title,`collection`.user_id,`collection`.dept_id,`collection`.apply_time,`collection`.project_id,`collection`.bargin_id,`collection`.total_pay,
+		case `collection`.is_new_project when 1 then `collection`.apply_pay
+		 else `collection`.apply_pay end as apply_pay,
+		`collection`.apply_proportion,`collection`.pay_company,`collection`.is_invoiced,`collection`.invoiced_id,`collection`.bill,`collection`.bill_date,`collection`.coollection,`collection`.collection_type,`collection`.IS_SEND,`collection`.
+		reason,`collection`.email_uid,`collection`.IS_DELETED,`collection`.CREATE_BY,`collection`.CREATE_DATE,`collection`.UPDATE_BY,`collection`.UPDATE_DATE,`collection`.ATTACH_NAME,`collection`.ATTACHMENTS,`collection`.collection_date
+		,`collection`.commission_base,`collection`.commission_proportion,`collection`.allocations,`collection`.channel_cost,`collection`.receiving,`collection`.not_receiving,`collection`.is_new_project,`collection`.is_new_process,sum(attach.collection_bill) as collectionBill FROM fin_collection `collection`
+		left join fin_colletcion_attach attach on collection.id=attach.collection_id
+		JOIN sys_user `user`
+				ON `user`.`ID` = `collection`.USER_ID
+		JOIN sys_dept dept
+				ON dept.`ID` = `user`.`DEPT_ID`
+		LEFT JOIN sale_bargin_manage `bargin`
+				ON `bargin`.`ID` = `collection`.bargin_id
+		LEFT JOIN sale_project_manage `project`
+				ON `project`.`ID` = `collection`.project_id
+		WHERE 1 = 1
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND `collection`.USER_ID = #{userId}
+			AND (collection.STATUS != 6 or collection.STATUS is null)
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND (dept.`ID` IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach>)
+			AND (((`collection`.STATUS != 6) OR (
+				`collection`.USER_ID = #{userId} and (`collection`.STATUS != 6 or  `collection`.STATUS is null))))
+		</if>
+		<if test="status != null and status != ''">
+			AND collection.STATUS = #{status}
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( collection.`pay_company` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `bargin`.`BARGIN_CODE` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `project`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			)
+		</if>
+		GROUP BY collection.id ORDER BY `collection`.ID DESC
+	</select>
+	
+	<update id="update">
+		UPDATE fin_collection 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	STATUS=#{status},
+			  	TITLE=#{title},
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	APPLY_TIME=#{applyTime},
+			  	BARGIN_ID=#{barginId},
+			  	PROJECT_ID=#{projectId},
+			  	TOTAL_PAY=#{totalPay},
+			  	APPLY_PAY=#{applyPay},
+			  	APPLY_PROPORTION=#{applyProportion},
+			  	PAY_COMPANY=#{payCompany},
+			  	IS_INVOICED=#{isInvoiced},
+			  	INVOICED_ID=#{invoicedId},
+			  	BILL=#{bill},
+			  	BILL_DATE=#{billDate},
+			  	COOLLECTION=#{coollection},
+			  	COLLECTION_TYPE=#{collectionType},
+			  	REASON=#{reason},
+			  	IS_SEND=#{isSend},
+			  	IS_DELETED=#{isDeleted},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	EMAIL_UID=#{emailUid},
+			  	ATTACH_NAME=#{attachName},
+			  	ATTACHMENTS=#{attachments},
+			  	collection_date=#{collectionDate},
+			    commission_base=#{commissionBase},
+			    commission_proportion=#{commissionProportion},
+			    allocations=#{allocations},
+			    channel_cost=#{channelCost},
+			    receiving=#{receiving},
+			    not_receiving=#{notReceiving},
+			    is_new_project = #{isNewProject},
+			    is_old_data = #{isOldData},
+			    is_new_process = #{isNewProcess}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="batchUpdate">
+		<foreach collection="collectionList" item="collection" index="index" open="" close="" separator=";">
+			UPDATE fin_collection 
+			SET
+			  	PROJECT_ID=#{collection.projectId}
+		WHERE ID = #{collection.id}
+		</foreach>
+	</update>
+	
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_collection(
+			  	PROCESS_INSTANCE_ID,
+			  	STATUS,
+			  	TITLE,
+			  	USER_ID,
+			  	DEPT_ID,
+			  	APPLY_TIME,
+			  	BARGIN_ID,
+			  	PROJECT_ID,
+			  	TOTAL_PAY,
+			  	APPLY_PAY,
+			  	APPLY_PROPORTION,
+			  	PAY_COMPANY,
+			  	IS_INVOICED,
+			  	INVOICED_ID,
+			  	BILL,
+			  	BILL_DATE,
+			  	COOLLECTION,
+			  	COLLECTION_TYPE,
+			  	REASON,
+			  	IS_SEND,
+			  	IS_DELETED,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	EMAIL_UID,
+			  	ATTACH_NAME,
+			  	ATTACHMENTS,
+			  	commission_base,
+			  	commission_proportion,
+			  	allocations,
+			  	channel_cost,
+			  	receiving,
+			  	not_receiving,
+			  	is_new_project,
+			  	collection_date,
+			  	is_old_data,
+			  	is_new_process
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{status},
+			  	#{title},
+			  	#{userId},
+			  	#{deptId},
+			  	#{applyTime},
+			  	#{barginId},
+			  	#{projectId},
+			  	#{totalPay},
+			  	#{applyPay},
+			  	#{applyProportion},
+			  	#{payCompany},
+			  	#{isInvoiced},
+			  	#{invoicedId},
+			  	#{bill},
+			  	#{billDate},
+			  	#{coollection},
+			  	#{collectionType},
+			  	#{reason},
+			  	#{isSend},
+			  	#{isDeleted},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{emailUid},
+			  	#{attachName},
+			  	#{attachments},
+			  	#{commissionBase},
+			  	#{commissionProportion},
+			  	#{allocations},
+			  	#{channelCost},
+			  	#{receiving},
+			  	#{notReceiving},
+			  	#{isNewProject},
+			  	#{collectionDate},
+			  	#{isOldData},
+			  	#{isNewProcess}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_collection WHERE ID = #{id}
+	</delete>
+	
+	<!-- 联合查询开始  -->
+	<select id="findUserByUserId" resultMap="sysUserResult">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findProjectById" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id} AND (is_deleted is null or is_deleted = '0' )
+	</select>
+	
+	<select id="findBarginById" resultType="saleBarginManage">
+		SELECT * FROM sale_bargin_manage WHERE ID = #{id}
+	</select>
+	
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE `ID` = #{id}
+	</select>
+	
+	<select id="findInvoicedByInvoicedId" resultType="FinInvoiced">
+		SELECT * FROM fin_invoiced WHERE `ID` = #{id}
+	</select>
+	
+	<select id="findCollectionAttachInList" resultMap="finCollectionAttachResult">
+		SELECT * FROM fin_colletcion_attach WHERE collection_id = #{id}
+	</select>
+	<select id="findInvoicedAttachInList" resultMap="finInvoicedAttachResult">
+		SELECT * FROM fin_invoiced_attach WHERE invoiced_id = #{invoicedId}
+	</select>
+	
+	<!-- 联合查询结束  -->
+
+
+</mapper>

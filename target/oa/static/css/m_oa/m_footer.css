@@ -1,0 +1,25 @@
+footer{max-width: 750px;background: #fff;position: fixed;bottom: 0;left: 0;z-index: 9999;height: 1rem;width: 100%;border-top: 1px solid #f5f5f5;}
+footer ul{margin: 0;padding: 0 0.7rem;padding-top: 0.1rem;display: flex;align-content: center;justify-content: space-between;}
+footer ul li{text-align: center;}
+footer ul li a{display: block;}
+footer ul li a i{display: block;font-size: 0.6rem !important;height: 0.47rem;color: #999;}
+footer ul li a i:first-child+ i{display: none;}
+.icon-home:before,.icon-homefill:before{position: relative;top: -0.09rem;}
+.icon-barrage:before,.icon-barrage_fill:before{position: relative;top: -0.09rem;}
+.icon-people:before,.icon-peoplefill:before{position: relative;top: -0.09rem;}
+footer ul li a span{display: block;font-size: 0.2rem;color: #999;padding-top: 0.05rem;}
+footer ul li.active a i{display: none;}
+footer ul li.active a i:first-child+ i{display: block;color: #488ff2;}
+footer ul li.active a span{color: #488ff2;}
+
+footer ul li a{-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+-webkit-user-select: none;
+-moz-user-focus: none;
+-moz-user-select: none;}
+a,a:hover,a:active,a:visited,a:link,a:focus{
+    -webkit-tap-highlight-color:rgba(0,0,0,0);
+    -webkit-tap-highlight-color: transparent;
+    outline:none;
+    background: none;
+    text-decoration: none;
+}

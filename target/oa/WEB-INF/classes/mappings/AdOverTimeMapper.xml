@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdOverTimeDao">
+	
+	<resultMap id="adOverTimeResult" type="adOverTime">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="title" column="title" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="reason" column="reason" />
+		<result property="days" column="days" />
+		<result property="hours" column="hours" />
+		<result property="status" column="status" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="applyTime" column="apply_time" />
+		
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+	</resultMap>
+	
+	<select id="findAll" resultMap="adOverTimeResult">
+		SELECT * FROM ad_overtime
+	</select>
+	
+	<select id="findById" resultMap="adOverTimeResult">
+		SELECT * FROM ad_overtime WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="adOverTimeResult">
+		SELECT `overtime`.* FROM ad_overtime `overtime`
+		JOIN sys_user `user`
+				ON `user`.`ID` = `overtime`.USER_ID
+			JOIN sys_dept dept
+				ON dept.`ID` = `user`.`DEPT_ID`
+		WHERE overtime.status != 4
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND `overtime`.USER_ID = #{userId}
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND (dept.`ID` IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach>
+			OR `overtime`.USER_ID = #{userId})
+		</if>
+		<if test="startTime != null and startTime != ''.toString()">
+			AND `overtime`.`START_TIME` &gt;= #{startTime} 
+		</if>
+		<if test="endTime != null and endTime != ''.toString()">
+			AND `overtime`.`END_TIME` &lt;= #{endTime} 
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR `overtime`.`REASON` LIKE CONCAT('%',#{fuzzyContent},'%'))
+		</if>
+		ORDER BY `overtime`.ID DESC
+	</select>
+	
+	<update id="update">
+		UPDATE ad_overtime 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	TITLE=#{title},
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	START_TIME=#{startTime},
+			  	END_TIME=#{endTime},
+			  	REASON=#{reason},
+			  	DAYS=#{days},
+			  	HOURS=#{hours},
+			  	STATUS=#{status},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	APPLY_TIME=#{applyTime}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_overtime(
+			  	PROCESS_INSTANCE_ID,
+			  	TITLE,
+			  	USER_ID,
+			  	DEPT_ID,
+			  	START_TIME,
+			  	END_TIME,
+			  	REASON,
+			  	DAYS,
+			  	HOURS,
+			  	STATUS,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	APPLY_TIME
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{title},
+			  	#{userId},
+			  	#{deptId},
+			  	#{startTime},
+			  	#{endTime},
+			  	#{reason},
+			  	#{days},
+			  	#{hours},
+			  	#{status},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{applyTime}
+			)
+	</insert>
+	
+	<!-- 本月加班时间 -->
+	<select id="findByParam" resultMap="adOverTimeResult">
+		select * from ad_overtime where date_format(START_TIME,'%Y-%m') LIKE CONCAT('%',#{generalMonth},'%') 	
+			and status != 4
+		<if test="userIds != null and userIds.size > 0">
+				AND user_id IN 
+				<foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">  
+					#{userId}
+				</foreach>
+				
+		</if>
+	</select>
+	
+	
+	<!-- 所有加班时间 -->
+	<select id="findAllByParam" resultMap="adOverTimeResult">
+		select * from ad_overtime where 1=1 AND `START_TIME` &lt; date_format(#{generalMonth}, '%Y-%m-%d  %H:%i:%s') 	
+		and status != 4
+		<if test="userIds != null and userIds.size > 0">
+				AND user_id IN 
+				<foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">  
+					#{userId}
+				</foreach>
+		</if>
+	</select>
+	
+	
+	<delete id="deleteById">
+		DELETE FROM ad_overtime WHERE ID = #{id}
+	</delete>
+	
+	<select id="findUserByUserId" resultMap="sysUserResult">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE `ID` = #{id}
+	</select>
+	
+</mapper>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinCollectionMembersDao">
+	
+	<resultMap id="finCollectionMembersResult" type="finCollectionMembers">
+		<id property="id" column="id" />
+		<result property="resultsProportion" column="results_proportion" />
+		<result property="commissionProportion" column="commission_proportion" />
+		<result property="finCollectionId" column="fin_collection_id" />
+		<result property="sorting" column="sorting" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="userId" column="user_id" />
+		<collection property="sysUser" column="user_id" select="sysUserById" />  
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+	</resultMap>
+	
+	<select id="sysUserById" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select> 
+	
+	<select id="findAll" resultMap="finCollectionMembersResult">
+		SELECT * FROM fin_collection_members
+	</select>
+	
+	<select id="findById" resultMap="finCollectionMembersResult">
+		SELECT * FROM fin_collection_members WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByFinCollectionId" resultMap="finCollectionMembersResult">
+		SELECT * FROM fin_collection_members WHERE fin_collection_id=#{finCollectionId} and (is_deleted is null or is_deleted ='0') order by sorting
+	</select>
+	
+	<update id="update">
+		UPDATE fin_collection_members 
+			SET
+				USER_ID=#{userId},
+				RESULTS_PROPORTION=#{resultsProportion},
+			  	COMMISSION_PROPORTION=#{commissionProportion},
+			  	fin_collection_id=#{finCollectionId},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	sorting=#{sorting},
+			  	is_deleted=#{isDeleted}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="batchUpdate">
+	<foreach collection="finCollectionMembersList" item="finCollectionMembers" index="index" open="" close="" separator=";">
+		UPDATE fin_collection_members 
+			SET
+				USER_ID=#{finCollectionMembers.userId},
+				RESULTS_PROPORTION=#{finCollectionMembers.resultsProportion},
+			  	COMMISSION_PROPORTION=#{finCollectionMembers.commissionProportion},
+			  	fin_collection_id=#{finCollectionMembers.finCollectionId},
+			  	UPDATE_BY=#{finCollectionMembers.updateBy},
+			  	UPDATE_DATE=#{finCollectionMembers.updateDate},
+			  	sorting=#{finCollectionMembers.sorting},
+			  	is_deleted=#{finCollectionMembers.isDeleted}
+		WHERE ID = #{finCollectionMembers.id}
+	</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_collection_members(
+				USER_ID,
+				RESULTS_PROPORTION,
+			  	COMMISSION_PROPORTION,
+			  	fin_collection_id,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	sorting,
+			  	is_deleted
+			) 
+			VALUES (
+				#{userId},
+				#{resultsProportion},
+			  	#{commissionProportion},
+			  	#{finCollectionId},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{sorting},
+			  	#{isDeleted}
+			)
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO fin_collection_members(
+				USER_ID,
+				RESULTS_PROPORTION,
+			  	COMMISSION_PROPORTION,
+			  	fin_collection_id,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	sorting,
+			  	is_deleted
+			) 
+			VALUES
+		<foreach item="finCollectionMembersList" index="index" collection="list" separator=",">  
+			 (
+			  	#{finCollectionMembersList.userId},
+			  	#{finCollectionMembersList.resultsProportion},
+			  	#{finCollectionMembersList.commissionProportion},
+			  	#{finCollectionMembersList.finCollectionId},
+			  	#{finCollectionMembersList.createBy},
+			  	#{finCollectionMembersList.createDate},
+			  	#{finCollectionMembersList.updateBy},
+			  	#{finCollectionMembersList.updateDate},
+			  	#{finCollectionMembersList.sorting},
+			  	#{finCollectionMembersList.isDeleted}
+			)
+		</foreach>
+	</insert>
+		
+	<delete id="deleteById">
+		DELETE FROM fin_collection_members WHERE ID = #{id}
+	</delete>
+	
+	
+</mapper>

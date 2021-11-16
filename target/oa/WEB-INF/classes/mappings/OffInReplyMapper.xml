@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IOffInReplyDao">
+	
+	<resultMap id="offInReplyResult" type="com.reyzar.oa.domain.OffInReply">
+		<id property="id" column="id" />
+		<result property="replyId" column="replyId" />
+		<result property="userId" column="userId" />
+		<result property="unickName" column="unickName" />
+		<result property="avaUrl" column="avaUrl" />
+		<result property="ruserId" column="ruserId" />
+		<result property="runickname" column="runickname" />
+		<result property="content" column="content" />
+		<result property="replyTime" column="replyTime" />
+		<result property="isDeleted" column="Is_delete" />
+	</resultMap>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO off_inreply(
+			  	replyId,
+			  	userId,
+			  	unickName,
+			  	avaUrl,
+			  	ruserId,
+			  	runickname,
+			  	content,
+			  	replyTime,
+			  	Is_delete
+			) 
+			VALUES (
+			  	#{replyId},
+			  	#{userId},
+			  	#{unickName},
+			  	#{avaUrl},
+			  	#{ruserId},
+			  	#{runickname},
+			  	#{content},
+			  	#{replyTime},
+			  	#{isDeleted}
+			)
+	</insert>
+
+	<update id="batchUpdate">
+		<foreach collection="updateList" item="inReply" index="index" open="" close="" separator=";">
+			UPDATE off_inreply 
+				SET
+				  	Is_delete = #{inReply.isDeleted}
+			WHERE id = #{inReply.id}
+		</foreach>
+	</update>
+
+
+</mapper>

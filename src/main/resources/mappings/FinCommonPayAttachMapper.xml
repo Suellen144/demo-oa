@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinCommonPayAttachDao">
+	
+	<resultMap id="finCommonPayAttachResult" type="finCommonPayAttach">
+		<id property="id" column="id" />
+		<result property="commonPayId" column="COMMON_PAY_ID" />
+		<result property="projectManageId" column="PROJECT_MANAGE_ID" />
+		<result property="date" column="DATE" />
+		<result property="reason" column="REASON" />
+		<result property="money" column="MONEY" />
+		<result property="deptId" column="DEPT_ID" />
+		<result property="type" column="TYPE" />
+		<result property="receivedAccount" column="RECEIVED_ACCOUNT" />
+		<result property="receivedCompany" column="RECEIVED_COMPANY" />
+		<result property="costProperty" column="COST_PROPERTY" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="projectManage" column="PROJECT_MANAGE_ID" javaType="saleProjectManage" select="findProjectByProjectId" /> 
+	</resultMap>
+	
+	<resultMap id="singleDetail" type="com.reyzar.oa.domain.SingleDetail">
+		<id property="id" column="id" />
+		<id property="commonPayId" column="commonPayId" />
+		<result property="processInstanceId" column="processInstanceId"/>
+		<result property="orderNo" column="orderNo"/>
+		<result property="userName" column="name"/>
+		<result property="date" column="date"/>
+		<result property="projectName" column="projectName"/>
+		<result property="reason" column="reason"/>
+		<result property="money" column="money"/>
+	</resultMap>
+
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<select id="findProjectByProjectId" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id}
+	</select>
+	
+	<select id="findAll" resultMap="finCommonPayAttachResult">
+		SELECT * FROM fin_common_pay_attach
+	</select>
+	
+	<select id="findById" resultMap="finCommonPayAttachResult">
+		SELECT * FROM fin_common_pay_attach WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByCommonId" resultMap="finCommonPayAttachResult">
+		SELECT * FROM fin_common_pay_attach WHERE COMMON_PAY_ID = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE fin_common_pay_attach 
+			SET
+				COMMON_PAY_ID=#{commonPayId},
+				PROJECT_MANAGE_ID=#{projectManageId},
+			  	DATE=#{date},
+			  	REASON=#{reason},
+			  	MONEY=#{money},
+			  	TYPE=#{type},
+			  	RECEIVED_ACCOUNT=#{receivedAccount},
+			  	RECEIVED_COMPANY=#{receivedCompany},
+			  	COST_PROPERTY=#{costProperty},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	IS_DELETED=#{isDeleted},
+			  	DEPT_ID=#{deptId}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="batchUpdate">
+		<foreach collection="list" item="commonPayAttach" index="index" open="" close="" separator=";">
+			UPDATE fin_common_pay_attach 
+				SET
+					COMMON_PAY_ID=#{commonPayAttach.commonPayId},
+					PROJECT_MANAGE_ID=#{commonPayAttach.projectManageId},
+				  	DATE=#{commonPayAttach.date},
+				  	REASON=#{commonPayAttach.reason},
+				  	MONEY=#{commonPayAttach.money},
+				  	TYPE=#{commonPayAttach.type},
+				  	RECEIVED_ACCOUNT=#{commonPayAttach.receivedAccount},
+				  	RECEIVED_COMPANY=#{commonPayAttach.receivedCompany},
+				  	COST_PROPERTY=#{commonPayAttach.costProperty},
+				  	CREATE_BY=#{commonPayAttach.createBy},
+				  	CREATE_DATE=#{commonPayAttach.createDate},
+				  	UPDATE_BY=#{commonPayAttach.updateBy},
+				  	UPDATE_DATE=#{commonPayAttach.updateDate},
+				  	IS_DELETED=#{commonPayAttach.isDeleted},
+				  	DEPT_ID=#{commonPayAttach.deptId}
+			WHERE ID = #{commonPayAttach.id}
+		</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_common_pay_attach(
+				COMMON_PAY_ID,
+				PROJECT_MANAGE_ID,
+			  	DATE,
+			  	REASON,
+			  	MONEY,
+			  	TYPE,
+			  	RECEIVED_ACCOUNT,
+			  	RECEIVED_COMPANY,
+			  	COST_PROPERTY,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_DELETED,
+			  	DEPT_ID
+			) 
+			VALUES (
+				#{commonPayId},
+				#{projectManageId},
+			  	#{date},
+			  	#{reason},
+			  	#{money},
+			  	#{type},
+			  	#{receivedAccount},
+			  	#{receivedCompany},
+			  	#{costProperty},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isDeleted},
+			  	#{deptId}
+			)
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO fin_common_pay_attach(
+				COMMON_PAY_ID,
+				PROJECT_MANAGE_ID,
+			  	DATE,
+			  	REASON,
+			  	MONEY,
+			  	TYPE,
+			  	RECEIVED_ACCOUNT,
+			  	RECEIVED_COMPANY,
+			  	COST_PROPERTY,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_DELETED,
+			  	DEPT_ID
+			) 
+		VALUES 
+			<foreach item="commonPayAttachs" index="index" collection="list" separator=",">  
+				(
+					#{commonPayAttachs.commonPayId},
+					#{commonPayAttachs.projectManageId},
+				  	#{commonPayAttachs.date},
+				  	#{commonPayAttachs.reason},
+				  	#{commonPayAttachs.money},
+				  	#{commonPayAttachs.type},
+				  	#{commonPayAttachs.receivedAccount},
+				  	#{commonPayAttachs.receivedCompany},
+				  	#{commonPayAttachs.costProperty},
+				  	#{commonPayAttachs.createBy},
+				  	#{commonPayAttachs.createDate},
+				  	#{commonPayAttachs.updateBy},
+				  	#{commonPayAttachs.updateDate},
+				  	#{commonPayAttachs.isDeleted},
+				  	#{commonPayAttachs.deptId}
+				)
+			</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_common_pay_attach WHERE ID = #{id}
+	</delete>
+
+	<delete id="deleteByCommonPayId">
+		DELETE FROM fin_common_pay_attach WHERE COMMON_PAY_ID =#{id}
+	</delete>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM fin_common_pay_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="findByStatistics" resultMap="finCommonPayAttachResult">
+		SELECT 
+			attach.id,
+			attach.PROJECT_MANAGE_ID,
+			attach.TYPE,attach.money 
+		FROM fin_common_pay_attach AS attach
+		JOIN fin_common_pay AS commonpay ON attach.COMMON_PAY_ID = commonpay.id
+		WHERE 1=1
+		AND commonpay.is_deleted IS NULL
+		<if test="projectId !=null and projectId != ''">
+			AND attach.PROJECT_MANAGE_ID =#{projectId}
+		</if>
+		<if test="deptId !=null and deptId != ''">
+			AND attach.DEPT_ID = #{deptId}
+		</if>
+		<if test="generalReimbursType !=null and generalReimbursType !=''">
+			AND attach.TYPE=#{generalReimbursType}
+		</if>
+		<if test="payType != null and payType !=''">
+			AND attach.COST_PROPERTY=#{payType}
+		</if>
+		<if test="payCompany !=null and payCompany !=''">
+			AND commonpay.pay_company=#{payCompany}
+		</if>
+		<if test="beginDate !=null and beginDate !=''">
+			AND attach.DATE &gt;= #{beginDate}
+		</if>
+		<if test="endDate !=null and endDate !=''">
+			AND attach.DATE &lt;= #{endDate}
+		</if>
+		<if test="zBeginDate !=null and zBeginDate !=''">
+			AND attach.DATE &gt;= #{zBeginDate}
+		</if>
+		<if test="zEndDate !=null and zEndDate !=''">
+			AND attach.DATE &lt;= #{zEndDate}
+		</if>
+		<if test="cBeginDate !=null and cBeginDate !=''">
+			AND attach.DATE &gt;= #{cBeginDate}
+		</if>
+		<if test="cEndDate !=null and cEndDate !=''">
+			AND attach.DATE &lt;= #{cEndDate}
+		</if>
+	</select>
+
+	<select id="findCommonPayByIdList" resultMap="singleDetail">
+		SELECT 
+			sysuser.name AS name,
+			commonpay.ID AS commonPayId,
+			commonpay.process_instance_id AS processInstanceId,
+			project.NAME AS projectName,
+			attach.date AS date,
+			attach.reason AS reason,
+			attach.MONEY AS money
+		FROM fin_common_pay_attach AS attach
+		JOIN fin_common_pay AS commonpay ON attach.COMMON_PAY_ID = commonpay.id
+		JOIN sys_user AS sysuser ON commonpay.user_id = sysuser.id
+		JOIN sale_project_manage AS project ON project.ID = attach.PROJECT_MANAGE_ID
+		WHERE attach.id IN
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="findCommonPayByProjectId" resultMap="singleDetail">
+		SELECT 
+			sysuser.name AS name,
+			commonpay.ID AS commonPayId,
+			commonpay.process_instance_id AS processInstanceId,
+			project.NAME AS projectName,
+			attach.date AS date,
+			attach.reason AS reason,
+			attach.MONEY AS money
+		FROM fin_common_pay_attach AS attach
+		JOIN fin_common_pay AS commonpay ON attach.COMMON_PAY_ID = commonpay.id
+		JOIN sys_user AS sysuser ON commonpay.user_id = sysuser.id
+		JOIN sale_project_manage AS project ON project.ID = attach.PROJECT_MANAGE_ID
+		WHERE attach.id IN
+		(SELECT attach.ID FROM fin_common_pay_attach attach 
+			JOIN fin_common_pay commonpay ON attach.COMMON_PAY_ID = commonpay.id
+			WHERE attach.TYPE != '32' AND attach.PROJECT_MANAGE_ID = #{projectId})
+	</select>
+	<select id="findFinCommonPayAttach" resultMap="finCommonPayAttachResult">
+		SELECT
+			attach.id,
+			attach.PROJECT_MANAGE_ID,
+			attach.type,
+		  attach.MONEY
+		FROM
+			fin_common_pay_attach AS attach
+		JOIN fin_common_pay AS common ON attach.COMMON_PAY_ID = common.id
+		JOIN sys_user AS sysuser ON common.USER_ID = sysuser.id 
+		WHERE 1 = 1
+		<if test="userName !=null and userName !='' and userName != 'null'">
+			AND sysuser.name = #{userName}
+		</if>
+		<if test="deptId !=null and deptId !=''">
+			AND common.dept_id = #{deptId}
+		</if>
+		<if test="projectId !=null and projectId != ''">
+			AND attach.PROJECT_MANAGE_ID = #{projectId}
+		</if>
+		<if test="beginDate != null and beginDate!=''">
+			AND common.apply_time &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			AND common.apply_time &lt;= #{endDate}
+		</if>
+	</select>
+</mapper>

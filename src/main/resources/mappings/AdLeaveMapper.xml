@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdLeaveDao">
+	
+	<resultMap id="adLeaveResult" type="adLeave">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="title" column="title" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="leaveType" column="leave_type" />
+		<result property="days" column="days" />
+		<result property="hours" column="hours" />
+		<result property="reason" column="reason" />
+		<result property="applyTime" column="apply_time" />
+		<result property="attachName" column="attach_name" />
+		<result property="attachments" column="attachments" />
+		<result property="status" column="status" />
+		<result property="backTime" column="back_time" />
+		<result property="backWay" column="back_way" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+	</resultMap>
+	
+	<select id="findAll" resultMap="adLeaveResult">
+		SELECT * FROM ad_leave
+	</select>
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="adLeaveResult">
+		SELECT `leave`.* FROM ad_leave `leave`
+		JOIN sys_user `user`
+				ON `user`.`ID` = `leave`.USER_ID
+			JOIN sys_dept dept
+				ON dept.`ID` = `user`.`DEPT_ID`
+		WHERE leave.status != 6
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			<choose>
+			<when test="userSet !=null and userSet.size > 0">
+				AND (`leave`.USER_ID IN
+				<foreach collection="userSet" item="principalId" index="index" open="(" separator=",">
+					#{principalId}
+				</foreach>
+				,#{userId}))
+			</when>
+			<otherwise>
+				AND `leave`.USER_ID = #{userId}
+			</otherwise>
+		</choose>
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND (dept.`ID` IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach>
+			OR `leave`.USER_ID = #{userId})
+		</if>
+		<if test="startTime != null and startTime != ''.toString()">
+			AND `leave`.`START_TIME` &gt;= #{startTime} 
+		</if>
+		<if test="endTime != null and endTime != ''.toString()">
+			AND `leave`.`END_TIME` &lt;= #{endTime} 
+		</if>
+		<!-- 根据内容模糊查询，查找表字段：sys_user.name、sys_dept.name、ad_leave.days、ad_leave.hours、ad_leave.reason、ad_leave.leave_type -->
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR CONCAT(`leave`.`DAYS`,'天') LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR CONCAT(`leave`.`HOURS`,'小时') LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR `leave`.`REASON` LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR (CASE WHEN `leave`.`LEAVE_TYPE` = '0' THEN '事假' 
+						WHEN `leave`.`LEAVE_TYPE` = '1' THEN '年假' 
+						WHEN `leave`.`LEAVE_TYPE` = '2' THEN '调休' 
+						WHEN `leave`.`LEAVE_TYPE` = '3' THEN '病假' 
+						WHEN `leave`.`LEAVE_TYPE` = '4' THEN '婚假' 
+						WHEN `leave`.`LEAVE_TYPE` = '5' THEN '产假' 
+						WHEN `leave`.`LEAVE_TYPE` = '6' THEN '陪产假' 
+						WHEN `leave`.`LEAVE_TYPE` = '7' THEN '其他' 
+						ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%') )
+		</if>
+		ORDER BY `leave`.ID DESC
+	</select>
+	
+	<select id="findById" resultMap="adLeaveResult">
+		SELECT * FROM ad_leave WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByEndTimeAndStatus" resultMap="adLeaveResult">
+		SELECT * FROM ad_leave WHERE END_TIME &lt;= #{endTime} AND STATUS = #{status}
+	</select>
+	
+	<!-- 关联查询 Begin -->
+	<select id="findUserByUserId" resultMap="sysUserResult">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE `ID` = #{id}
+	</select>
+	<!-- 关联查询 End -->
+	
+	<select id="getLeaveDays" resultType="java.util.HashMap">
+		<!-- SELECT T1.* FROM (
+			SELECT T.`NAME`, SUM(T.DAYS) AS `DAYS`, SUM(T.HOURS) AS `HOURS` FROM (
+				SELECT `user`.`ID`, `user`.`NAME`, `leave`.`DAYS`, `leave`.`HOURS`, `leave`.`APPLY_TIME` FROM ad_leave `leave`
+					JOIN sys_user `user` ON `user`.`ID` = `leave`.`USER_ID` AND `user`.`IS_DELETED` IS NULL
+					JOIN sys_dept `dept` ON `dept`.`ID` = `user`.`DEPT_ID`
+				WHERE 1 = 1 AND `leave`.`STATUS` = 5
+				<if test="yearWithMonth != null and yearWithMonth != ''">
+					AND DATE_FORMAT(`leave`.`START_TIME`, '%Y-%m') = #{yearWithMonth}
+				</if>
+				<if test="userId != null">
+					AND `user`.ID = #{userId}
+				</if>
+				<if test="deptIdList != null and deptIdList.size > 0">
+					AND `dept`.`ID` IN
+					<foreach item="deptId" index="index" collection="deptIdList" open="(" separator="," close=")">  
+		  				#{deptId}
+		  			</foreach>
+				</if>
+			) T GROUP BY T.`ID` ORDER BY T.`DAYS`
+		) T1 ORDER BY T1.`DAYS` DESC
+		 -->
+		SELECT `user`.`ID` id, `user`.`NAME` name , `leave`.`START_TIME` start_time, `leave`.`END_TIME`  end_time FROM ad_leave `leave`
+					JOIN sys_user `user` ON `user`.`ID` = `leave`.`USER_ID` AND `user`.`IS_DELETED` IS NULL
+					JOIN sys_dept `dept` ON `dept`.`ID` = `user`.`DEPT_ID`
+				WHERE 1 = 1 AND `leave`.`STATUS` = 5
+					<if test="yearWithMonth != null and yearWithMonth != ''">
+						AND (DATE_FORMAT(`leave`.`START_TIME`, '%Y-%m') = #{yearWithMonth} OR 
+							DATE_FORMAT(`leave`.`END_TIME`, '%Y-%m') = #{yearWithMonth}
+						)
+				</if>
+				<if test="deptIdList != null and deptIdList.size > 0">
+					AND `dept`.`ID` IN
+					<foreach item="deptId" index="index" collection="deptIdList" open="(" separator="," close=")">  
+		  				#{deptId}
+		  			</foreach>
+				</if>
+				 order by `user`.`ID`
+	</select>
+	
+	
+	<select id="getNameList" resultType="java.util.HashMap">
+		SELECT `user`.`ID` id, `user`.`NAME` name FROM ad_leave `leave`
+					JOIN sys_user `user` ON `user`.`ID` = `leave`.`USER_ID` AND `user`.`IS_DELETED` IS NULL
+					JOIN sys_dept `dept` ON `dept`.`ID` = `user`.`DEPT_ID`
+				WHERE 1 = 1 AND `leave`.`STATUS` = 5
+					<if test="yearWithMonth != null and yearWithMonth != ''">
+						AND (DATE_FORMAT(`leave`.`START_TIME`, '%Y-%m') = #{yearWithMonth} OR 
+							DATE_FORMAT(`leave`.`END_TIME`, '%Y-%m') = #{yearWithMonth}
+						)
+				</if>
+				<if test="deptIdList != null and deptIdList.size > 0">
+					AND `dept`.`ID` IN
+					<foreach item="deptId" index="index" collection="deptIdList" open="(" separator="," close=")">  
+		  				#{deptId}
+		  			</foreach>
+				</if>
+				group by `user`.`ID`
+				order by `user`.`ID`
+	</select>
+	
+	
+	<select id="findByParam" resultMap="adLeaveResult">
+		select ID,PROCESS_INSTANCE_ID,TITLE,USER_ID,DEPT_ID,MIN(START_TIME) as START_TIME,MAX(END_TIME) as END_TIME,
+		LEAVE_TYPE,DAYS,sum(HOURS) as HOURS,REASON,APPLY_TIME,ATTACH_NAME,ATTACHMENTS,STATUS,BACK_TIME,BACK_WAY,CREATE_BY,CREATE_DATE,
+		UPDATE_BY,UPDATE_DATE from ad_leave where (date_format(START_TIME,'%Y-%m') LIKE CONCAT('%',#{generalMonth},'%')
+			or date_format(END_TIME,'%Y-%m') LIKE CONCAT('%',#{generalMonth},'%')
+		) 
+			and status =5
+		<if test="userIds != null and userIds.size > 0">
+				AND user_id IN 
+				<foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">  
+					#{userId}
+				</foreach>
+		</if>
+		GROUP BY user_id,DATE_FORMAT(start_time, '%Y%m%d'),DATE_FORMAT(end_time, '%Y%m%d')
+	</select>
+	
+	<select id="findLeaveByParam" resultMap="adLeaveResult">
+		select ID,PROCESS_INSTANCE_ID,TITLE,USER_ID,DEPT_ID,MIN(START_TIME) as START_TIME,MAX(END_TIME) as END_TIME,
+		LEAVE_TYPE,DAYS,sum(HOURS) as HOURS,REASON,APPLY_TIME,ATTACH_NAME,ATTACHMENTS,STATUS,BACK_TIME,BACK_WAY,CREATE_BY,CREATE_DATE,
+		UPDATE_BY,UPDATE_DATE from ad_leave where (date_format(START_TIME,'%Y-%m') LIKE CONCAT('%',#{generalMonth},'%')
+			or date_format(END_TIME,'%Y-%m') LIKE CONCAT('%',#{generalMonth},'%')
+		) 
+			and status =5
+		<if test="userIds != null and userIds.size > 0">
+				AND user_id IN 
+				<foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">  
+					#{userId}
+				</foreach>
+		</if>
+		GROUP BY user_id,DATE_FORMAT(start_time, '%Y%m%d'),DATE_FORMAT(end_time, '%Y%m%d')
+	</select>
+	
+	<select id="findYearLeave" resultMap="adLeaveResult">
+		select * from ad_leave where date_format(START_TIME,'%Y') LIKE CONCAT('%',#{generalMonth},'%') 
+			and status =5 and LEAVE_TYPE='1'
+		<if test="userIds != null and userIds.size > 0">
+				AND user_id IN 
+				<foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">  
+					#{userId}
+				</foreach>
+				
+		</if>
+	</select>
+	
+	<!-- 查找考勤表中所有人的所有调休请假记录 -->
+	<select id="findRestByParam" resultMap="adLeaveResult">
+		select * from ad_leave where LEAVE_TYPE='2' AND `START_TIME` &lt;date_format(#{generalMonth}, '%Y-%m-%d  %H:%i:%s')
+		and status =5
+		<if test="userIds != null and userIds.size > 0">
+				AND user_id IN 
+				<foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">  
+					#{userId}
+				</foreach>
+				
+		</if>
+	</select>
+	
+	
+	<update id="update">
+		UPDATE ad_leave 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	TITLE=#{title},
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	START_TIME=#{startTime},
+			  	END_TIME=#{endTime},
+			  	LEAVE_TYPE=#{leaveType},
+			  	DAYS=#{days},
+			  	HOURS=#{hours},
+			  	REASON=#{reason},
+			  	APPLY_TIME=#{applyTime},
+			  	ATTACH_NAME=#{attachName},
+			  	ATTACHMENTS=#{attachments},
+			  	STATUS=#{status},
+			  	BACK_TIME=#{backTime},
+			  	BACK_WAY=#{backWay},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_leave(
+			  	PROCESS_INSTANCE_ID,
+			  	TITLE,
+			  	USER_ID,
+			  	DEPT_ID,
+			  	START_TIME,
+			  	END_TIME,
+			  	LEAVE_TYPE,
+			  	DAYS,
+			  	HOURS,
+			  	REASON,
+			  	APPLY_TIME,
+			  	ATTACH_NAME,
+			  	ATTACHMENTS,
+			  	STATUS,
+			  	BACK_TIME,
+			  	BACK_WAY,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{title},
+			  	#{userId},
+			  	#{deptId},
+			  	#{startTime},
+			  	#{endTime},
+			  	#{leaveType},
+			  	#{days},
+			  	#{hours},
+			  	#{reason},
+			  	#{applyTime},
+			  	#{attachName},
+			  	#{attachments},
+			  	#{status},
+			  	#{backTime},
+			  	#{backWay},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_leave WHERE ID = #{id}
+	</delete>
+	
+	<select id="findByUserId" resultMap="adLeaveResult">
+		SELECT * FROM ad_leave WHERE USER_ID = #{id} AND YEAR(START_TIME) = YEAR(NOW());
+	</select>
+	
+</mapper>

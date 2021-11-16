@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISaleBarginManageDao">
+	
+	<resultMap id="saleBarginManageResult" type="saleBarginManage">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="title" column="title" />
+		<result property="deptId" column="dept_id" />
+		<result property="userId" column="user_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="barginName" column="bargin_name" />
+		<result property="barginCode" column="bargin_code" />
+		<result property="barginType" column="bargin_type" />
+		<result property="barginDescribe" column="bargin_describe" />
+		<result property="company" column="company" />
+		<result property="totalMoney" column="total_money" />
+		<result property="receivedMoney" column="received_money" />
+		<result property="unreceivedMoney" column="unreceived_money" />
+		<!-- <result property="receivedInvoice" column="received_invoice" />
+		<result property="unreceivedInvoice" column="unreceived_invoice" /> -->
+		<result property="payReceivedInvoice" column="pay_received_invoice" />
+		<result property="payUnreceivedInvoice" column="pay_unreceived_invoice" />
+		<result property="invoiceMoney" column="invoice_Money" />
+		<result property="advancesReceived" column="advances_Received" />
+		<result property="accountReceived" column="account_Received" />
+		<result property="payMoney" column="PAY_MONEY" />
+		<result property="unpayMoney" column="UNPAY_MONEY" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="attachName" column="attach_name" />
+		<result property="attachments" column="attachments" />
+		<result property="attachName2" column="attach_name2" />
+		<result property="attachments2" column="attachments2" />
+		<result property="barginConfirm" column="bargin_confirm" />
+		<result property="status" column="status" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<!-- 项目管理模块添加 -->
+		<result property="isNewProject" column="is_new_project" />
+		<result property="channelExpense" column="channel_expense" />
+		<result property="contribution" column="contribution" />
+		<result property="commissionAmount" column="commission_amount" />
+		<result property="companyPeople" column="company_people" />
+		<result property="companyPhone" column="company_phone" />
+		<result property="barginExplain" column="bargin_explain" />
+
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="sysUser" column="user_id" javaType="sysUser" select="findUserByUserId" />
+		<association property="projectManage" column="project_manage_id" javaType="saleProjectManage" select="findSaleProjectManageById" />
+		<collection property="collectionList"  column="id"  select="findCollectionByBarginId"/>
+		<collection property="payList" column="id" select="findPayByBarginId" />  
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+	</resultMap>
+	
+	<resultMap id="saleBarginDTOResult" type="com.reyzar.oa.common.dto.StatiscsBarginOtherDTO">
+		<id property="id" column="id" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="totalMoneyS" column="total_MoneyS" />
+		<result property="receivedMoney" column="apply_pay" />
+		<result property="invoiceMoney" column="bill" />
+		<result property="totalMoneyB" column="total_MoneyB" />
+		<result property="payMoney" column="ACTUAL_PAY_MONEY" />
+		<result property="payBill" column="PAY_BILL" />
+		<result property="payReceivedInvoice" column="INVOICE_MONEY" />
+		<association property="projectManage" column="project_manage_id" javaType="saleProjectManage" select="findSaleProjectManageById" />
+	</resultMap>
+	
+		<resultMap id="validationJumpResult" type="com.reyzar.oa.domain.ValidationJump">
+		<id property="module" column="module" />
+		<result property="isNewProject" column="is_new_project" />
+		<result property="type" column="type" />
+	</resultMap>
+
+	<select id="findByProjectIdAndType" resultMap="saleBarginManageResult">
+		SELECT * FROM sale_bargin_manage WHERE project_manage_id = #{projectManageId} and status = "5" and bargin_type = 'S' ORDER by create_date DESC
+	</select>
+	
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findSaleProjectManageById" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id}  
+	</select>
+	
+	<select id="findByContractAmount" resultMap="saleBarginManageResult">
+		SELECT SUM(TOTAL_MONEY) AS TOTAL_MONEY,SUM(channel_expense) as channel_expense FROM sale_bargin_manage WHERE project_manage_id = #{projectId} AND status = 5  AND BARGIN_TYPE ='S'
+	</select>
+	
+	<select id="findByIncome" resultMap="saleBarginManageResult">
+		 select SUM(confirm_amount) as confirmAmount,SUM(results_amount) as resultsAmount from sale_bargin_manage a inner join (
+		 select confirm_amount,results_amount,sale_bargin_manage_id from fin_results_recognition
+		 union all
+ 		 select confirm_amount,results_contribution as results_amount,sale_bargin_manage_id from fin_revenue_recognition
+ 		 union all
+		 select a.collection_bill confirm_amount,0 as results_amount,b.bargin_id as sale_bargin_manage_id
+		 from fin_colletcion_attach a inner join fin_collection b on a.COLLECTION_ID=b.id where  b.status = '5' and b.is_new_process = 0
+ 	     union all
+         select c.collection_bill confirm_amount,0 as results_amount,d.bargin_id as sale_bargin_manage_id
+         from fin_colletcion_attach c inner join fin_collection d on c.COLLECTION_ID=d.id where  d.status = '3' and d.is_new_process = 1) b
+         on a.id=b.sale_bargin_manage_id where project_manage_id =#{projectId}
+	</select>
+	
+	<select id="findByIncomeBargin" resultMap="saleBarginManageResult">
+		select SUM(b.results_amount) as resultsAmount from sale_bargin_manage a inner join fin_results_recognition b on a.id=b.sale_bargin_manage_id where a.id =#{id}
+	</select>
+	
+	<select id="findByChannelHave" resultMap="saleBarginManageResult">
+		select SUM(b.channel_cost) as channelCost,SUM(allocations) AS allocations from sale_bargin_manage a  inner join  fin_collection b on a.id=b.bargin_id where a.project_manage_id =#{projectId} AND a.status = 5 AND b.`status` != 6
+	</select>
+	
+	<select id="findByChannelHaveBargin" resultMap="saleBarginManageResult">
+		select SUM(b.allocations) AS allocations from sale_bargin_manage a  inner join  fin_collection b on a.id=b.bargin_id where a.id=#{id} AND b.status = 5
+	</select>
+	
+	<select id="findByBarginName" resultMap="saleBarginManageResult">
+		SELECT * FROM sale_bargin_manage WHERE bargin_name = #{barginName} and status != '6'
+		<if test="id != null and id != '' ">
+			and id != #{id}
+		</if>
+	</select>
+	
+	<select id="findByValidationJump" resultMap="validationJumpResult">
+		select 'bargin' as module,is_new_project,bargin_type as type,'' as is_new_process from sale_bargin_manage where PROCESS_INSTANCE_ID=#{processInstanceId}
+		UNION ALL 
+		select 'collection' as module,is_new_project,'' as type,is_new_process from fin_collection  where PROCESS_INSTANCE_ID=#{processInstanceId}
+		UNION ALL
+		select 'pay' as module, '1' as is_new_project,'' as type,'' as is_new_process from fin_pay  where PROCESS_INSTANCE_ID=#{processInstanceId}
+	</select>
+	
+	<select id="findByProjectManageId" resultMap="saleBarginManageResult">
+		SELECT * FROM sale_bargin_manage WHERE project_manage_id = #{projectManageId} and status = "5" ORDER by create_date DESC
+	</select>
+	
+	<select id="findMaxNum" resultType="java.lang.String">
+		SELECT MAX(bargin_code) FROM sale_bargin_manage  where bargin_code like CONCAT('%',#{type},'%')
+	</select>
+	
+	<select id="findAll" resultMap="saleBarginManageResult">
+		SELECT * FROM sale_bargin_manage
+	</select>
+	
+	<select id="findById" resultMap="saleBarginManageResult">
+		SELECT ID,PROCESS_INSTANCE_ID,PROJECT_MANAGE_ID,TITLE,DEPT_ID,USER_ID,APPLY_TIME,BARGIN_NAME,BARGIN_CODE,BARGIN_TYPE,BARGIN_DESCRIBE,COMPANY,
+		TOTAL_MONEY,RECEIVED_MONEY,UNRECEIVED_MONEY,START_TIME,END_TIME,ATTACH_NAME,ATTACHMENTS,ATTACH_NAME2,ATTACHMENTS2,bargin_confirm,STATUS,IS_DELETED,CREATE_BY,CREATE_DATE,UPDATE_BY,
+		UPDATE_DATE,RECEIVED_INVOICE,UNRECEIVED_INVOICE,PAY_MONEY,UNPAY_MONEY,PAY_RECEIVED_INVOICE,PAY_UNRECEIVED_INVOICE,INVOICE_MONEY,ADVANCES_RECEIVED,
+		ACCOUNT_RECEIVED,remark,is_new_project,channel_expense,(select sum(allocations) from fin_collection where bargin_id=sale_bargin_manage.id) as commissionAmount
+		,(select sum(results_contribution) from fin_revenue_recognition where sale_bargin_manage_id=sale_bargin_manage.id) as contribution,company_people,company_phone,
+		BARGIN_EXPLAIN
+ 		FROM sale_bargin_manage WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="saleBarginManageResult">
+		SELECT bargain.* FROM sale_bargin_manage bargain
+		JOIN sale_project_manage project
+		ON project.id = bargain.PROJECT_MANAGE_ID
+		JOIN sys_user user
+		ON user.ID = bargain.USER_ID
+		JOIN sys_dept dept
+		ON dept.ID = user.DEPT_ID
+		<if test="status != null and status != ''">
+			AND bargain.STATUS = #{status}
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( bargain.BARGIN_NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR bargain.BARGIN_CODE LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR bargain.COMPANY LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR project.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR user.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR dept.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR (CASE WHEN bargain.BARGIN_TYPE = 'L' THEN '劳动合同'
+			WHEN bargain.BARGIN_TYPE = 'C' THEN '合作协议'
+			WHEN bargain.BARGIN_TYPE = 'M' THEN '备忘录'
+			WHEN bargain.BARGIN_TYPE = 'S' THEN '销售合同'
+			WHEN bargain.BARGIN_TYPE = 'B' THEN '采购合同'
+			ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+			)
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND bargain.START_TIME &gt;= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND bargain.END_TIME &lt;= #{endTime}
+		</if>
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND (bargain.USER_ID = #{userId} or bargain.bargin_type = #{barginType})
+			where bargain.status != 6 or bargain.status is null
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND dept.ID IN
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">
+				#{deptId}
+			</foreach>
+			where (bargain.status != 6 and bargain.status != "") or (bargain.USER_ID = #{userId} AND bargain.status = "")
+		</if>
+		ORDER by `bargain`.create_date DESC
+	</select>
+	
+		<select id="findByPageNew" parameterType="java.util.Map" resultMap="saleBarginManageResult">
+		SELECT bargain.*,(select name from sys_user where id=project.user_id) as userName FROM sale_bargin_manage bargain
+		JOIN sale_project_manage project
+		ON project.id = bargain.PROJECT_MANAGE_ID
+		JOIN sys_user user
+		ON user.ID = bargain.USER_ID
+		JOIN sys_dept dept
+		ON dept.ID = user.DEPT_ID where 1=1
+		<if test="status != null and status != ''">
+			AND bargain.STATUS = #{status}
+		</if>
+		<if test="status_T1 != null and status_T1 != ''">
+			AND bargain.STATUS != 5 and bargain.STATUS !=6 and bargain.STATUS !=11
+		</if>
+		<if test="dateSearch != null and dateSearch != ''">
+			AND  bargain.START_TIME &lt; now() AND bargain.END_TIME &gt; now()
+		</if>
+		
+		<if test="userIdCurrent !=null and userIdCurrent !=''">
+			AND ( (select APPLICANT from sale_project_manage where id=bargain.PROJECT_MANAGE_ID)= #{userIdCurrent} or bargain.USER_ID = #{userIdCurrent})
+		</if>
+		<if test="idStr != null and idStr !=''">
+			AND ( (select APPLICANT from sale_project_manage where id=bargain.PROJECT_MANAGE_ID) in
+			<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+			  #{item}
+			</foreach>
+			 or bargain.USER_ID in
+			<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+			  #{item}
+			</foreach>
+			)
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( bargain.BARGIN_NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR bargain.BARGIN_CODE LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR bargain.COMPANY LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR project.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR user.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR dept.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR (CASE WHEN bargain.BARGIN_TYPE = 'L' THEN '劳动合同'
+			WHEN bargain.BARGIN_TYPE = 'C' THEN '合作协议'
+			WHEN bargain.BARGIN_TYPE = 'M' THEN '备忘录'
+			WHEN bargain.BARGIN_TYPE = 'S' THEN '销售合同'
+			WHEN bargain.BARGIN_TYPE = 'B' THEN '采购合同'
+			ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+			)
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND bargain.START_TIME &gt;= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND bargain.END_TIME &lt; #{endTime}
+		</if>
+		ORDER by `bargain`.create_date DESC
+	</select>
+
+	<select id="findByPage1" parameterType="java.util.Map" resultMap="saleBarginManageResult">
+		select * FROM sale_bargin_manage  WHERE PROJECT_MANAGE_ID = #{projectManageId} AND (BARGIN_TYPE='S' or BARGIN_TYPE='C' or BARGIN_TYPE='B')
+	</select>
+
+	<select id="findByOne" parameterType="java.util.Map" resultMap="saleBarginManageResult">
+		SELECT bargain.* FROM sale_bargin_manage bargain
+		JOIN sale_project_manage project
+		ON project.id = bargain.PROJECT_MANAGE_ID
+		JOIN sys_user user
+		ON user.ID = bargain.USER_ID
+		JOIN sys_dept dept
+		ON dept.ID = user.DEPT_ID
+		where (bargain.status != 5  and bargain.status != 6 and bargain.status is not null and (bargain.USER_ID = 36 or bargain.USER_ID = 50)) or
+		(bargain.status is null AND (bargain.USER_ID = 36 or bargain.USER_ID = 50) )
+		<if test="status != null and status != ''">
+			AND bargain.STATUS = #{status}
+		</if>
+
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( bargain.BARGIN_NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR bargain.BARGIN_CODE LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR bargain.COMPANY LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR project.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR user.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR dept.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+
+			OR (CASE WHEN bargain.BARGIN_TYPE = 'L' THEN '劳动合同'
+			WHEN bargain.BARGIN_TYPE = 'C' THEN '合作协议'
+			WHEN bargain.BARGIN_TYPE = 'M' THEN '备忘录'
+			WHEN bargain.BARGIN_TYPE = 'S' THEN '销售合同'
+			WHEN bargain.BARGIN_TYPE = 'B' THEN '采购合同'
+			ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+			)
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND bargain.START_TIME &gt;= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND bargain.END_TIME &lt;= #{endTime}
+		</if>
+		ORDER by bargain.create_date DESC
+	</select>
+	
+	<select id="getBarginListForDialog" parameterType="java.util.Map" resultMap="saleBarginManageResult">
+		SELECT bargain.* FROM sale_bargin_manage bargain
+		JOIN sys_user user ON user.ID = bargain.USER_ID
+		JOIN sys_dept dept ON dept.ID = user.DEPT_ID
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( bargain.BARGIN_CODE = #{fuzzyContent}
+			OR user.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR dept.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			)
+		</if>
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND bargain.USER_ID = #{userId}
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND dept.ID IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach> 
+		</if>
+		where bargain.status = 4 OR bargain.status = 5
+		ORDER by bargain.create_date DESC
+	</select>
+	
+	
+	<update id="update">
+		UPDATE sale_bargin_manage 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	PROJECT_MANAGE_ID=#{projectManageId},
+			  	TITLE=#{title},
+			  	DEPT_ID=#{deptId},
+			  	USER_ID=#{userId},
+			  	APPLY_TIME=#{applyTime},
+			  	BARGIN_NAME=#{barginName},
+			  	BARGIN_CODE=#{barginCode},
+			  	BARGIN_TYPE=#{barginType},
+			  	BARGIN_DESCRIBE=#{barginDescribe},
+			  	COMPANY=#{company},
+			  	TOTAL_MONEY=#{totalMoney},
+			  	RECEIVED_MONEY=#{receivedMoney},
+			  	UNRECEIVED_MONEY=#{unreceivedMoney},
+			  	<!-- RECEIVED_INVOICE=#{receivedInvoice},
+			  	UNRECEIVED_INVOICE=#{unreceivedInvoice}, -->
+			  	PAY_RECEIVED_INVOICE=#{payReceivedInvoice},
+			  	PAY_UNRECEIVED_INVOICE=#{payUnreceivedInvoice},
+			  	INVOICE_MONEY=#{invoiceMoney},
+			  	ADVANCES_RECEIVED=#{advancesReceived},
+			  	ACCOUNT_RECEIVED=#{accountReceived},
+			  	PAY_MONEY=#{payMoney},
+			  	UNPAY_MONEY=#{unpayMoney},
+			  	START_TIME=#{startTime},
+			  	END_TIME=#{endTime},
+			  	ATTACH_NAME=#{attachName},
+			  	ATTACHMENTS=#{attachments},
+			  	STATUS=#{status},
+			  	<if test="isDeleted != null and isDeleted != ''">
+			  		IS_DELETED=#{isDeleted},
+			  	</if>
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	REMARK = #{remark},
+			  	is_new_project = #{isNewProject},
+			  	channel_expense = #{channelExpense},
+			  	contribution = #{contribution},
+			  	commission_amount = #{commissionAmount},
+			  	company_people = #{companyPeople},
+			  	company_phone = #{companyPhone},
+				bargin_explain = #{barginExplain},
+				ATTACH_NAME2 = #{attachName2},
+				ATTACHMENTS2 = #{attachments2},
+				bargin_confirm = #{barginConfirm}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_bargin_manage(
+			  	PROCESS_INSTANCE_ID,
+			  	PROJECT_MANAGE_ID,
+			  	TITLE,
+			  	DEPT_ID,
+			  	USER_ID,
+			  	APPLY_TIME,
+			  	BARGIN_NAME,
+			  	BARGIN_CODE,
+			  	BARGIN_TYPE,
+			  	BARGIN_DESCRIBE,
+			  	COMPANY,
+			  	TOTAL_MONEY,
+			  	RECEIVED_MONEY,
+			  	UNRECEIVED_MONEY,
+			  	<!-- RECEIVED_INVOICE,
+			  	UNRECEIVED_INVOICE, -->
+			  	PAY_RECEIVED_INVOICE,
+			  	PAY_UNRECEIVED_INVOICE,
+			  	INVOICE_MONEY,
+			  	ADVANCES_RECEIVED,
+			  	ACCOUNT_RECEIVED,
+			  	PAY_MONEY,
+			  	UNPAY_MONEY,
+			  	START_TIME,
+			  	END_TIME,
+			  	ATTACH_NAME,
+			  	ATTACHMENTS,
+			  	STATUS,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	is_new_project,
+			  	channel_expense,
+			  	contribution,
+			  	commission_amount,
+			  	company_people,
+			  	company_phone,
+			  	bargin_explain,
+				ATTACH_NAME2,
+				ATTACHMENTS2,
+				bargin_confirm
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{projectManageId},
+			  	#{title},
+			  	#{deptId},
+			  	#{userId},
+			  	#{applyTime},
+			  	#{barginName},
+			  	#{barginCode},
+			  	#{barginType},
+			  	#{barginDescribe},
+			  	#{company},
+			  	#{totalMoney},
+			  	#{receivedMoney},
+			  	#{unreceivedMoney},
+			  	<!-- #{receivedInvoice},
+			  	#{unreceivedInvoice}, -->
+			  	#{payReceivedInvoice},
+			  	#{payUnreceivedInvoice},
+			  	#{invoiceMoney},
+			  	#{advancesReceived},
+			  	#{accountReceived},
+			  	#{payMoney},
+			  	#{unpayMoney},
+			  	#{startTime},
+			  	#{endTime},
+			  	#{attachName},
+			  	#{attachments},
+			  	#{status},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isNewProject},
+			  	#{channelExpense},
+			  	#{contribution},
+			  	#{commissionAmount},
+			  	#{companyPeople},
+			  	#{companyPhone},
+				#{barginExplain},
+				#{attachName2},
+				#{attachments2},
+				#{barginConfirm}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM sale_bargin_manage WHERE ID = #{id}
+	</delete>
+
+	<select id="findByStatistics" resultMap="saleBarginManageResult">
+		SELECT * FROM sale_bargin_manage
+		<where>
+			<if test="statisticsBarginDTO.projectId != null and statisticsBarginDTO.projectId != ''">
+				project_manage_id = #{statisticsBarginDTO.projectId}
+			</if>
+			<if test="statisticsBarginDTO.beginDate != null and statisticsBarginDTO.beginDate != ''">
+				AND start_time &gt;= #{statisticsBarginDTO.beginDate}
+			</if>
+			<if test="statisticsBarginDTO.endDate != null and statisticsBarginDTO.endDate != ''">
+				AND start_time &lt;= #{statisticsBarginDTO.endDate}
+			</if>
+			<if test="statisticsBarginDTO.barginId != null and statisticsBarginDTO.barginId != ''">
+				AND id IN
+				<foreach collection="barginList" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="statisticsBarginDTO.payCompany != null and statisticsBarginDTO.payCompany != ''">
+				AND title IN
+				<foreach collection="payCompanyList" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="barginTypeList != null and barginTypeList.size >0">
+				AND bargin_type IN
+				<foreach collection="barginTypeList" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<select id="findByOtherStatisticsB" resultMap="saleBarginDTOResult">
+		select PROJECT_MANAGE_ID,ifnull(sum(TOTAL_MONEY),0) TOTAL_MONEYB from sale_bargin_manage 
+				where PROJECT_MANAGE_ID is not null and BARGIN_TYPE='B'
+				AND status = '5' AND is_deleted != '1' 
+			<if test="statisticsBarginDTO.projectId != null and statisticsBarginDTO.projectId != ''">
+				and project_manage_id = #{statisticsBarginDTO.projectId}
+			</if>
+			<if test="statisticsBarginDTO.beginDate != null and statisticsBarginDTO.beginDate != ''">
+				 AND START_TIME  &gt;= #{statisticsBarginDTO.beginDate}
+			</if>
+			<if test="statisticsBarginDTO.endDate != null and statisticsBarginDTO.endDate != ''">
+				 AND START_TIME  &lt;= #{statisticsBarginDTO.endDate}
+			</if>
+			<if test="statisticsBarginDTO.payCompany != null and statisticsBarginDTO.payCompany != ''">
+				AND title IN
+				<foreach collection="payCompanyList" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY PROJECT_MANAGE_ID
+	</select>
+	
+	<select id="findByColleaction" resultMap="saleBarginDTOResult">
+			select t.project_manage_id,ifnull(t.bill,0) bill ,ifnull(t1.apply_pay,0) apply_pay from (
+					select id, project_id project_manage_id,sum(bill) bill from fin_collection  
+			WHERE project_id is not null 
+				and  bargin_id in(
+						select id from sale_bargin_manage where BARGIN_TYPE='S' AND status = '5' AND is_deleted != '1'
+					) 
+			group by project_id) t left join (
+			select COLLECTION_ID,sum(COLLECTION_BILL) apply_pay from fin_colletcion_attach group by COLLECTION_ID) t1 on t.id=t1.COLLECTION_ID
+	</select>
+	
+	<select id="findByPay" resultMap="saleBarginDTOResult">
+		<!-- select PROJECT_MANAGE_ID,ifnull(sum(ACTUAL_PAY_MONEY),0) ACTUAL_PAY_MONEY,ifnull(sum(INVOICE__MONEY),0) INVOICE_MONEY from fin_pay 
+		WHERE PROJECT_MANAGE_ID is not null  
+		and  BARGIN_MANAGE_ID in(
+		select id from sale_bargin_manage where BARGIN_TYPE='B' AND status = '5' AND is_deleted != '1' 
+			) 
+		group by PROJECT_MANAGE_ID -->
+		select PROJECT_MANAGE_ID,ifnull(sum(ACTUAL_PAY_MONEY),0) ACTUAL_PAY_MONEY,ifnull(sum(INVOICE__MONEY),0) INVOICE_MONEY,ifnull(sum(PAY_BILL),0) PAY_BILL from fin_pay
+		LEFT JOIN fin_pay_attach attach ON fin_pay.ID = attach.PAY_ID
+		WHERE PROJECT_MANAGE_ID is not null  
+		and  BARGIN_MANAGE_ID in(
+		select id from sale_bargin_manage where BARGIN_TYPE='B' AND status = '5' AND is_deleted != '1' 
+		) 
+		group by PROJECT_MANAGE_ID
+	</select>
+
+	<select id="findByOtherStatisticsS" resultMap="saleBarginDTOResult">
+		select PROJECT_MANAGE_ID,ifnull(sum(TOTAL_MONEY),0) TOTAL_MONEYS from sale_bargin_manage 
+				where PROJECT_MANAGE_ID is not null and BARGIN_TYPE='S'
+				AND status = '5' AND is_deleted != '1' 
+			<if test="statisticsBarginDTO.projectId != null and statisticsBarginDTO.projectId != ''">
+				and project_manage_id = #{statisticsBarginDTO.projectId}
+			</if>
+			<if test="statisticsBarginDTO.beginDate != null and statisticsBarginDTO.beginDate != ''">
+				 AND START_TIME  &gt;= #{statisticsBarginDTO.beginDate}
+			</if>
+			<if test="statisticsBarginDTO.endDate != null and statisticsBarginDTO.endDate != ''">
+				 AND START_TIME  &lt;= #{statisticsBarginDTO.endDate}
+			</if>
+			<if test="statisticsBarginDTO.payCompany != null and statisticsBarginDTO.payCompany != ''">
+				AND title IN
+				<foreach collection="payCompanyList" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY PROJECT_MANAGE_ID
+	</select>
+
+	<select id="findOtherByProjectIdS" resultMap="saleBarginManageResult">
+		select * from sale_bargin_manage 
+				where  BARGIN_TYPE='S' and PROJECT_MANAGE_ID is not null
+				AND status = '5' AND is_deleted != '1' 
+				and project_manage_id = #{statisticsBarginDTO.projectId}
+			<if test="statisticsBarginDTO.beginDate != null and statisticsBarginDTO.beginDate != ''">
+				 AND START_TIME  &gt;= #{statisticsBarginDTO.beginDate}
+			</if>
+			<if test="statisticsBarginDTO.endDate != null and statisticsBarginDTO.endDate != ''">
+				 AND START_TIME  &lt;= #{statisticsBarginDTO.endDate}
+			</if>
+			<if test="statisticsBarginDTO.payCompany != null and statisticsBarginDTO.payCompany != ''">
+				AND title IN
+				<foreach collection="payCompanyList" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+	</select>
+	
+	<select id="findOtherByProjectIdB" resultMap="saleBarginManageResult">
+		select * from sale_bargin_manage 
+				where  BARGIN_TYPE='B'  and PROJECT_MANAGE_ID is not null
+				AND status = '5' AND is_deleted != '1' 
+				and project_manage_id = #{statisticsBarginDTO.projectId}
+			<if test="statisticsBarginDTO.beginDate != null and statisticsBarginDTO.beginDate != ''">
+				 AND START_TIME  &gt;= #{statisticsBarginDTO.beginDate}
+			</if>
+			<if test="statisticsBarginDTO.endDate != null and statisticsBarginDTO.endDate != ''">
+				 AND START_TIME  &lt;= #{statisticsBarginDTO.endDate}
+			</if>
+			<if test="statisticsBarginDTO.payCompany != null and statisticsBarginDTO.payCompany != ''">
+				AND title IN
+				<foreach collection="payCompanyList" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+	</select>
+	
+	
+	<resultMap type="com.reyzar.oa.domain.FinCollection" id="finCollectionresult">
+		<result property="applyPay" column="apply_pay" />
+		<result property="bill" column="bill" />
+	</resultMap>
+	
+	<select id="findCollectionByBarginId" resultMap="finCollectionresult">
+		select ifnull(t.bill,0) bill,ifnull(t1.apply_pay,0) apply_pay from (
+			select * from fin_collection where bargin_id=#{id} and `status` !=6) t left join (
+			select COLLECTION_ID,sum(COLLECTION_BILL) apply_pay from fin_colletcion_attach group by COLLECTION_ID) t1 
+		on t.id=t1.COLLECTION_ID
+	</select>
+
+	<resultMap type="com.reyzar.oa.domain.FinPay" id="finPayresult">
+		<result property="actualPayMoney" column="ACTUAL_PAY_MONEY" />
+		<result property="invoiceMoney" column="INVOICE__MONEY" />
+		<result property="payBill" column="PAY_BILL" />
+	</resultMap>
+	
+	<select id="findPayByBarginId" resultMap="finPayresult">
+		<!-- select * from fin_pay where BARGIN_MANAGE_ID = #{id} and status = '5' -->
+		select ifnull(s.INVOICE__MONEY,0) invoiceMoney,ifnull(s.ACTUAL_PAY_MONEY,0) actualPayMoney,ifnull(t.PAY_BILL,0) payBill from (
+		select * from fin_pay where BARGIN_MANAGE_ID = #{id} and status = '5') s
+		LEFT JOIN (SELECT PAY_ID,SUM(PAY_BILL) pay_bill FROM fin_pay_attach group by PAY_ID) t
+		ON s.ID = t.PAY_ID
+	</select>
+	
+	<!-- 存货类别查询开始 -->
+	<!-- 付款查询 -->
+	<select id="findPayByProjectIdAndType" resultType="Double">
+		SELECT ifnull(sum(pay.APPLY__MONEY),0), ifnull(sum(payAttach.PAY_BILL),0) FROM fin_pay pay
+		LEFT JOIN fin_pay_attach payAttach ON payAttach.PAY_ID = pay.ID
+		WHERE pay.REIMBURSE_TYPE = '34' AND pay.STATUS = '5' AND pay.PROJECT_MANAGE_ID = #{projectId} 
+	</select>
+	
+	<!-- 常规付款 -->
+	<select id="findCommonByProjectIdAndType" resultType="Double">
+		select ifnull(sum(money),0) from fin_common_pay_attach where TYPE = '34' AND PROJECT_MANAGE_ID = #{projectId}
+	</select>
+	
+	<!-- 通用报销 -->
+	<select id="findReimburseByProjectIdAndType" resultType="Double">
+		<!-- select ifnull(sum(ACT_REIMBURSE),0) from fin_reimburse_attach where TYPE = '34' AND PROJECT_ID = #{projectId} -->
+		select ifnull(sum(ACT_REIMBURSE),0) from fin_reimburse_attach attach 
+		JOIN fin_reimburse  reimburse ON attach.reimburse_id = reimburse.id
+		where TYPE = '34' AND reimburse.status='6' AND PROJECT_ID = #{projectId}
+	</select>
+	
+	<!-- 差旅报销  -->
+	<select id="findTravelByProjectIdAndType" resultType="Double">
+		<!-- select ifnull(sum(ACT_REIMBURSE),0) from fin_travelreimburse_attach where TYPE = '34' AND PROJECT_ID = #{projectId} -->
+		select ifnull(sum(ACT_REIMBURSE),0) from fin_travelreimburse_attach attach
+		JOIN fin_travelreimburse travelreimburse ON attach.travelreimburse_id = travelreimburse.id
+		where TYPE = '34' AND travelreimburse.status='6' AND PROJECT_ID = #{projectId}
+	</select>
+	<!-- 存货类别查询结束 -->
+	
+	<!-- 互转类别查询开始 -->
+	<!-- 付款查询 -->
+	<select id="findPayByProjectIdAndTypes" resultType="Double">
+		SELECT ifnull(sum(pay.APPLY__MONEY),0), ifnull(sum(payAttach.PAY_BILL),0) FROM fin_pay pay
+		LEFT JOIN fin_pay_attach payAttach ON payAttach.PAY_ID = pay.ID
+		WHERE pay.REIMBURSE_TYPE = '32' AND pay.PAY_TYPE = '3' AND pay.STATUS = '5' AND pay.PROJECT_MANAGE_ID = #{projectId} 
+	</select>
+	
+	<!-- 常规付款 -->
+	<select id="findCommonByProjectIdAndTypes" resultType="Double">
+		select ifnull(sum(money),0) from fin_common_pay_attach where TYPE = '32' AND PROJECT_MANAGE_ID = #{projectId}
+	</select>
+	
+	<!-- 通用报销 -->
+	<select id="findReimburseByProjectIdAndTypes" resultType="Double">
+		<!-- select ifnull(sum(ACT_REIMBURSE),0) from fin_reimburse_attach where TYPE = '34' AND PROJECT_ID = #{projectId} -->
+		select ifnull(sum(ACT_REIMBURSE),0) from fin_reimburse_attach attach 
+		JOIN fin_reimburse  reimburse ON attach.reimburse_id = reimburse.id
+		where TYPE = '32' AND reimburse.status='6' AND PROJECT_ID = #{projectId}
+	</select>
+	
+	<!-- 差旅报销  -->
+	<select id="findTravelByProjectIdAndTypes" resultType="Double">
+		<!-- select ifnull(sum(ACT_REIMBURSE),0) from fin_travelreimburse_attach where TYPE = '34' AND PROJECT_ID = #{projectId} -->
+		select ifnull(sum(ACT_REIMBURSE),0) from fin_travelreimburse_attach attach
+		JOIN fin_travelreimburse travelreimburse ON attach.travelreimburse_id = travelreimburse.id
+		where TYPE = '32' AND travelreimburse.status='6' AND PROJECT_ID = #{projectId}
+	</select>
+	<!-- 互转类别查询结束 -->
+	
+	<!-- 付款查询 -->
+	<select id="findPayByProjectId" resultType="Double">
+		<!-- SELECT ifnull(sum(pay.APPLY__MONEY),0), ifnull(sum(payAttach.PAY_BILL),0) FROM fin_pay pay
+		LEFT JOIN fin_pay_attach payAttach ON payAttach.PAY_ID = pay.ID
+		WHERE pay.PROJECT_MANAGE_ID = #{projectId}  -->
+		SELECT ifnull(sum(pay.APPLY__MONEY),0), ifnull(sum(payAttach.PAY_BILL),0) FROM fin_pay pay
+		LEFT JOIN fin_pay_attach payAttach ON payAttach.PAY_ID = pay.ID
+		WHERE pay.STATUS = '5' AND pay.PROJECT_MANAGE_ID = #{projectId} 
+	</select>
+	
+	<!-- 常规付款 -->
+	<select id="findCommonByProjectId" resultType="Double">
+		select ifnull(sum(money),0) from fin_common_pay_attach where PROJECT_MANAGE_ID = #{projectId}
+	</select>
+	
+	<!-- 通用报销 -->
+	<select id="findReimburseByProjectId" resultType="Double">
+		<!-- select ifnull(sum(ACT_REIMBURSE),0) from fin_reimburse_attach where PROJECT_ID=#{projectId} -->
+		select ifnull(sum(ACT_REIMBURSE),0) from fin_reimburse_attach attach 
+		JOIN fin_reimburse reimburse ON attach.reimburse_id = reimburse.id
+		where reimburse.status='6' AND PROJECT_ID = #{projectId}
+	</select>
+	
+	<!-- 差旅报销  -->
+	<select id="findTravelByProjectId" resultType="Double">
+		<!-- select ifnull(sum(ACT_REIMBURSE),0) from fin_travelreimburse_attach where PROJECT_ID=#{projectId} -->
+		select ifnull(sum(ACT_REIMBURSE),0) from fin_travelreimburse_attach attach
+		JOIN fin_travelreimburse travelreimburse ON attach.travelreimburse_id = travelreimburse.id
+		where travelreimburse.status='6' AND PROJECT_ID = #{projectId}
+	</select>
+
+	<select id="findBarginBySale" resultMap="saleBarginManageResult">
+		SELECT id,bargin_name,process_instance_id  FROM  sale_bargin_manage
+		WHERE status= '5'
+		AND bargin_type = 'S'
+	</select>
+</mapper>

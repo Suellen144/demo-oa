@@ -1,0 +1,111 @@
+@charset "utf-8";
+/* CSS Document */
+.popup{ width:350px; height:260px; position:fixed; right:5px; bottom:1px; z-index:100; margin-bottom:0;}
+.popupBox{ width:100%; height:120px; margin-bottom:10px;}
+.popupList{ width:100%; height:200px; overflow:auto;}
+.popupList li{ width:100%; padding:5px 10px; height:40px; line-height:30px; border-bottom:1px dashed #ccc; color:#666;}
+.popupList li:last-of-type{ border-bottom:0;}
+.popupList li a{ color:#666; float:inherit;}
+.popupList li a:hover{ color:#72afd2;}
+.popup h4{ font-size:20px; text-align:center;}
+.popupBox p{ line-height:24px; color:#666; text-align: justify;}
+.box-body a{ float:right; cursor:pointer;}
+@media (max-width: 991px){
+    .navbar-custom-menu>.navbar-nav>li{ position: relative;}
+}
+@media (max-width: 767px){
+.main-header .logo, .main-header .navbar{ display: initial; position: relative;}
+.skin-blue .main-header .navbar .sidebar-toggle{ width: 11% !important; line-height:50px;padding:0;text-align:center;}
+.logo{width:35% !important;}
+.navbar-custom-menu{width:50% !important;}
+.navbar-custom-menu ul{width:100% !important;}
+.navbar-custom-menu ul li{width:25%}
+.navbar-custom-menu ul li a{padding:0;text-align:center;line-height:50px !important;padding:0 !important;}
+}
+
+/*小方块*/
+.blockBox{ width: 100%; height: auto; padding: 20px; background-color: #fff; border: 1px solid #c1c1c1; margin-bottom: 30px;}
+.blockBoxL{ width: 50%; height: 80px; float: left;}
+.blockBoxTit{ width: 100%; line-height: 18px; font-size: 18px; margin-bottom: 20px;}
+.blockBoxNum{ width: 100%; line-height: 42px; font-size: 42px;}
+.blockBoxTit.orange,.blockBoxNum.orange{ color: #f9ae35;}
+.blockBoxTit.red,.blockBoxNum.red{ color: #f75757;}
+.blockBoxTit.green,.blockBoxNum.green{ color: #609d5b;}
+.blockBoxTit.blue,.blockBoxNum.blue{ color: #1b6294;}
+.blockBoxR{ width: 50%; margin-left: 50%; height: 80px; line-height: 80px; text-align: right;}
+.blockBoxR img{ height: 74px;}
+
+/*窗口*/
+.iconFBox{ width: 100%; height: auto; background-color: #fff; border: 1px solid #c1c1c1; margin-bottom: 30px;}
+.shortcutBox{ width: 100%; line-height: 34px; height: 35px; border-bottom: 1px solid #c1c1c1; padding: 0 10px;}
+.shortcutBoxR{ width: auto; height: 34px; line-height: 34px; float: left; font-size: 18px;font-weight:bold;color:#3c8dbc;margin-bottom: 10px;}
+.shortcutBoxR span{ margin-left: 10px;}
+.iconFBody{ width: 100%; height: auto; padding: 30px;}
+.iconFConn{display:block; width: 97px; height: 97px; line-height: 97px; text-align: center; background-color: #ededed; margin: 0 auto; margin-bottom: 15px;}
+.iconFConn img{ width: 53px;}
+.iconFName{ width: 100%; line-height: 12px; text-align: center; color: #5d5d5d; font-size: 12px; margin-bottom: 50px;}
+.fcolorBrown{color:#c17b74;}
+
+
+/*头部*/
+.skin-blue .main-header .navbar .sidebar-toggle{ background: #2b4d86; width: 190px;}
+.skin-blue .main-header .navbar{background: none;}
+.main-header{ background: #1b6294;}
+.main-header>.navbar{ margin-left: 0;}
+.skin-blue .main-header .logo,.skin-blue .main-header .navbar{ background: none!important;}
+.skin-blue .main-header .navbar .sidebar-toggle:hover{ background: #2b4d86;}
+.main-header .sidebar-toggle{ background: #2b4d86; color: #fff;}
+.skin-blue.sidebar-collapse .main-header .navbar .sidebar-toggle{ width: 50px;}
+.skin-blue .main-header .navbar .sidebar-toggle:hover{ background-color: #23527c;}
+
+/*左侧菜单*/
+.skin-blue .wrapper, .skin-blue .main-sidebar, .skin-blue .left-side{ background-color: #e0e0e0;}
+.skin-blue .sidebar-menu>li>.treeview-menu{ background-color: #e0e0e0; margin: 0;}
+.sidebar-menu .treeview-menu{ padding-left: 0;}
+.skin-blue .treeview-menu>li>a{ color: #2b4d86;}
+.skin-blue .treeview-menu>li.active>a, .skin-blue .treeview-menu>li>a:hover{ color: #2b4d86;}
+.sidebar-menu .treeview-menu .treeview-menu{ padding-left: 0;}
+.sidebar-menu .treeview-menu>li{ border-bottom: 1px solid #ccc;}
+.sidebar-menu .treeview-menu .treeview-menu li{ border: 0;}
+.sidebar-menu .treeview-menu .treeview-menu li:first-of-type{ border-top:1px solid #ccc;}
+.sidebar-menu .treeview-menu .treeview-menu a{ color: #686868;}
+.sidebar-menu .treeview-menu .treeview-menu a:hover{ background-color: #d6e8f4; color: #686868;}
+/*用户名部门*/
+.userMsgBox{ width: 100%; height: auto; padding: 20px 15px; border-bottom: 1px solid #ccc;}
+.userMsgConn{ width: 100%; line-height: 14px; color: #000; margin-bottom: 7px;}
+.userMsgConn:last-of-type{ margin-bottom: 0;}
+/*待办事项*/
+.scheduleBox{ width: auto; height: 50px; line-height: 50px; color: #fff; float: left; margin-right: 45px; position: relative; cursor: pointer;}
+.scheduleBox i{ margin-left: 10px;}
+.scheduleBox span{padding: 3px;color: #fff;font-size: 12px;line-height: 12px;position: absolute;right: 0;top: 2px;background-color: red;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

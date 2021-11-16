@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IOffPostDao">
+	
+	<resultMap id="offPostResult" type="com.reyzar.oa.domain.OffPost">
+		<id property="id" column="id" />
+		<result property="userId" column="userId" />
+		<result property="forumId" column="forumId" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="postEvent" column="postEvent" />
+		<result property="applyTime" column="apply_Time" />
+		<result property="lastReplyTime" column="lastReplyTime" />
+		<result property="lastReplyId" column="lastReplyId" />
+		<result property="lastReplyName" column="lastReplyName" />
+		<result property="replyCount" column="replyCount" />
+		<result property="status" column="status" />
+		<result property="audit" column="audit" />
+		<result property="isDeleted" column="Is_delete" />
+		<association property="user" column="userId" javaType="sysUser" select="findUserByUserId" />
+		<association property="forum" column="forumId" javaType="com.reyzar.oa.domain.OffForum" select="findForumByForumId" />
+		<collection property="replies" column="id"  select="findReplieList" /> 
+	</resultMap>
+	
+	<resultMap id="offReplyResult" type="com.reyzar.oa.domain.OffReply">
+		<id property="id" column="id" />
+		<result property="userId" column="userId" />
+		<result property="postId" column="postId" />
+		<result property="content" column="content" />
+		<result property="replyTime" column="replyTime" />
+		<result property="inReplyCount" column="inReplyCount" />
+		<result property="isDeleted" column="Is_delete" />
+	</resultMap>
+	
+	<select id="findReplieList" resultMap="offReplyResult">
+		SELECT * FROM off_reply WHERE postId = #{id} AND is_delete is null
+	</select>
+	
+	<select id="findForumByForumId" resultType="com.reyzar.oa.domain.OffForum">
+		SELECT * FROM off_forum WHERE ID = #{id} AND is_delete is null
+	</select>
+	
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id} AND is_deleted is null
+	</select>
+	
+	<select id="findAll" resultMap="offPostResult" parameterType="java.util.Map">
+		SELECT * FROM off_post WHERE  is_delete is null
+		<if test="userId != null and userId != '' and userId !=2 ">
+			AND  audit=0
+		</if>
+		<if test="tab != null and tab != ''">
+			AND  forumId= #{tab}
+		</if>
+		<if test="status != null and status != ''">
+			AND  status= #{status}
+		</if>
+	</select>
+	
+	<select id="findById" resultMap="offPostResult">
+		SELECT * FROM off_post WHERE id=#{id} and  is_delete is null
+	</select>
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO off_post(
+			  	userId,
+			  	forumId,
+			  	title,
+			  	content,
+			  	postEvent,
+			  	lastReplyTime,
+			  	lastReplyId,
+			  	lastReplyName,
+			  	replyCount,
+			  	status,
+			  	audit,
+			  	is_delete,
+			  	apply_time
+			) 
+			VALUES (
+			  	#{userId},
+			  	#{forumId},
+			  	#{title},
+			  	#{content},
+			  	#{postEvent},
+			  	#{lastReplyTime},
+			  	#{lastReplyId},
+			  	#{lastReplyName},
+			  	#{replyCount},
+			  	#{status},
+			  	#{audit},
+			  	#{isDeleted},
+			  	#{applyTime}
+			)
+	</insert>
+	
+		<update id="update">
+		UPDATE off_post 
+			SET
+			  	userId=#{userId},
+			  	forumId=#{forumId},
+			  	title=#{title},
+			  	content=#{content},
+			  	postEvent=#{postEvent},
+			  	lastReplyTime=#{lastReplyTime},
+			  	lastReplyId=#{lastReplyId},
+			  	lastReplyName=#{lastReplyName},
+			  	replyCount=#{replyCount},
+			  	status=#{status},
+			  	audit=#{audit},
+			  	is_delete=#{isDeleted},
+			  	apply_time=#{applyTime}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="updateAudit">
+		UPDATE off_post 
+			SET
+			  	audit=#{audit}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="updateStatus">
+		UPDATE off_post 
+			SET
+			  	status=#{status}
+		WHERE ID = #{id}
+	</update>
+	
+</mapper>

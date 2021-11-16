@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysUserDao">
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="isSkip" column="isSkip" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		<result property="principalId" column="PRINCIPAL_ID"/>
+		<result property="principalName" column="PRINCIPAL_NAME"/>
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptid" /> 
+		<collection property="roleList" column="id" select="selectRole" />
+		<collection property="positionList" column="id" select="selectPosition" />
+	</resultMap>
+	
+	<select id="findByPage" resultMap="sysUserResult">
+		SELECT DISTINCT `user`.* FROM sys_user `user`
+			LEFT JOIN sys_dept dept ON dept.id = `user`.DEPT_ID
+			LEFT JOIN sys_user_role ur ON ur.USER_ID = `user`.ID
+			JOIN sys_role role ON role.ID = ur.ROLE_ID 
+		WHERE (user.is_deleted is null OR user.is_deleted = '0')
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( `user`.`ACCOUNT` LIKE CONCAT('%',#{fuzzyContent},'%'))
+			OR `user`.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR dept.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR role.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+		</if>
+		<!-- <if test="fuzzyContent != null and fuzzyContent != ''">
+			AND `user`.ACCOUNT LIKE CONCAT('%',#{fuzzyContent},'%')
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''">
+			AND `user`.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''">
+			AND dept.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''">
+			AND role.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+		</if>  -->
+	</select>
+	
+	<select id="findByPage2" resultMap="sysUserResult">
+		SELECT
+			t.ID,
+			t.`NAME`,
+			t.ACCOUNT,
+			t.MOBILEPHONE,
+			t.DEPT_ID
+		FROM
+			sys_user t
+		JOIN sys_dept d ON t.DEPT_ID = d.ID
+		WHERE
+			1 = 1
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( t.`ACCOUNT` LIKE CONCAT('%',#{fuzzyContent},'%'))
+			OR t.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR d.NAME LIKE CONCAT('%',#{fuzzyContent},'%')
+		</if>
+	</select>
+	
+	<select id="findByAccount" resultMap="sysUserResult">
+		select * from sys_user user where account = #{account} 
+			AND (user.is_deleted is null OR user.is_deleted = '0')
+	</select>
+
+	<select id="findByName" resultMap="sysUserResult">
+		select * from sys_user user where name=#{name}
+			AND (user.is_deleted is null OR user.is_deleted = '0')
+	</select>
+	
+	<select id="findById" resultMap="sysUserResult">
+		select * from sys_user where id = #{id} and (is_deleted is null OR is_deleted = '0' OR is_deleted = '')
+	</select>
+	
+	<select id="findAllById" resultMap="sysUserResult">
+		select * from sys_user where id = #{id}
+	</select>
+	
+	<select id="selectRole" resultType="SysRole">
+		select role.* from sys_role role
+			join sys_user_role ur on ur.role_id = role.id 
+			where ur.user_id = #{id} and role.enabled = '1'
+	</select>
+	
+	<select id="selectPosition" resultType="AdPosition">
+		select position.* from ad_position position
+			join sys_user_position up on up.position_id = position.id 
+			where up.user_id = #{id}
+	</select>
+	
+	<select id="findByDeptid" resultType="sysUser">
+		SELECT * FROM sys_user user WHERE DEPT_ID = #{deptId}
+		AND (user.is_deleted is null OR user.is_deleted = '0')
+	</select>
+	
+	<select id="findManagerByDeptcode" resultType="sysUser">
+		SELECT `user`.* FROM sys_user `user`
+		JOIN sys_dept dept ON dept.USER_ID = `user`.ID
+		WHERE dept.CODE = #{deptCode}
+		AND (`user`.is_deleted is null OR `user`.is_deleted = '0')
+	</select>
+	
+	<select id="findDeptByDeptid" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<select id="findByPositionCode" resultType="sysUser">
+		SELECT `user`.* FROM sys_user `user`
+			JOIN sys_user_position up
+			ON up.`USER_ID` = `user`.`ID`
+			JOIN ad_position `position`
+			ON `position`.`ID` = up.`POSITION_ID`
+		WHERE `position`.`CODE` = #{positionCode}
+		AND (`user`.is_deleted is null OR `user`.is_deleted = '0')
+	</select>
+	
+	<select id="findByPositionId" resultType="sysUser">
+		SELECT `user`.* FROM sys_user `user`
+			JOIN sys_user_position up
+			ON up.`USER_ID` = `user`.`ID`
+			JOIN ad_position `position`
+			ON `position`.`ID` = up.`POSITION_ID`
+		WHERE `position`.`ID` = #{positionId}
+		AND (`user`.is_deleted is null OR `user`.is_deleted = '0')
+	</select>
+	
+	<select id="findByUserIds" resultType="sysUser">
+		SELECT `user`.* FROM sys_user `user` 
+			WHERE `user`.ID IN
+			<if test="userIdList != null and userIdList.size > 0">
+				<foreach item="userId" index="index" collection="userIdList" open="(" separator="," close=")">  
+	  				#{userId}
+	  			</foreach>
+  			</if>
+  			<if test="userIdList == null or userIdList.size &lt;= 0">
+  				(-1)
+  			</if>
+	</select>
+	
+	<select id="findByDeptIds" resultType="sysUser">
+		SELECT `user`.* FROM sys_user `user` 
+			WHERE (`user`.is_deleted is null OR `user`.is_deleted = '0') AND `user`.DEPT_ID IN
+			<if test="deptIdList != null and deptIdList.size > 0">
+				<foreach item="deptId" index="index" collection="deptIdList" open="(" separator="," close=")">  
+	  				#{deptId}
+	  			</foreach>
+  			</if>
+  			<if test="deptIdList == null or deptIdList.size &lt;= 0">
+  				(-1)
+  			</if>
+	</select>
+	
+	<select id="findAll" resultType="sysUser">
+		SELECT `user`.* FROM sys_user `user`
+			WHERE `user`.IS_DELETED != '1' OR `user`.IS_DELETED IS NULL  
+	</select>
+	
+	<select id="findDeleteUsersByMonth" resultType="sysUser">
+		SELECT
+			`user`.*
+		FROM
+			sys_user `user`
+		WHERE
+			`user`.IS_DELETED = 1
+		  AND DATE_FORMAT(date(`user`.UPDATE_DATE),"%Y-%m")=#{updateTime}
+		ORDER BY
+			`user`.UPDATE_DATE DESC
+	</select>
+	
+	
+	<select id="findAllByMeeting" resultType="sysUser">
+		SELECT `user`.* FROM sys_user `user`
+			WHERE (`user`.IS_DELETED != '1' OR `user`.IS_DELETED IS NULL) AND `user`.ID != 1
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sys_user(NAME, NICKNAME, ACCOUNT, DEPT_ID, PASSWORD, TELPHONE, MOBILEPHONE, EMAIL, QQ, PHOTO, IN_JOB,
+								CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED,READ_NOTICE_DATE,PRINCIPAL_ID,PRINCIPAL_NAME)
+			VALUES (
+				#{name}, #{nickname}, #{account}, #{deptId}, #{password}, #{telphone}, #{mobilephone}, #{email}, #{qq}, #{photo}, #{inJob},
+				#{createBy}, #{createDate}, #{updateBy}, #{updateDate}, #{remark}, #{isDeleted},#{readNoticeDate},#{principalId},#{principalName}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_user 
+				SET NAME=#{name}, NICKNAME=#{nickname}, ACCOUNT=#{account}, DEPT_ID=#{deptId}, PASSWORD=#{password}, 
+				TELPHONE=#{telphone}, MOBILEPHONE=#{mobilephone}, EMAIL=#{email}, QQ=#{qq}, PHOTO=#{photo}, IN_JOB=#{inJob},
+				CREATE_BY=#{createBy}, CREATE_DATE=#{createDate}, UPDATE_BY=#{updateBy}, UPDATE_DATE=#{updateDate}, 
+				REMARK=#{remark}, IS_DELETED=#{isDeleted},read_notice_date=#{readNoticeDate},PRINCIPAL_ID=#{principalId},PRINCIPAL_NAME=#{principalName}
+		WHERE ID = #{id}
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM sys_user WHERE ID = #{id}
+	</delete>
+	
+	<update id="setNullByDeptid">
+		UPDATE sys_user 
+				SET DEPT_ID = null WHERE DEPT_ID = #{deptId}
+	</update>
+
+	<select id="findIdByPrincipalId" resultType="java.lang.Integer">
+		SELECT ID FROM sys_user WHERE PRINCIPAL_ID=#{principalId}
+	</select>
+
+	<select id="findMaxId" resultType="Integer">
+		select max(id) from sys_user 
+	</select>
+	<select id="finNewUser" resultMap="sysUserResult">
+		select * from sys_user  order by id desc  limit 0,1
+	</select>
+	
+	<update id="updateLogin">
+		UPDATE sys_user 
+				SET MISSSTART = #{missStart}, 
+				MISSTIME = #{missTime}
+		WHERE ID = #{id}
+	</update>
+</mapper>

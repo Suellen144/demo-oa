@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdLegalHolidayDao">
+	
+	<resultMap id="adLegalHoliday" type="com.reyzar.oa.domain.AdLegalHoliday">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="dateBelongs" column="date_belongs" />
+		<result property="startDate" column="start_date" />
+		<result property="endDate" column="end_date" />
+		<result property="legal" column="legal" />
+		<result property="numberDays" column="number_days" />
+		<result property="beforeLeave" column="before_leave" />
+		<result property="afterLeave" column="after_leave" />
+		<result property="fitPeople" column="fit_people" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	 <select id="findByPage" resultMap="adLegalHoliday">
+		select * from  ad_legal_holiday where 1=1
+			<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( `name` LIKE CONCAT('%',#{fuzzyContent},'%') ) 
+			</if>
+		ORDER BY id DESC
+	</select>
+	
+	
+	
+	<select id="findById" parameterType="Integer" resultMap="adLegalHoliday">
+		select * from  ad_legal_holiday where id=#{id}
+	</select>
+	
+	
+	<select id="getLegalHolidays" parameterType="java.util.Map" resultMap="adLegalHoliday">
+		select * from  ad_legal_holiday where 1=1
+		<if test="dateBelongs != null and dateBelongs != ''.toString()">
+			AND ((date_format(start_date, '%Y-%m') =#{dateBelongs})
+					or (date_format(end_date, '%Y-%m') =#{dateBelongs}))
+		</if>
+	</select>
+	
+	<select id="getHolidays" parameterType="java.util.Map" resultMap="adLegalHoliday">
+		select * from  ad_legal_holiday where 1=1
+		<if test="dateBelongs != null and dateBelongs != ''.toString()">
+			AND (date_belongs=#{dateBelongs})
+		</if>
+	</select>
+	
+	<insert id="addBatchs">
+			INSERT INTO ad_legal_holiday(
+			  	name,
+			  	date_belongs,
+			  	start_date,
+			  	end_date,
+			  	legal,
+			  	number_days,
+			  	before_leave,
+			  	after_leave,
+			  	fit_people,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES
+		<foreach item="legalHolidays" index="index" collection="list" separator=",">  
+			 (
+			  	#{legalHolidays.name},
+			  	#{legalHolidays.dateBelongs},
+			  	#{legalHolidays.startDate},
+			  	#{legalHolidays.endDate},
+			  	#{legalHolidays.legal},
+			  	#{legalHolidays.numberDays},
+			  	#{legalHolidays.beforeLeave},
+			  	#{legalHolidays.afterLeave},
+			  	#{legalHolidays.fitPeople},
+			  	#{legalHolidays.createBy},
+			  	#{legalHolidays.createDate},
+			  	#{legalHolidays.updateBy},
+			  	#{legalHolidays.updateDate}
+			)
+		</foreach>
+	
+	</insert>
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_legal_holiday(
+			  	name,
+			  	date_belongs,
+			  	start_date,
+			  	end_date,
+			  	legal,
+			  	number_days,
+			  	before_leave,
+			  	after_leave,
+			  	fit_people,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{name},
+			  	#{dateBelongs},
+			  	#{startDate},
+			  	#{endDate},
+			  	#{legal},
+			  	#{numberDays},
+			  	#{beforeLeave},
+			  	#{afterLeave},
+			  	#{fitPeople},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	<delete id="delete" parameterType="Integer">
+		delete from ad_legal_holiday where id=#{id}
+	</delete>
+	
+	<update id="update">
+		UPDATE ad_legal_holiday 
+			SET
+			  	name=#{name},
+			  	date_belongs=#{dateBelongs},
+			  	start_date=#{startDate},
+			  	end_date=#{endDate},
+			  	legal=#{legal},
+			  	number_days=#{numberDays},
+			  	before_leave=#{beforeLeave},
+			  	after_leave=#{afterLeave},
+			  	fit_people=#{fitPeople},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+</mapper>

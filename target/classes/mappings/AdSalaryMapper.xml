@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdSalaryDao">
+	
+	<resultMap id="adSalaryResult" type="adSalary">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="tittle" column="tittle" />
+		<result property="company" column="company" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="applyTime" column="apply_time" />
+		<result property="status" column="status" />
+		<result property="encrypted" column="encrypted" />
+		<result property="value" column="value" />
+		<result property="name" column="name" />
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" />
+		<collection property="salaryAttachList" column="id" select="findSalaryAttachInList" />
+	</resultMap>
+	
+	<resultMap id="adSalaryAttachResult" type="adSalaryAttach">
+		<id property="id" column="id" />
+		<result property="salaryId" column="salary_id" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="lastdate" column="last_date" />
+		<result property="personAmplitude" column="person_amplitude" />
+		<result property="manageAmplitude" column="manage_amplitude" />
+		<result property="finallyAmplitude" column="finally_amplitude" />
+		<result property="finallySalary" column="finally_salary" />
+		<result property="score" column="score" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<association property="record" column="user_id" javaType="AdRecord" select="findRecordByUserId" />
+		<association property="salary" column="user_id" javaType="AdRecordSalaryHistory" select="findSalaryByUserId" />
+	</resultMap>
+	
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="adSalaryResult">
+		SELECT `salary`.* FROM ad_salary `salary`
+		JOIN sys_user `user`
+				ON `user`.`ID` = `salary`.USER_ID
+			JOIN sys_dept dept
+				ON dept.`ID` = `user`.`DEPT_ID`
+		WHERE salary.status != 7
+	<!-- <if test="deptIdSet == null or deptIdSet.size == 0">
+			AND `overtime`.USER_ID = #{userId}
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND dept.`ID` IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach>
+		</if> -->
+		ORDER BY `salary`.ID DESC
+	</select>
+	
+	<select id="findAll" resultMap="adSalaryResult">
+		SELECT * FROM ad_salary
+	</select>
+	
+	<select id="findById" resultMap="adSalaryResult">
+		SELECT * FROM ad_salary WHERE ID = #{id}
+	</select> 
+
+	<select id="findByEncrypted" resultMap="adSalaryResult">
+		SELECT * FROM ad_salary WHERE ENCRYPTED = #{encrypted}
+	</select>
+	
+	<!-- 关联查询 Begin -->
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id} AND is_deleted is null
+	</select>
+	<select id="findSalaryAttachInList" resultMap="adSalaryAttachResult">
+		SELECT * FROM ad_salary_attach WHERE salary_id = #{id} 
+	</select>
+	<select id="findRecordByUserId" resultType="AdRecord">
+		SELECT * FROM ad_record WHERE user_id = #{id}
+	</select>
+	<select id="findSalaryByUserId" resultType="AdRecordSalaryHistory">
+		SELECT * FROM ad_record_salary_history WHERE user_id = #{id} AND is_deleted != "1" AND end_time is null;
+	</select>
+	<!-- 关联查询 End -->
+	
+	
+	
+	<update id="update">
+		UPDATE ad_salary 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	TITTLE=#{tittle},
+			  	COMPANY=#{company},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	APPLY_TIME=#{applyTime},
+			  	STATUS=#{status},
+			  	ENCRYPTED=#{encrypted}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_salary(
+			  	PROCESS_INSTANCE_ID,
+			  	USER_ID,
+			  	DEPT_ID,
+			  	TITTLE,
+			  	COMPANY,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	APPLY_TIME,
+			  	STATUS,
+			  	ENCRYPTED
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{userId},
+			  	#{deptId},
+			  	#{tittle},
+			  	#{company},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{applyTime},
+			  	#{status},
+			  	#{encrypted}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_salary WHERE ID = #{id}
+	</delete>
+	
+	<select id="workingStateselectVal" resultMap="adSalaryResult">
+		SELECT t.`value`,t.`name` FROM sys_dictdata t WHERE t.type_id ="57" AND (t.is_deleted IS NULL OR t.is_deleted = 0) AND t.`value` NOT IN(4,5,6)
+	</select>
+	
+</mapper>

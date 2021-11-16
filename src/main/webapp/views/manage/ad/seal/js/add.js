@@ -1,0 +1,124 @@
+var fileData = null;
+
+$(function() {
+	initFileUpload();
+});
+
+
+function save() {
+	bootstrapConfirm("提示", "是否确定提交？", 300, function() {
+		var formData = $("#form1").serializeJson();
+		if(!checkForm(formData)) {
+			return ;
+		}
+		
+		openBootstrapShade(true);
+		if(fileData != null) {
+			fileData.submit();
+		} else {
+			submitForm(formData);
+		}
+	})
+}
+
+function submitForm(formData) {
+	$.ajax({
+		url: "save",
+		type: "post",
+		data: formData,
+		dataType: "json",
+		success: function(data) {
+			if(data.code == 1) {
+					backPageAndRefresh();
+			} else {
+				bootstrapAlert("提示", data.result, 400, null);
+			}
+		},
+		error: function(data) {
+			bootstrapAlert("提示", "网络错误，请稍后重试！", 400, null);
+		},
+		complete: function(data) {
+			openBootstrapShade(false);
+		}
+	});
+}
+
+function checkForm(formData) {
+	var text = [];
+	if(isNull(formData["reason"])) {
+		text.push("用章事由不能为空！<br/>");
+	}
+	if(text.length > 0) {
+		bootstrapAlert("提示", text.join(""), 400, null);
+		return false;
+	} else {
+		return true;
+	}
+}
+
+function resetForm() {
+	fileData = null;
+}
+
+
+//文件上传
+function initFileUpload() {
+	var date = new Date();
+	var params = {
+		"path": "seal/" + date.getFullYear() + (date.getMonth()+1) + date.getDate()
+	};
+	
+	urlParam = urlEncode(params);
+	$('#file').fileupload({
+		url: web_ctx+'/fileUpload?'+urlParam,
+        dataType: 'json',
+        formData: params,
+        maxFileSize: 50 * 1024 * 1024, // 50 MB
+        messages: {
+        	maxFileSize: '附件大小最大为50M！'
+        },
+        add: function (e, data) {
+        	var $this = $(this);
+        	data.process(function() {
+        		return $this.fileupload('process', data);
+        	}).done(function(){
+        		fileData = data;
+            	$("#showName").val(data.files[0].name);
+        	}).fail(function() {
+        		var errorMsg = [];
+        		$(data.files).each(function(index, file) {
+        			errorMsg.push(file.error);
+        		});
+        		bootstrapAlert("提示", errorMsg.join("<br/>"), 400, null);
+        	});
+        },
+        done: function(e, data) {
+        	var result = data.result;
+        	if(result.execResult.code != 0) {
+        		// 如果表单保存不成功，则保留上次上传的文件。再次点提交会删除上次的文件
+    			params["deleteFile"] = result.path;
+    			urlParam = urlEncode(params);
+    			$("#file").fileupload("option", "url", (web_ctx+'/fileUpload?'+urlParam));
+    			$("#file").fileupload("option", "formData", urlParam);
+        		$("#showName").val(result.originName);
+        		$("#attachments").val(result.path);
+        		$("#attachName").val(result.originName);
+        		
+        		var formData = $("#form1").serializeJson();
+        		submitForm(formData);
+        	} else {
+        		openBootstrapShade(false);
+        		bootstrapAlert("提示", "保存文件失败，错误信息：" + result.execResult.result, 400, null);
+        	}
+        },
+        processfail: function (e, data) {
+            var currentFile = data.files[data.index];
+            if (data.files.error && currentFile.error) {
+                // there was an error, do something about it
+            }
+        },
+        complete: function() {
+        	openBootstrapShade(false);
+        }
+    });
+}

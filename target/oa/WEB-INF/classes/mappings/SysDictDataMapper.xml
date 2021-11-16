@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysDictDataDao">
+	<resultMap id="DictDataResult" type="com.reyzar.oa.domain.SysDictData">
+		<id property="id" column="id" />
+		<result property="typeid" column="type_id" />
+		<result property="name" column="name" />
+		<result property="value" column="value" />
+		<result property="remark" column="remark" />
+		<result property="isdeleted" column="is_deleted" />
+		<result property="sort" column="sort" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="DictDataResult">
+		SELECT *
+			FROM sys_dictdata WHERE 1 = 1
+	</select>
+	
+	<select id="findByPage" resultMap="DictDataResult">
+		SELECT *
+			FROM sys_dictdata WHERE type_id = #{typeid} AND (is_deleted IS NULL OR is_deleted = 0)
+	</select> 
+	
+	
+	<select id="findById" resultMap="DictDataResult">
+		SELECT *
+			FROM sys_dictdata WHERE ID = #{id}
+	</select>
+	
+	<select id="findByTypeId" resultMap="DictDataResult">
+		SELECT *
+			FROM sys_dictdata WHERE type_id = #{typeid}
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sys_dictdata(name, type_id,remark,value) 
+			VALUES(
+				#{name}, #{typeid},#{remark},#{value}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_dictdata 
+			SET name=#{name}, type_id=#{typeid}, remark=#{remark}, value=#{value},sort=#{sort},is_deleted=#{isdeleted}
+		WHERE ID = #{id}
+	</update> 
+	
+	<delete id="delete">
+		DELETE FROM sys_dictdata WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByTypeId">
+		DELETE FROM sys_dictdata WHERE type_id = #{typeid}
+	</delete>
+
+	<select id="findByTypeIdAndValue" resultMap="DictDataResult">
+		SELECT name FROM sys_dictdata WHERE value=#{value} AND type_id = #{typeid}
+	</select>
+
+	<select id="findByValueAndTypeidNotDelet" resultMap="DictDataResult">
+		SELECT name,value FROM sys_dictdata WHERE value=#{value} AND type_id = #{typeId} AND is_deleted IS NULL
+	</select>
+
+	<select id="findByValueAndTypeidNotDeletList" resultMap="DictDataResult">
+		SELECT name,value FROM sys_dictdata WHERE type_id = #{typeId} AND is_deleted IS NULL AND value IN
+		<foreach collection="generalId" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+</mapper>

@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdRecordDao">
+	
+	<resultMap id="adRecordResult" type="com.reyzar.oa.domain.AdRecord">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="sex" column="sex" />
+		<result property="birthday" column="birthday" />
+		<result property="education" column="education" />
+		<result property="major" column="major" />
+		<result property="majorName" column="major_name" />
+		<result property="politicsStatus" column="politics_status" />
+		<result property="maritalStatus" column="marital_status" />
+		<result property="nation" column="nation" />
+		<result property="height" column="height" />
+		<result property="weight" column="weight" />
+		<result property="phone" column="phone" />
+		<result property="emergencyPerson" column="emergency_person" />
+		<result property="emergencyRelation" column="emergency_relation" />
+		<result property="emergencyPhone" column="emergency_phone" />
+		<result property="idcard" column="idcard" />
+		<result property="idcardAddress" column="idcard_address" />
+		<result property="qq" column="qq" />
+		<result property="specialty" column="specialty" />
+		<result property="householdState" column="household_state" />
+		<result property="householdAddress" column="household_address" />
+		<result property="email" column="email" />
+		<result property="home" column="home" />
+		<result property="postcode" column="postcode" />
+		<result property="entrystatus" column="entry_status" />
+		<result property="probationsalary" column="probation_salary" />
+		<result property="salary" column="salary" />
+		<result property="dept" column="dept" />
+		<result property="deptName" column="dept_name" />
+		<result property="position" column="position" />
+		<result property="entryTime" column="entry_time" />
+		<result property="leaveTime" column="leave_time" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="becomeDate" column="become_date" />
+		<result property="beforeWarnDay" column="before_warn_day" />
+		<result property="workBeginDate" column="work_begin_date" />
+		<result property="workEndDate" column="work_end_date" />
+		<result property="unlimited" column="unlimited" />
+		<result property="school" column="school" />
+		<result property="photo" column="photo" />
+		<result property="score" column="score" />
+		<result property="projectTeam" column="project_team" />
+		<result property="number" column="number" />
+		<result property="bankCard" column="bank_card" />
+		<result property="bank" column="bank" />
+		<result property="company" column="company" />
+		<result property="isencryption" column="is_encryption" />
+	</resultMap>
+	
+	
+	<resultMap id="recordExcelDTO" type="com.reyzar.oa.common.dto.RecordExcelDTO">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="education" column="education" />
+		<result property="major" column="major" />
+		<result property="majorName" column="major_name" />
+		<result property="idcard" column="idcard" />
+		<result property="phone" column="phone" />
+		<result property="email" column="email" />
+		<result property="entrystatus" column="entry_status" />
+		<result property="dept" column="dept" />
+		<result property="number" column="number" />
+		<result property="position" column="position" />
+		<result property="entryTime" column="entry_time" />
+		<result property="school" column="school" />
+	</resultMap>
+
+	<select id="findByEmail2" resultType="Integer">
+			select count(id) from ad_record where email = #{email}
+			AND (is_deleted is null OR is_deleted = '0')
+	</select>
+
+	<select id="findByEmail" resultMap="adRecordResult">
+		select * from ad_record user where email = #{email}
+			AND (is_deleted is null OR is_deleted = '0')
+	</select>
+
+ 	<select id="findByPage" resultMap="adRecordResult">
+		SELECT t.* FROM (
+			SELECT record.*,`user`.NAME AS username, dept.`NAME` as DEPT_NAME ,dept.SORT as SORT FROM ad_record record
+			JOIN sys_user `user`
+					ON `user`.`ID` = record.user_id
+			JOIN sys_dept dept
+					ON dept.`ID` = `user`.`DEPT_ID`
+			<if test="deptIdSet == null or deptIdSet.size == 0">
+				AND record.user_id = #{userId}
+			</if>
+			<if test="deptIdSet != null and deptIdSet.size > 0">
+				AND (dept.`ID` IN 
+				<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+					#{deptId}
+				</foreach>
+				OR record.user_id = #{userId})
+			</if>
+			<!-- <if test="orderColumns != null and orderColumns.size > 0">
+				ORDER BY
+				<foreach collection="orderColumns.keys" item="key" separator=",">  
+					<choose>
+						<when test='key == "dept"'>
+							dept.SORT 
+						</when>
+						<when test='key == "name"'>
+							CONVERT( record.${key} USING gbk ) COLLATE gbk_chinese_ci
+						</when>
+						<otherwise>
+							record.${key}
+						</otherwise>
+					</choose>
+		            <choose>
+		            	<when test='orderColumns[key] == "desc"'> DESC</when>
+		            	<otherwise> ASC</otherwise>
+		            </choose>
+		        </foreach>
+			</if> -->
+		)t LEFT JOIN sys_dept   ON t.company=sys_dept.name
+		WHERE 1 = 1
+		<if test="entryStatus != null and entryStatus != ''.toString()">
+			<if test="entryStatus == 3">
+				AND t.entry_status &lt;= 3
+			</if>
+			<if test="entryStatus != 3">
+				AND t.entry_status = #{entryStatus}
+			</if>
+		</if>
+		<if test="dept != null and dept != ''.toString()">
+				AND t.company LIKE CONCAT('%',
+						(CASE WHEN #{dept} = '0' THEN '睿哲科技股份有限公司'
+							  WHEN #{dept} = '1' THEN '新疆睿哲网络科技有限公司 '
+							  WHEN #{dept} = '2' THEN '四川睿哲网络科技有限公司'
+							  WHEN #{dept} = '3' THEN '武汉润哲网络科技有限公司'
+							  WHEN #{dept} = '4' THEN '福建润哲网络科技有限公司'
+							  WHEN #{dept} = '5' THEN '北京睿哲广联科技有限公司'
+							  WHEN #{dept} = '6' THEN '沈阳睿哲科技有限公司'
+							  WHEN #{dept} = '7' THEN '湖北威络科技有限公司'
+							ELSE '' END),'%')
+		</if>
+		
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND (t.NAME LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.DEPT_NAME LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EDUCATION LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.MAJOR LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.MAJOR_NAME LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.NATION LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.HEIGHT LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.WEIGHT LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.PHONE LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EMERGENCY_PERSON LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EMERGENCY_RELATION LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EMERGENCY_PHONE LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.IDCARD LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.IDCARD_ADDRESS LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.QQ LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.SPECIALTY LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.HOUSEHOLD_ADDRESS LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EMAIL LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.HOME LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.POSTCODE LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.POSITION LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.SCHOOL LIKE CONCAT('%',#{fuzzyContent},"%")  
+				OR DATE_FORMAT(t.BIRTHDAY, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")  
+				OR DATE_FORMAT(t.ENTRY_TIME, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR DATE_FORMAT(t.WORK_BEGIN_DATE, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR DATE_FORMAT(t.WORK_END_DATE, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR DATE_FORMAT(t.LEAVE_TIME, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR (CASE WHEN t.SEX = '0' THEN '男' 
+						WHEN t.SEX = '1' THEN '女'
+						ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR (CASE WHEN t.POLITICS_STATUS = '0' THEN '群众' 
+						WHEN t.POLITICS_STATUS = '1' THEN '团员'
+						WHEN t.POLITICS_STATUS = '2' THEN '党员'
+						ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR (CASE WHEN t.HOUSEHOLD_STATE = '1' THEN '本市城镇'
+						WHEN t.HOUSEHOLD_STATE = '2' THEN '本市农村'
+						WHEN t.HOUSEHOLD_STATE = '3' THEN '外市城镇'
+						WHEN t.HOUSEHOLD_STATE = '4' THEN '外市农村'
+						ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+				)
+		</if>
+		
+		ORDER BY sys_dept.create_date, t.company,t.SORT desc,t.user_id ,t.entry_time ASC
+	</select> 
+	
+	
+	<select id="getExcelData" resultMap="recordExcelDTO">
+		SELECT t.dept,t.name,t.position,t.entry_time,t.entry_status,t.major_name,t.education,t.school,t.major,t.phone,t.email,t.idcard,t.leave_time as leaveTime FROM (
+			SELECT record.*,`user`.NAME AS username, dept.`NAME` as DEPT_NAME ,dept.SORT as SORT FROM ad_record record
+			JOIN sys_user `user`
+					ON `user`.`ID` = record.user_id
+			JOIN sys_dept dept
+					ON dept.`ID` = `user`.`DEPT_ID`
+			<if test="deptIdSet == null or deptIdSet.size == 0">
+				AND record.user_id = #{userId}
+			</if>
+			<if test="deptIdSet != null and deptIdSet.size > 0">
+				AND dept.`ID` IN 
+				<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+					#{deptId}
+				</foreach>
+			</if>
+		)t
+		WHERE 1 = 1
+		<if test="entryStatus != null and entryStatus != ''.toString()">
+			<if test="entryStatus == 3">
+				AND t.entry_status &lt;= 3
+			</if>
+			<if test="entryStatus != 3">
+				AND t.entry_status = #{entryStatus}
+			</if>
+		</if>
+		<if test="dept != null and dept != ''.toString()">
+				AND t.company LIKE CONCAT('%',
+						(CASE WHEN #{dept} = '1' THEN '睿哲科技股份有限公司'
+							  WHEN #{dept} = '2' THEN '新疆睿哲网络科技有限公司 '
+							  WHEN #{dept} = '3' THEN '四川睿哲网络科技有限公司'
+							  WHEN #{dept} = '4' THEN '武汉润哲网络科技有限公司'
+							  WHEN #{dept} = '5' THEN '福建润哲网络科技有限公司'
+							  WHEN #{dept} = '6' THEN '北京睿哲广联科技有限公司'
+							  WHEN #{dept} = '7' THEN '沈阳睿哲科技有限公司'
+							ELSE '' END),'%')
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND (t.NAME LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.DEPT_NAME LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EDUCATION LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.MAJOR LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.MAJOR_NAME LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.NATION LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.HEIGHT LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.WEIGHT LIKE CONCAT('%',#{fuzzyContent},"%") 
+				OR t.PHONE LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EMERGENCY_PERSON LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EMERGENCY_RELATION LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EMERGENCY_PHONE LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.IDCARD LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.IDCARD_ADDRESS LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.QQ LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.SPECIALTY LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.HOUSEHOLD_ADDRESS LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.EMAIL LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.HOME LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.POSTCODE LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.POSITION LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR t.SCHOOL LIKE CONCAT('%',#{fuzzyContent},"%")  
+				OR DATE_FORMAT(t.BIRTHDAY, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")  
+				OR DATE_FORMAT(t.ENTRY_TIME, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR DATE_FORMAT(t.WORK_BEGIN_DATE, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR DATE_FORMAT(t.WORK_END_DATE, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR DATE_FORMAT(t.LEAVE_TIME, '%Y-%m-%d') LIKE CONCAT('%',#{fuzzyContent},"%")
+				OR (CASE WHEN t.SEX = '0' THEN '男' 
+						WHEN t.SEX = '1' THEN '女'
+						ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR (CASE WHEN t.POLITICS_STATUS = '0' THEN '群众' 
+						WHEN t.POLITICS_STATUS = '1' THEN '团员'
+						WHEN t.POLITICS_STATUS = '2' THEN '党员'
+						ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR (CASE WHEN t.HOUSEHOLD_STATE = '1' THEN '本市城镇'
+						WHEN t.HOUSEHOLD_STATE = '2' THEN '本市农村'
+						WHEN t.HOUSEHOLD_STATE = '3' THEN '外市城镇'
+						WHEN t.HOUSEHOLD_STATE = '4' THEN '外市农村'
+						ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+				)
+		</if>
+		
+		ORDER BY t.SORT DESC,t.entry_time ASC
+	</select> 
+	
+	<!--用于查找所有已经进行加密的档案数据 -->
+	<select id="findAll" resultMap="adRecordResult">
+		SELECT * FROM ad_record
+		where ad_record.is_deleted is null and ad_record.is_encryption is not null
+	</select>
+	
+	 <select id="showContacts" resultMap="adRecordResult">
+		SELECT record.name, record.dept, record.position, record.email, record.qq, record.phone, record.user_id, dept.`NAME` as dept_name
+			FROM ad_record record
+			JOIN sys_user `user`
+					ON `user`.`ID` = record.user_id
+			JOIN sys_dept dept
+					ON dept.`ID` = `user`.`DEPT_ID`
+			WHERE (record.is_deleted is null or record.is_deleted = '0')
+			<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+				AND ( record.NAME LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR dept.NAME LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR record.POSITION LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR record.EMAIL LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR record.QQ LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR record.PHONE LIKE CONCAT('%',#{fuzzyContent},'%') ) 
+			</if>
+			<if test="orderColumns != null and orderColumns.size > 0">
+				ORDER BY
+				<foreach collection="orderColumns.keys" item="key" separator=",">  
+					<choose>
+						<when test='key == "dept"'>
+							dept.SORT 
+						</when>
+						<when test='key == "name"'>
+							CONVERT( record.${key} USING gbk ) COLLATE gbk_chinese_ci
+						</when>
+						<otherwise>
+							record.${key}
+						</otherwise>
+					</choose>
+		            <choose>
+		            	<when test='orderColumns[key] == "desc"'> DESC</when>
+		            	<otherwise> ASC</otherwise>
+		            </choose>
+		        </foreach>
+			</if>
+	</select> 
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_record(
+			name,sex,birthday,education,major,major_name,politics_status,marital_status,nation,height,weight,
+			phone,emergency_person,emergency_relation,emergency_phone,idcard,idcard_address,qq,specialty,household_state,
+			household_address,email,home,postcode,dept,dept_id,position,entry_time,create_by,create_date,update_by,update_date,
+			remark,is_deleted,become_date,before_warn_day,work_begin_date,work_end_date,unlimited,school,user_id,photo,leave_time,salary,probation_salary,entry_status,project_team,number,bank_card,bank,company
+		)VALUES (
+			#{name},#{sex},#{birthday},#{education},#{major},#{majorName},#{politicsStatus},#{maritalStatus},#{nation},#{height},#{weight},
+			#{phone},#{emergencyPerson},#{emergencyRelation},#{emergencyPhone},#{idcard},#{idcardAddress},#{qq},#{specialty},#{householdState},
+			#{householdAddress},#{email},#{home},#{postcode},#{dept},#{deptId},#{position},#{entryTime},#{createBy},#{createDate},#{updateBy},#{updateDate},
+			#{remark},#{isDeleted},#{becomeDate},#{beforeWarnDay},#{workBeginDate},#{workEndDate},#{unlimited},#{school},#{userId},#{photo},#{leaveTime},#{salary},#{probationsalary},#{entrystatus},#{projectTeam},#{number},#{bankCard},#{bank},#{company}
+		)
+	</insert>
+	<update id="update">
+		UPDATE ad_record 
+				SET 
+				name=#{name},sex=#{sex},birthday=#{birthday},education=#{education},major=#{major},major_name=#{majorName},politics_status=#{politicsStatus},
+				marital_status=#{maritalStatus},nation=#{nation},height=#{height},weight=#{weight},phone=#{phone},emergency_person=#{emergencyPerson},
+				emergency_relation=#{emergencyRelation},emergency_phone=#{emergencyPhone},idcard=#{idcard},idcard_address=#{idcardAddress},qq=#{qq},school=#{school},
+				specialty=#{specialty},household_state=#{householdState},household_address=#{householdAddress},email=#{email},home=#{home},postcode=#{postcode},
+				dept=#{dept},position=#{position},entry_time=#{entryTime},create_by=#{createBy},create_date=#{createDate},update_by=#{updateBy},update_date=#{updateDate},
+				remark=#{remark},is_deleted=#{isDeleted},become_date=#{becomeDate},before_warn_day=#{beforeWarnDay},work_begin_date=#{workBeginDate},work_end_date=#{workEndDate},unlimited=#{unlimited},
+				photo=#{photo},leave_time=#{leaveTime},salary=#{salary},probation_salary=#{probationsalary},entry_status=#{entrystatus},project_team=#{projectTeam},number=#{number},bank_card=#{bankCard},
+				bank=#{bank},company=#{company}
+				
+		WHERE ID = #{id}
+	</update>
+	
+	<select id="findById" resultMap="adRecordResult">
+		select record.*, dept.name as dept_name from ad_record record
+		JOIN sys_user `user`
+					ON `user`.`ID` = record.user_id
+			JOIN sys_dept dept
+					ON dept.`ID` = `user`.`DEPT_ID`
+		where record.id = #{id}
+	</select>
+	
+	
+	<select id="getByName" resultMap="adRecordResult">
+		select record.*, dept.name as dept_name from ad_record record
+		JOIN sys_user `user`
+					ON `user`.`ID` = record.user_id
+			JOIN sys_dept dept
+					ON dept.`ID` = `user`.`DEPT_ID`
+		where record.name = #{name}
+	</select>
+	
+	
+	<select id="findByUserid" resultMap="adRecordResult">
+		SELECT record.*, dept.name as dept_name FROM ad_record record
+		JOIN sys_user `user`
+					ON `user`.`ID` = record.user_id
+			JOIN sys_dept dept
+					ON dept.`ID` = `user`.`DEPT_ID`
+		where record.USER_ID = #{userId}
+	</select>
+	
+	<select id="findOne" resultMap="adRecordResult">
+		SELECT record.*, dept.name as dept_name FROM ad_record record
+		JOIN sys_user `user`
+					ON `user`.`ID` = record.user_id
+			JOIN sys_dept dept
+					ON dept.`ID` = `user`.`DEPT_ID`
+		where record.USER_ID = #{userId}
+	</select>
+	
+	<select id="findByDeptIds" resultMap="adRecordResult">
+		SELECT `record`.* FROM ad_record `record`
+			JOIN sys_user `user`
+			ON `user`.ID = `record`.`USER_ID`
+			JOIN sys_dept dept
+			ON dept.id = `record`.`DEPT_ID`
+			WHERE (user.is_deleted is null OR user.is_deleted = '0') AND `user`.DEPT_ID IN 
+			<foreach item="deptId" index="index" collection="list" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach>
+			ORDER BY dept.SORT DESC ,record.USER_ID
+	</select>
+	<select id="findByDeptIds2" resultMap="adRecordResult">
+			SELECT
+				`record`.id,
+				`record`.user_id,
+				`user`.DEPT_ID,
+				`record`.`name`,
+				`record`.sex,
+				`record`.birthday,
+				`record`.education,
+				`record`.major,
+				`record`.major_name,
+				`record`.politics_status,
+				`record`.nation,
+				`record`.height,
+				`record`.weight,
+				`record`.phone,
+				`record`.emergency_person,
+				`record`.emergency_relation,
+				`record`.emergency_phone,
+				`record`.idcard,
+				`record`.idcard_address,
+				`record`.qq,
+				`record`.specialty,
+				`record`.household_state,
+				`record`.household_address,
+				`record`.email,
+				`record`.home,
+				`record`.postcode,
+				`record`.dept,
+				`record`.POSITION,
+				`record`.entry_time,
+				`record`.create_by,
+				`record`.create_date,
+				`record`.update_by,
+				`record`.update_date,
+				`record`.remark,
+				`record`.is_deleted,
+				`record`.become_date,
+				`record`.before_warn_day,
+				`record`.work_begin_date,
+				`record`.work_end_date,
+				`record`.school,
+				`record`.photo,
+				`record`.leave_time,
+				`record`.probation_salary,
+				`record`.salary,
+				`record`.entry_status,
+				`record`.score,
+				`record`.is_encryption,
+				`record`.unlimited,
+				`record`.number,
+				`record`.bank_card,
+				`record`.bank,
+				`record`.company
+			FROM
+				ad_record `record`
+			JOIN sys_user `user` ON `user`.ID = `record`.`USER_ID`
+			JOIN sys_dept dept ON dept.id = `user`.`DEPT_ID`
+			WHERE
+				(
+					`user`.is_deleted IS NULL
+					OR `user`.is_deleted = '0'
+				)
+			AND `user`.DEPT_ID IN (SELECT ID FROM sys_dept t WHERE t.PARENT_ID in (1,3,5) AND t.ID !="11")
+			<if test="entry_status !=null and entry_status !=''">
+				AND `record`.entry_status=#{entry_status}
+			</if>
+			ORDER BY
+				dept.SORT DESC,
+				record.USER_ID
+	</select>
+	
+	<select id="findEmailsByUserIdList" resultType="String">
+		SELECT EMAIL FROM ad_record where USER_ID IN
+		<foreach item="userId" index="index" collection="list" open="(" separator="," close=")">  
+			#{userId}
+		</foreach>
+	</select>
+	
+	<select id="findMaxId" resultType="Integer">
+			select MAX(id) from ad_record 
+	</select>
+	
+	
+	<delete id="deleteById">
+		DELETE FROM ad_record WHERE id = #{id}
+	</delete>
+	
+	
+	
+	
+	
+</mapper>

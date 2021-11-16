@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdClientManageDao">
+	
+	<resultMap id="adClientManageResult" type="adClientManage">
+		<id property="id" column="id" />
+		<result property="deptId" column="dept_id" />
+		<result property="userId" column="user_id" />
+		<result property="preClientId" column="pre_client_id" />
+		<result property="clientId" column="client_id" />
+		<result property="clientName" column="client_name" />
+		<result property="company" column="company" />
+		<result property="dept" column="dept" />
+		<result property="address" column="address" />
+		<result property="projectId" column="project_id" />
+		<result property="clientPosition" column="client_position" />
+		<result property="clientPhone" column="client_phone" />
+		<result property="email" column="email" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		
+		<association property="user" column="client_id" javaType="sysUser" select="findUserByClientId" />
+		<association property="preUser" column="pre_client_id" javaType="sysUser" select="findUserByPreClientId" />
+		<association property="projectManage" column="project_id" javaType="saleProjectManage" select="findSaleProjectManageById" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="adClientManageResult">
+		SELECT * FROM ad_client_manage
+	</select>
+	
+	
+	<select id="findByPage" resultMap="adClientManageResult">
+		SELECT c.*
+			FROM ad_client_manage  c JOIN 
+			sys_user `user`
+				ON `user`.`ID` = c.USER_ID
+			JOIN sys_dept `dept`
+				ON `dept`.`ID` = `user`.`DEPT_ID`
+			WHERE (c.is_deleted is null or c.is_deleted = 'n') 
+			<if test="deptIdSet == null or deptIdSet.size == 0">
+				AND c.USER_ID = #{userId}
+			</if>
+			<if test="deptIdSet != null and deptIdSet.size > 0">
+				AND (`dept`.`ID` IN 
+				<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+					#{deptId}
+				</foreach>
+				OR c.USER_ID = #{userId})
+			</if>
+			<!-- 根据内容模糊查询，查找表字段：c.client_name, c.company, c.client_phone, c.email, c.address-->
+			<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+				AND ( c.client_name LIKE CONCAT('%',#{fuzzyContent},'%') 
+					OR c.company LIKE CONCAT('%',#{fuzzyContent},'%') 
+					OR c.client_phone LIKE CONCAT('%',#{fuzzyContent},'%')
+					OR c.email LIKE CONCAT('%',#{fuzzyContent},'%')
+					OR c.address LIKE CONCAT('%',#{fuzzyContent},'%'))
+			</if>
+			ORDER BY c.id DESC
+	</select> 
+	
+	<select id="findById" resultMap="adClientManageResult">
+		SELECT * FROM ad_client_manage WHERE ID = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE ad_client_manage 
+			SET
+			  	DEPT_ID=#{deptId},
+			  	USER_ID=#{userId},
+			  	PRE_CLIENT_ID=#{preClientId},
+			  	CLIENT_ID=#{clientId},
+			  	CLIENT_NAME=#{clientName},
+			  	COMPANY=#{company},
+			  	DEPT=#{dept},
+			  	ADDRESS=#{address},
+			  	PROJECT_ID=#{projectId},
+			  	CLIENT_POSITION=#{clientPosition},
+			  	CLIENT_PHONE=#{clientPhone},
+			  	EMAIL=#{email},
+			  	REMARK=#{remark},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	IS_DELETED=#{isDeleted}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_client_manage(
+			  	DEPT_ID,
+			  	USER_ID,
+			  	PRE_CLIENT_ID,
+			  	CLIENT_ID,
+			  	CLIENT_NAME,
+			  	COMPANY,
+			  	DEPT,
+			  	ADDRESS,
+			  	PROJECT_ID,
+			  	CLIENT_POSITION,
+			  	CLIENT_PHONE,
+			  	EMAIL,
+			  	REMARK,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_DELETED
+			) 
+			VALUES (
+			  	#{deptId},
+			  	#{userId},
+			  	#{preClientId},
+			  	#{clientId},
+			  	#{clientName},
+			  	#{company},
+			  	#{dept},
+			  	#{address},
+			  	#{projectId},
+			  	#{clientPosition},
+			  	#{clientPhone},
+			  	#{email},
+			  	#{remark},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isDeleted}
+			)
+	</insert>
+	
+	
+	<!-- 关联搜索BEGIN -->
+	<select id="findUserByClientId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id} 
+	</select>
+	<select id="findUserByPreClientId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id} 
+	</select>
+	<select id="findSaleProjectManageById" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id}  
+	</select>
+	<!-- 关联搜索END -->
+	
+	<delete id="deleteById">
+		DELETE FROM ad_client_manage WHERE ID = #{id}
+	</delete>
+	
+</mapper>

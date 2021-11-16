@@ -1,0 +1,835 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.reyzar.oa.dao.IFinPayDao">
+	<resultMap id="finPayResult" type="finPay">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="PROCESS_INSTANCE_ID" />
+		<result property="barginManageId" column="BARGIN_MANAGE_ID" />
+		<result property="projectManageId" column="PROJECT_MANAGE_ID" />
+		<result property="title" column="TITLE" />
+		<result property="deptId" column="DEPT_ID" />
+		<result property="userId" column="USER_ID" />
+		<result property="applyTime" column="APPLY_TIME" />
+		<result property="collectCompany" column="COLLECT_COMPANY" />
+		<result property="bankAccount" column="BANK_ACCOUNT" />
+		<result property="bankAddress" column="BANK_ADDRESS" />
+		<result property="payType" column="PAY_TYPE" />
+		<result property="reimburseType" column="reimburse_type" />
+		<result property="invoiceCollect" column="INVOICE_COLLECT" />
+		<result property="invoiceMoney" column="INVOICE__MONEY" />
+		<result property="totalMoney" column="TOTAL_MONEY" />
+		<result property="applyMoney" column="APPLY__MONEY" />
+		<result property="applyProportion" column="APPLY_PROPORTION" />
+		<result property="actualInvoiceStatus" column="ACTUAL_INVOICE_STATUS" />
+		<result property="actualPayMoney" column="ACTUAL_PAY_MONEY" />
+		<result property="actualPayDate" column="ACTUAL_PAY_DATE" />
+		<result property="purpose" column="PURPOSE" />
+		<result property="attachName" column="ATTACH_NAME" />
+		<result property="attachments" column="ATTACHMENTS" />
+		<result property="status" column="STATUS" />
+		<result property="remark" column="REMARK" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="reimburseType" column="reimburse_type" />
+		<result property="cause" column="cause" />
+		
+		<association property="dept" column="DEPT_ID" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="sysUser" column="USER_ID" javaType="sysUser" select="findUserByUserId" />
+		<association property="barginManage" column="BARGIN_MANAGE_ID" javaType="saleBarginManage" select="findBarginById" /> 
+		<association property="projectManage" column="PROJECT_MANAGE_ID" javaType="saleProjectManage" select="findProjectById" />
+		<collection property="payAttachList" column="id" select="findPayAttachInList" />
+	</resultMap>
+
+	<resultMap id="singleDetail" type="com.reyzar.oa.domain.SingleDetail">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="processInstanceId"/>
+		<result property="userName" column="name"/>
+		<result property="date" column="ACTUAL_PAY_DATE"/>
+		<result property="projectName" column="projectName"/>
+		<result property="reason" column="PURPOSE"/>
+		<result property="money" column="ACTUAL_PAY_MONEY"/>
+		<result property="payMoney" column="PAY_MONEY"/>
+		<result property="payDate" column="PAY_DATE"/>
+	</resultMap>
+	
+	<resultMap id="finPayAttachResult" type="finPayAttach">
+		<id property="id" column="id" />
+		<result property="payId" column="pay_id" />
+		<result property="payBill" column="pay_bill" />
+		<result property="payDate" column="pay_date" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isSend" column="is_send" />
+	</resultMap>
+	
+	<!-- 关联查询 Begin -->
+	<select id="findPayAttachInList" resultMap="finPayAttachResult">
+		SELECT * FROM fin_pay_attach WHERE pay_id = #{id}
+	</select>
+	
+	<select id="findBarginById" resultType="saleBarginManage">
+		SELECT * FROM sale_bargin_manage WHERE ID = #{id}
+	</select>
+	
+	<select id="findProjectById" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id} AND (is_deleted is null or is_deleted = '0' )
+	</select>
+	
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findById" resultMap="finPayResult">
+		SELECT * FROM fin_pay WHERE ID = #{id} 
+	</select>
+	
+	<select id="findPayMoney" resultType="java.lang.Double">
+		SELECT SUM(ACTUAL_PAY_MONEY) FROM fin_pay WHERE BARGIN_MANAGE_ID = #{barginManageId} 
+	</select>
+	
+	<select id="findPayMoneyNew" resultType="finPay">
+		SELECT fin_pay.*, SUM(fin_pay_attach.pay_bill) AS payBill FROM fin_pay
+		LEFT JOIN fin_pay_attach ON fin_pay_attach.PAY_ID = fin_pay.ID
+		WHERE fin_pay.BARGIN_MANAGE_ID = #{barginManageId} 
+	</select>
+	
+	<select id="findPayReceivedInvoice" resultType="java.lang.Double">
+		SELECT SUM(INVOICE__MONEY) FROM fin_pay WHERE BARGIN_MANAGE_ID = #{barginManageId} 
+	</select>
+	
+	<select id="findPayInfo" resultMap="finPayResult">
+		SELECT * FROM fin_pay WHERE BARGIN_MANAGE_ID = #{barginManageId} and STATUS = #{status}
+	</select>
+	
+	<select id="findByBarginId" resultMap="finPayResult">
+		SELECT * FROM fin_pay WHERE BARGIN_MANAGE_ID = #{barginId} 
+	</select>
+	
+	
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="finPayResult">
+		SELECT `pay`.* FROM fin_pay `pay`
+		JOIN sys_user `user`
+				ON `user`.`ID` = `pay`.USER_ID
+		JOIN sys_dept dept
+				ON dept.`ID` = `user`.`DEPT_ID`
+		LEFT JOIN sale_bargin_manage `bargin`
+				ON `bargin`.`ID` = `pay`.BARGIN_MANAGE_ID
+		LEFT JOIN sale_project_manage `project`
+				ON `project`.`ID` = `pay`.PROJECT_MANAGE_ID
+		LEFT JOIN fin_pay_attach ON pay.ID = fin_pay_attach.PAY_ID 
+		WhERE 1 = 1
+		<if test="status != null and status != ''">
+			AND pay.STATUS = #{status}
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( pay.`COLLECT_COMPANY` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `bargin`.`BARGIN_CODE` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `project`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			<!-- OR `bargin`.`BARGIN_NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `bargin`.`BARGIN_CODE` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `bargin`.`COMPANY` LIKE CONCAT('%',#{fuzzyContent},'%')
+			
+			OR (CASE WHEN `bargin`.`BARGIN_TYPE` = 'L' THEN '劳动合同' 
+							WHEN `bargin`.`BARGIN_TYPE` = 'C' THEN '合作协议' 
+							WHEN `bargin`.`BARGIN_TYPE` = 'M' THEN '备忘录' 
+							WHEN `bargin`.`BARGIN_TYPE` = 'S' THEN '销售合同' 
+							WHEN `bargin`.`BARGIN_TYPE` = 'B' THEN '采购合同' 
+							ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%')
+			-->
+			)
+		</if>
+
+		<if test="startTime !=null and startTime != ''">
+			AND (pay.ACTUAL_PAY_DATE &gt;= #{startTime} OR fin_pay_attach.PAY_DATE &gt;=#{startTime})
+		</if>
+		<if test="endTime !=null and endTime != '' ">
+			AND (pay.ACTUAL_PAY_DATE &lt;= #{endTime} OR fin_pay_attach.PAY_DATE &lt;=#{endTime})
+		</if>
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND pay.USER_ID = #{userId}
+			AND (pay.status != 6 or pay.status is null)
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND dept.ID IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach> 
+			AND ((pay.status != 6 and pay.status is not null ) or 
+					(pay.USER_ID = #{userId} AND pay.status is null))
+		</if>
+		ORDER by `pay`.create_date DESC
+	</select>
+
+	<select id="findByPage2" parameterType="java.util.Map" resultMap="finPayResult">
+		SELECT `pay`.* FROM fin_pay `pay`
+		JOIN sys_user `user`
+		ON `user`.`ID` = `pay`.USER_ID
+		JOIN sys_dept dept
+		ON dept.`ID` = `user`.`DEPT_ID`
+		LEFT JOIN sale_bargin_manage `bargin`
+		ON `bargin`.`ID` = `pay`.BARGIN_MANAGE_ID
+		LEFT JOIN sale_project_manage `project`
+		ON `project`.`ID` = `pay`.PROJECT_MANAGE_ID
+		LEFT JOIN fin_pay_attach ON pay.ID = fin_pay_attach.PAY_ID
+		WhERE 1 = 1 and pay.status != 6
+		<!--<if test="status != null and status != ''">
+			AND pay.STATUS = #{status}
+		</if>-->
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( pay.`COLLECT_COMPANY` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `bargin`.`BARGIN_CODE` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `project`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			)
+		</if>
+
+		<if test="startTime !=null and startTime != ''">
+			AND (pay.ACTUAL_PAY_DATE &gt;= #{startTime} OR fin_pay_attach.PAY_DATE &gt;=#{startTime})
+		</if>
+		<if test="endTime !=null and endTime != '' ">
+			AND (pay.ACTUAL_PAY_DATE &lt;= #{endTime} OR fin_pay_attach.PAY_DATE &lt;=#{endTime})
+		</if>
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND pay.USER_ID = #{userId}
+			AND (pay.status != 6 or pay.status is null)
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND dept.ID IN
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">
+				#{deptId}
+			</foreach>
+			AND ((pay.status != 6 and pay.status is not null ) or
+			(pay.USER_ID = #{userId} AND pay.status is null))
+		</if>
+		ORDER by `pay`.create_date DESC
+	</select>
+
+
+
+	<select id="findByOne" parameterType="java.util.Map" resultMap="finPayResult">
+		SELECT `pay`.* FROM fin_pay `pay`
+		JOIN sys_user `user`
+		ON `user`.`ID` = `pay`.USER_ID
+		JOIN sys_dept dept
+		ON dept.`ID` = `user`.`DEPT_ID`
+		where (pay.status != 5  and pay.status != 6 and pay.status is not null and (pay.USER_ID = 36 or pay.USER_ID = 50)) or
+		(pay.status is null AND (pay.USER_ID = 36 or pay.USER_ID = 50) )
+		<if test="status != null and status != ''">
+			AND pay.STATUS = #{status}
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( pay.`COLLECT_COMPANY` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR pay.`BANK_ACCOUNT` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			)
+		</if>
+		ORDER by `pay`.create_date DESC
+	</select>
+
+	<select id="findByOne2" parameterType="java.util.Map" resultMap="finPayResult">
+		SELECT `pay`.* FROM fin_pay `pay`
+		JOIN sys_user `user`
+		ON `user`.`ID` = `pay`.USER_ID
+		JOIN sys_dept dept
+		ON dept.`ID` = `user`.`DEPT_ID`
+		where (pay.status != 5  and pay.status != 6 and pay.status is not null and (pay.USER_ID = 36 or pay.USER_ID = 50)) or
+		(pay.status is null AND (pay.USER_ID = 36 or pay.USER_ID = 50) )
+		<if test="status != null and status != ''">
+			AND pay.STATUS = #{status}
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( pay.`COLLECT_COMPANY` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR pay.`BANK_ACCOUNT` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%')
+			)
+		</if>
+		ORDER by `pay`.create_date DESC
+	</select>
+
+	<select id="findByPageNew" parameterType="java.util.Map" resultMap="finPayResult">
+		SELECT attach.PAY_DATE as actual_pay_date,pay.USER_ID,attach.PAY_BILL as ACTUAL_PAY_MONEY,pay.status,pay.collect_Company,pay.PROCESS_INSTANCE_ID,pay.id
+ 		FROM fin_pay pay left join fin_pay_attach attach on pay.id=attach.PAY_ID where pay.BARGIN_MANAGE_ID=#{barginManageId} order by attach.PAY_DATE
+	</select>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_pay (
+			  	PROCESS_INSTANCE_ID,
+			  	BARGIN_MANAGE_ID,
+			  	PROJECT_MANAGE_ID,
+			  	TITLE,
+			  	DEPT_ID,
+			  	USER_ID,
+			  	APPLY_TIME,
+			  	COLLECT_COMPANY,
+			  	BANK_ACCOUNT,
+			  	BANK_ADDRESS,
+			  	PAY_TYPE,
+			  	REIMBURSE_TYPE,
+			  	INVOICE_COLLECT,
+			  	INVOICE__MONEY,
+			  	TOTAL_MONEY,
+			  	APPLY__MONEY,
+			  	APPLY_PROPORTION,
+			  	ACTUAL_INVOICE_STATUS,
+			  	ACTUAL_PAY_MONEY,
+			  	ACTUAL_PAY_DATE,
+			  	PURPOSE,
+			  	ATTACH_NAME,
+			  	ATTACHMENTS,
+			  	STATUS,
+			  	IS_DELETED,
+			  	REMARK,
+			  	UPDATE_BY,
+				UPDATE_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	CAUSE
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{barginManageId},
+			  	#{projectManageId},
+			  	#{title},
+			  	#{deptId},
+			  	#{userId},
+			  	#{applyTime},
+			  	#{collectCompany},
+			  	#{bankAccount},
+			  	#{bankAddress},
+			  	#{payType},
+			  	#{reimburseType},
+			  	#{invoiceCollect},
+			  	#{invoiceMoney},
+			  	#{totalMoney},
+			  	#{applyMoney},
+			  	#{applyProportion},
+			  	#{actualInvoiceStatus},
+			  	#{actualPayMoney},
+			  	#{actualPayDate},
+			  	#{purpose},
+			  	#{attachName},
+			  	#{attachments},
+			  	#{status},
+			  	#{isDeleted},
+			  	#{remark},
+			  	#{updateBy},
+				#{updateDate},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{cause}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE fin_pay 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	BARGIN_MANAGE_ID=#{barginManageId},
+			  	PROJECT_MANAGE_ID = #{projectManageId},
+			  	TITLE=#{title},
+			  	DEPT_ID=#{deptId},
+			  	USER_ID=#{userId},
+			  	APPLY_TIME=#{applyTime},
+			  	COLLECT_COMPANY=#{collectCompany},
+			  	BANK_ACCOUNT=#{bankAccount},
+			  	BANK_ADDRESS=#{bankAddress},
+			  	PAY_TYPE=#{payType},
+			  	REIMBURSE_TYPE=#{reimburseType},
+			  	INVOICE_COLLECT=#{invoiceCollect},
+			  	INVOICE__MONEY=#{invoiceMoney},
+			  	TOTAL_MONEY=#{totalMoney},
+			  	APPLY__MONEY=#{applyMoney},
+			  	APPLY_PROPORTION=#{applyProportion},
+			  	ACTUAL_INVOICE_STATUS=#{actualInvoiceStatus},
+			  	ACTUAL_PAY_MONEY=#{actualPayMoney},
+			  	ACTUAL_PAY_DATE=#{actualPayDate},
+			  	PURPOSE=#{purpose},
+			  	ATTACH_NAME=#{attachName},
+			  	ATTACHMENTS=#{attachments},
+			  	STATUS=#{status},
+			  	REMARK=#{remark},
+			  	IS_DELETED=#{isDeleted},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	CAUSE=#{cause}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="batchUpdate">
+		<foreach collection="payList" item="pay" index="index" open="" close="" separator=";">
+			UPDATE fin_pay 
+			SET
+			  	PROJECT_MANAGE_ID=#{pay.projectManageId}
+		WHERE ID = #{pay.id}
+		</foreach>
+	</update>
+	
+	
+	<delete id="deleteById">
+		DELETE FROM fin_pay WHERE ID = #{id}
+	</delete>
+
+	<!--根据页面的限制条件进行搜索-->
+	<select id="findPayByStatistics" resultMap="finPayResult">
+	  	SELECT fin_pay.id,fin_pay.PROJECT_MANAGE_ID,fin_pay.reimburse_type,fin_pay.ACTUAL_PAY_MONEY FROM fin_pay 
+	  	LEFT JOIN fin_pay_attach ON fin_pay.ID = fin_pay_attach.PAY_ID 
+	  	<if test="(zBeginDate != null and zBeginDate != '') or (cBeginDate != null and cBeginDate != '')">
+	  		LEFT JOIN ACT_HI_ACTINST ON fin_pay.PROCESS_INSTANCE_ID = ACT_HI_ACTINST.PROC_INST_ID_
+	  	</if>
+	  	WHERE 1=1
+		AND fin_pay.STATUS = '5'
+		AND fin_pay.PROJECT_MANAGE_ID is NOT  NULL
+	  	<if test="barginId!=null and barginId != ''">
+			AND fin_pay.BARGIN_MANAGE_ID=#{barginId}
+		</if>
+		<if test="projectId != null and projectId != ''">
+			AND fin_pay.PROJECT_MANAGE_ID=#{projectId}
+		</if>
+		<if test="payType != null and payType != ''">
+			AND fin_pay.PAY_TYPE=#{payType}
+		</if>
+		<if test="deptId != null and deptId != ''">
+			AND fin_pay.DEPT_ID=#{deptId}
+		</if>
+		<if test="userId != null and userId != ''">
+			AND fin_pay.USER_ID=#{userId}
+		</if>
+		<if test="payCompany!= null and payCompany!=''">
+			AND fin_pay.TITLE=#{payCompany}
+		</if>
+		<if test="generalReimbursType != null and generalReimbursType !=''">
+			AND fin_pay.reimburse_type=#{generalReimbursType}
+		</if>
+		<if test="beginDate != null and beginDate != ''">
+			AND (fin_pay.ACTUAL_PAY_DATE &gt;= #{beginDate} OR fin_pay_attach.PAY_DATE &gt;= #{beginDate})
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND (fin_pay.ACTUAL_PAY_DATE &lt;=#{endDate} OR fin_pay_attach.PAY_DATE &lt;=#{endDate})
+		</if>
+		<if test="zBeginDate != null and zBeginDate != '' and zEndDate != null and zEndDate != ''">
+			AND fin_pay.PROCESS_INSTANCE_ID in (SELECT PROC_INST_ID_ FROM ACT_HI_ACTINST WHERE ACT_NAME_ = #{actName} 
+			AND (START_TIME_ &gt;= #{zBeginDate} AND END_TIME_ &lt;= #{zEndDate}))
+		</if>
+		<if test="cBeginDate != null and cBeginDate != '' and cEndDate != null and cEndDate != ''">
+			AND fin_pay.PROCESS_INSTANCE_ID in (SELECT PROC_INST_ID_ FROM ACT_HI_ACTINST WHERE ACT_NAME_ = #{actName} 
+			AND (START_TIME_ &gt;= #{cBeginDate} AND END_TIME_ &lt;= #{cEndDate}))
+		</if>
+		GROUP BY fin_pay.id
+	</select>
+
+	<select id="findPayByTitleISZero" resultMap="finPayResult">
+		SELECT id,PROJECT_MANAGE_ID,reimburse_type,ACTUAL_PAY_MONEY FROM fin_pay WHERE 1=1
+		AND STATUS = '5'
+		AND PROJECT_MANAGE_ID is NOT  NULL
+		<if test="barginId !=null and barginId != ''">
+			AND BARGIN_MANAGE_ID=#{barginId}
+		</if>
+		<if test="projectId != null and projectId != ''">
+			AND PROJECT_MANAGE_ID=#{projectId}
+		</if>
+		<if test="payType != null and payType != ''">
+			AND PAY_TYPE=#{payType}
+		</if>
+		<if test="deptId != null and deptId != ''">
+			AND DEPT_ID=#{deptId}
+		</if>
+		<if test="userId != null and userId != ''">
+			AND USER_ID=#{userId}
+		</if>
+		<if test="payCompany !=null and payCompany !=''">
+			AND (TITLE=#{payCompany} OR TITLE='0')
+		</if>
+		<if test="generalReimbursType !=null and generalReimbursType !=''">
+			AND reimburse_type=#{generalReimbursType}
+		</if>
+		<if test="beginDate != null and beginDate != ''">
+			AND ACTUAL_PAY_DATE &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND ACTUAL_PAY_DATE &lt;=#{endDate}
+		</if>
+	</select>
+
+	<select id="findPayByIdList" resultMap="singleDetail">
+		SELECT pay.PROCESS_INSTANCE_ID AS processInstanceId ,project.NAME AS projectName,sysuser.name AS name,pay.create_date AS create_date,
+			pay.PURPOSE AS PURPOSE,pay.ACTUAL_PAY_MONEY AS ACTUAL_PAY_MONEY,pay.ACTUAL_PAY_DATE AS ACTUAL_PAY_DATE,payAttach.pay_Bill AS PAY_MONEY,payAttach.pay_Date AS PAY_DATE FROM fin_pay AS pay
+			JOIN sys_user AS sysuser ON pay.USER_ID = sysuser.id 
+			JOIN sale_project_manage AS project ON pay.PROJECT_MANAGE_ID = project.ID
+			LEFT JOIN fin_pay_attach as payAttach ON pay.id = payAttach.pay_id
+			WHERE pay.id IN
+				<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+	</select>
+	<select id="findStatisticsList" resultMap="singleDetail">
+		select * from (
+		select b.* from (select '付款管理' as modular,a.projectName,a.userName,a.money,a.accountingYear,a.dateOne,a.dateTo,MONTH(a.zjlEndTime) as paymentYear,
+		CASE WHEN a.zjlEndTime is not null THEN '现金支出' ELSE '非现金' END as cashProject,a.deptName,a.groups,a.type,a.costType,a.reason
+		,a.statusName,a.orderNo,a.zjlEndTime ,a.id ,a.investName,b.END_TIME_ as chunaTime from (SELECT a.*,DATE_FORMAT(b.END_TIME_,'%m/%d/%Y %H:%i:%s') as zjlEndTime from (
+			SELECT project.NAME AS projectName,sysuser.name AS userName,
+						case when payAttach.pay_Bill  is null then pay.APPLY__MONEY ELSE  payAttach.pay_Bill end  AS money,
+						DATE_FORMAT(pay.apply_time,'%m/%d/%Y') AS dateOne,
+						DATE_FORMAT(payAttach.pay_Date,'%m/%d/%Y') AS dateTo,
+						MONTH(payAttach.pay_Date) AS accountingYear,
+						case when sysuser.dept_id in ('35','36','37','38','39','3') then '市场部'
+						when sysuser.dept_id in ('4') then '行政部'
+						when sysuser.dept_id in ('5') then '研发部'
+						when sysuser.dept_id in ('6') then '工程部'
+						ELSE '其他' END as deptName,
+						case when sysuser.dept_id in ('35') then '销售A组'
+						when sysuser.dept_id in ('36') then '销售B组'
+						when sysuser.dept_id in ('37') then '销售C组'
+						when sysuser.dept_id in ('38') then '销售D组'
+						when sysuser.dept_id in ('39') then '支撑组'
+						ELSE '' END as groups,
+						(select a.name from sys_dictdata a where a.value = pay.reimburse_type and a.type_id=19 and a.is_deleted is null) as type,
+						CASE WHEN pay.reimburse_type
+						 in('4','2','37','36','26') THEN '营销费用'
+						WHEN pay.reimburse_type in('18','19','21','20') THEN '办公室租赁费'
+						WHEN pay.reimburse_type in('31','17','25') THEN '人工费用'
+						WHEN pay.reimburse_type in('7','28','10','6','5','22','3') THEN '办公费用'
+						WHEN pay.reimburse_type in('14','15') THEN '服务费'
+						WHEN pay.reimburse_type in('23') THEN '税金'
+						ELSE '其他' END as costType,
+						pay.purpose as reason,
+						case pay.status 
+						when 0 then '已提交'
+						when 1 then '部门经理审批'
+						when 2 then '财务审批'
+						when 3 then '总经理审批'
+						when 4 then '出纳审批'
+						when 5 then '已归档'
+						else 'N/A' end
+						as statusName,pay.PROCESS_INSTANCE_ID as processInstanceId,'' as orderNo ,pay.id ,'' as investName
+						FROM fin_pay AS pay
+						JOIN sys_user AS sysuser ON pay.USER_ID = sysuser.id 
+						JOIN sale_project_manage AS project ON pay.PROJECT_MANAGE_ID = project.ID
+						left JOIN fin_pay_attach as payAttach ON pay.id = payAttach.pay_id
+						AND (pay.status='6' or pay.status='5')) as a inner join ACT_HI_ACTINST b on a.processInstanceId=b.PROC_INST_ID_
+						where 1=1 AND b.ACT_NAME_ = '总经理'
+						<if test="zBeginDate != null and zBeginDate != '' and zEndDate != null and zEndDate != ''">
+						AND b.END_TIME_ &gt;= #{zBeginDate} AND b.END_TIME_ &lt;=#{zEndDate}
+						</if>
+						) as a inner join ACT_HI_ACTINST b on a.processInstanceId=b.PROC_INST_ID_
+						where 1=1 AND b.ACT_NAME_ = '出纳'  
+						<if test="cBeginDate != null and cBeginDate != '' and cEndDate != null and cEndDate != ''">
+						AND b.END_TIME_ &gt;= #{cBeginDate} AND b.END_TIME_ &lt;=#{cEndDate}
+						</if>
+						  order by  a.zjlEndTime desc) b group by b.id
+					union all
+
+					select b.* from (select '通用报销' as modular,a.projectName,a.userName,a.money,a.accountingYear,a.dateOne,a.dateTo,
+					MONTH(a.zjlEndTime) as paymentYear,CASE WHEN a.zjlEndTime is not null THEN '现金支出' ELSE '非现金' END as cashProject,a.deptName,a.groups,a.type,a.costType,a.reason
+					,a.statusName,a.orderNo,a.zjlEndTime,a.id ,a.investName,b.END_TIME_ as chunaTime
+					 from (select a.* ,DATE_FORMAT(b.END_TIME_,'%m/%d/%Y %H:%i:%s') as zjlEndTime
+					from (
+					SELECT project.NAME AS projectName,reimburse.name AS userName,attach.act_reimburse AS money,
+					DATE_FORMAT(reimburse.apply_time,'%m/%d/%Y') AS dateOne,
+					DATE_FORMAT(attach.date,'%m/%d/%Y') AS dateTo,
+					MONTH(attach.date) AS accountingYear,
+					case when sysuser.dept_id in ('35','36','37','38','39','3') then '市场部'
+					when sysuser.dept_id in ('4') then '行政部'
+					when sysuser.dept_id in ('5') then '研发部'
+					when sysuser.dept_id in ('6') then '工程部'
+					ELSE '其他' END as deptName,
+					case when sysuser.dept_id in ('35') then '销售A组'
+					when sysuser.dept_id in ('36') then '销售B组'
+					when sysuser.dept_id in ('37') then '销售C组'
+					when sysuser.dept_id in ('38') then '销售D组'
+					when sysuser.dept_id in ('39') then '支撑组'
+					ELSE '' END as groups,
+						(select a.name from sys_dictdata a where a.value = attach.type and a.type_id=19 and a.is_deleted is null) as type,
+						CASE WHEN attach.TYPE
+						 in('4','2','37','36','26') THEN '营销费用'
+						WHEN attach.TYPE in('18','19','21','20') THEN '办公室租赁费'
+						WHEN attach.TYPE in('31','17','25') THEN '人工费用'
+						WHEN attach.TYPE in('7','28','10','6','5','22','3') THEN '办公费用'
+						WHEN attach.TYPE in('14','15') THEN '服务费'
+						WHEN attach.TYPE in('23') THEN '税金'
+						ELSE '其他' END as costType,
+						attach.REASON as reason,
+						case reimburse.status 
+						when 0 then '已提交'
+						when 1 then '部门经理审批'
+						when 2 then '经办审批'
+						when 3 then '复核审批'
+						when 4 then '总经理审批'
+						when 5 then '出纳审批'
+						when 6 then '审批完结'
+						else 'N/A' end as statusName ,reimburse.PROCESS_INSTANCE_ID as processInstanceId
+						,reimburse.order_No as orderNo ,attach.id,
+						case when attach.INVEST_ID_STR IS not NULL or attach.INVEST_ID_STR != -1 THEN
+						attach.invest_id_str_name
+						ELSE
+						(	select value from fin_invest where id=attach.INVEST_ID )
+						end AS investName
+						FROM  fin_reimburse AS  reimburse
+						JOIN (select g.*,GROUP_CONCAT(s.value) as invest_id_str_name from fin_reimburse_attach g left join fin_invest s on FIND_IN_SET(s.id , g.invest_id_str)
+						GROUP BY g.id) AS attach ON attach.reimburse_id = reimburse.id
+						JOIN sys_user AS sysuser ON reimburse.user_id=sysuser.id
+						JOIN sale_project_manage AS project ON project.ID=attach.PROJECT_ID
+						where 1=1 AND reimburse.status='6' or reimburse.status='5') as a
+						inner join ACT_HI_ACTINST b on a.processInstanceId=b.PROC_INST_ID_
+						where 1=1 AND b.ACT_NAME_ = '总经理'
+						<if test="zBeginDate != null and zBeginDate != '' and zEndDate != null and zEndDate != ''">
+						AND b.END_TIME_ &gt;= #{zBeginDate} AND b.END_TIME_ &lt;=#{zEndDate}
+						</if>
+						) as a
+						inner join ACT_HI_ACTINST b on a.processInstanceId=b.PROC_INST_ID_
+						where 1=1 AND b.ACT_NAME_ = '出纳'  
+						<if test="cBeginDate != null and cBeginDate != '' and cEndDate != null and cEndDate != ''">
+						AND b.END_TIME_ &gt;= #{cBeginDate} AND b.END_TIME_ &lt;=#{cEndDate}
+						</if>
+						 order by a.zjlEndTime desc ) b group by b.id
+					union all
+
+					select b.* from (SELECT '差旅报销' as modular,a.projectName,a.userName,a.money,a.accountingYear,a.dateOne,a.dateTo,MONTH(a.zjlEndTime) as paymentYear,CASE WHEN a.zjlEndTime is not null THEN '现金支出' ELSE '非现金' END as cashProject,a.deptName,a.groups,a.type,a.costType,a.reason
+					,a.statusName,a.orderNo,a.zjlEndTime ,a.id ,a.investName,b.END_TIME_ as chunaTime
+					 from (select a.*
+					,DATE_FORMAT(b.END_TIME_,'%m/%d/%Y %H:%i:%s') as zjlEndTime
+					FROM (SELECT project.NAME AS projectName,travelreimburse.name AS userName,
+					attach.act_reimburse AS money,DATE_FORMAT(travelreimburse.apply_time,'%m/%d/%Y') AS dateOne,
+					DATE_FORMAT(attach.date,'%m/%d/%Y') AS dateTo,
+					MONTH(attach.date) AS accountingYear,
+					case when sysuser.dept_id in ('35','36','37','38','39','3') then '市场部'
+					when sysuser.dept_id in ('4') then '行政部'
+					when sysuser.dept_id in ('5') then '研发部'
+					when sysuser.dept_id in ('6') then '工程部'
+					ELSE '其他' END as deptName,
+					case when sysuser.dept_id in ('35') then '销售A组'
+					when sysuser.dept_id in ('36') then '销售B组'
+					when sysuser.dept_id in ('37') then '销售C组'
+					when sysuser.dept_id in ('38') then '销售D组'
+					when sysuser.dept_id in ('39') then '支撑组'
+					ELSE '' END as groups,
+						case attach.type 
+						when 0 then '差旅费'
+						when 1 then '差旅费'
+						when 2 then '差旅费'
+						when 3 then '招待费'
+						when 4 then '差旅费'
+						else 'N/A' end
+						as type,
+						CASE WHEN attach.type
+						 in(0,1,3,2,4) THEN '营销费用'
+						ELSE '其他' END as costType,
+						attach.REASON as reason,
+						case travelreimburse.status 
+						when 0 then '已提交'
+						when 1 then '部门经理审批'
+						when 2 then '经办审批'
+						when 3 then '复核审批'
+						when 4 then '总经理审批'
+						when 5 then '出纳审批'
+						when 6 then '审批完结'
+						else 'N/A' end as statusName, travelreimburse.PROCESS_INSTANCE_ID as processInstanceId
+						,travelreimburse.order_No as orderNo ,attach.id ,'' as investName
+						FROM fin_travelreimburse_attach AS attach
+						JOIN fin_travelreimburse AS travelreimburse ON attach.travelreimburse_id=travelreimburse.id
+					 	JOIN sys_user AS sysuser ON travelreimburse.user_id = sysuser.id
+					 	JOIN sale_project_manage AS project ON project.ID = attach.PROJECT_ID
+						where 1=1 AND travelreimburse.status='6' or travelreimburse.status='5'
+						) as a
+						inner join ACT_HI_ACTINST b on a.processInstanceId=b.PROC_INST_ID_
+						where 1=1
+						AND b.ACT_NAME_ = '总经理'
+						<if test="zBeginDate != null and zBeginDate != '' and zEndDate != null and zEndDate != ''">
+						AND b.END_TIME_ &gt;= #{zBeginDate} AND b.END_TIME_ &lt;=#{zEndDate}
+						</if>
+						) as a
+						inner join ACT_HI_ACTINST b on a.processInstanceId=b.PROC_INST_ID_
+						where 1=1 AND b.ACT_NAME_ ='出纳' 
+						<if test="cBeginDate != null and cBeginDate != '' and cEndDate != null and cEndDate != ''">
+						AND b.END_TIME_ &gt;= #{cBeginDate} AND b.END_TIME_ &lt;=#{cEndDate}
+						</if>
+						order by a.zjlEndTime) b group by b.id
+					union all
+
+					select '常规付款' as modular, project.NAME AS projectName,sysuser.name AS userName,
+					attach.money as money,MONTH(attach.DATE) as accountingYear, DATE_FORMAT(common.apply_time,'%m/%d/%Y') AS dateOne,
+					DATE_FORMAT(attach.DATE,'%m/%d/%Y') AS dateTo,MONTH(attach.DATE) as paymentYear ,'现金支出' as cashProject,
+					case when sysuser.dept_id in ('35','36','37','38','39','3') then '市场部'
+					when sysuser.dept_id in ('4') then '行政部'
+					when sysuser.dept_id in ('5') then '研发部'
+					when sysuser.dept_id in ('6') then '工程部'
+					ELSE '其他' END as deptName,
+					case when sysuser.dept_id in ('35') then '销售A组'
+					when sysuser.dept_id in ('36') then '销售B组'
+					when sysuser.dept_id in ('37') then '销售C组'
+					when sysuser.dept_id in ('38') then '销售D组'
+					when sysuser.dept_id in ('39') then '支撑组'
+					ELSE '' END as groups,
+					(select a.name from sys_dictdata a where a.value = attach.TYPE and a.type_id=19 and a.is_deleted is null) as type,
+					CASE WHEN attach.TYPE
+					 in('4','2','37','36','26') THEN '营销费用'
+					WHEN attach.TYPE in('18','19','21','20') THEN '办公室租赁费'
+					WHEN attach.TYPE in('31','17','25') THEN '人工费用'
+					WHEN attach.TYPE in('7','28','10','6','5','22','3') THEN '办公费用'
+					WHEN attach.TYPE in('14','15') THEN '服务费'
+					WHEN attach.TYPE in('23') THEN '税金'
+					ELSE '其他' END as costType,
+					 CAST(attach.REASON as char) as reason ,'' as statusName, '' as orderNo,'' as zjlEndTime,'' as id ,'' as investName,'' as chunaTime
+					 from fin_common_pay common 
+							JOIN sys_user AS sysuser ON common.USER_ID = sysuser.id 
+							join fin_common_pay_attach attach on common.id=attach.COMMON_PAY_ID
+							JOIN sale_project_manage AS project ON attach.PROJECT_MANAGE_ID = project.ID
+					where 1=1
+						<if test="gBeginDate != null and gBeginDate != ''">
+							AND attach.DATE &gt;= #{gBeginDate}
+						</if>
+						<if test="gEndDate != null and gEndDate != ''">
+							AND attach.DATE &lt;=#{gEndDate}
+						</if>
+						union all
+						select '常规收款' as modular,project.NAME AS projectName,sysuser.name AS userName,
+						attach.money as money,
+						MONTH(attach.DATE) as accountingYear, DATE_FORMAT(received.apply_time,'%m/%d/%Y') AS dateOne,
+						DATE_FORMAT(attach.DATE,'%m/%d/%Y') AS dateTo,
+						MONTH(attach.DATE) as paymentYear,'现金支出' as cashProject,
+						case when sysuser.dept_id in ('35','36','37','38','39','3') then '市场部'
+						when sysuser.dept_id in ('4') then '行政部'
+						when sysuser.dept_id in ('5') then '研发部'
+						when sysuser.dept_id in ('6') then '工程部'
+						ELSE '其他' END as deptName,
+						case when sysuser.dept_id in ('35') then '销售A组'
+						when sysuser.dept_id in ('36') then '销售B组'
+						when sysuser.dept_id in ('37') then '销售C组'
+						when sysuser.dept_id in ('38') then '销售D组'
+						when sysuser.dept_id in ('39') then '支撑组'
+						ELSE '' END as groups,
+						(select a.name from sys_dictdata a where a.value = attach.COST_PROPERTY and a.type_id=72 and a.is_deleted is null) as type,
+						CASE WHEN attach.COST_PROPERTY
+						in('1','0') THEN '非费用'
+						ELSE '其他' END as costType,
+						CAST(attach.REASON AS char) as reason,'' as statusName,'' as orderNo,'' as zjlEndTime ,'' as id , '' as investName,'' as chunaTime
+						from fin_common_received received
+						JOIN sys_user AS sysuser ON received.USER_ID = sysuser.id
+						join fin_common_received_attach attach on received.id=attach.COMMON_RECEIVED_ID
+						JOIN sale_project_manage AS project ON attach.PROJECT_MANAGE_ID = project.ID
+						where 1=1
+							<if test="gBeginDate != null and gBeginDate != ''">
+								AND attach.DATE &gt;= DATE_FORMAT(#{gBeginDate},'%Y/%m/%d %H:%i:%s')
+							</if>
+							<if test="gEndDate != null and gEndDate != ''">
+								AND attach.DATE &lt;= DATE_FORMAT(#{gEndDate},'%Y/%m/%d %H:%i:%s')
+							</if>
+						union all
+
+						select b.* from (select '收款管理' as modular,a.projectName,a.userName,a.money,a.accountingYear,a.dateOne,a.dateTo,MONTH(a.zjlEndTime) as paymentYear,CASE WHEN a.zjlEndTime is not null THEN '现金支出' ELSE '非现金' END as cashProject,a.deptName,a.groups,a.type,a.costType,a.reason
+						,a.statusName,a.orderNo,a.zjlEndTime ,a.id ,a.investName,b.END_TIME_ as chunaTime from (SELECT a.*,DATE_FORMAT(b.END_TIME_,'%m/%d/%Y %H:%i:%s') as zjlEndTime from (
+						SELECT project.NAME AS projectName,sysuser.name AS userName,
+						attach.collection_bill AS money,
+						DATE_FORMAT(collection.apply_time,'%m/%d/%Y') AS dateOne,
+						DATE_FORMAT(attach.collection_date,'%m/%d/%Y') AS dateTo,
+						MONTH(attach.collection_Date) AS accountingYear,
+						case when sysuser.dept_id in ('35','36','37','38','39','3') then '市场部'
+						when sysuser.dept_id in ('4') then '行政部'
+						when sysuser.dept_id in ('5') then '研发部'
+						when sysuser.dept_id in ('6') then '工程部'
+						ELSE '其他' END as deptName,
+						case when sysuser.dept_id in ('35') then '销售A组'
+						when sysuser.dept_id in ('36') then '销售B组'
+						when sysuser.dept_id in ('37') then '销售C组'
+						when sysuser.dept_id in ('38') then '销售D组'
+						when sysuser.dept_id in ('39') then '支撑组'
+						ELSE '' END as groups,
+						(select a.name from sys_dictdata a where a.value = collection.collection_Type and a.type_id=72 and a.is_deleted is null) as type,
+						CASE WHEN collection.collection_Type
+						in('1','0') THEN '非费用'
+						ELSE '其他' END as costType,
+						CAST(collection.reason AS char) as reason,
+						case collection.status
+						when 0 then '已提交'
+						when 1 then '部门经理审批'
+						when 2 then '财务审批'
+						when 3 then '总经理审批'
+						when 4 then '出纳审批'
+						when 5 then '已归档'
+						else 'N/A' end
+						as statusName,collection.PROCESS_INSTANCE_ID as processInstanceId,'' as orderNo , attach.id ,'' as investName
+						FROM fin_collection AS collection
+						JOIN sys_user AS sysuser ON collection.USER_ID = sysuser.id
+						JOIN sale_project_manage AS project ON collection.project_id = project.ID
+						left JOIN fin_colletcion_attach as attach ON collection.id = attach.collection_id
+						where 1=1
+						<if test="zBeginDate != null and zBeginDate != ''">
+							AND attach.collection_date &gt;= #{zBeginDate}
+						</if>
+						<if test="zEndDate != null and zEndDate != ''">
+							AND attach.collection_date &lt;=#{zEndDate}
+						</if>
+						) as a
+							inner join ACT_HI_ACTINST b on a.processInstanceId=b.PROC_INST_ID_
+							where 1=1 AND b.ACT_NAME_ = '总经理'
+						<if test="zBeginDate != null and zBeginDate != '' and zEndDate != null and zEndDate != ''">
+							AND b.END_TIME_ &gt;= #{zBeginDate} AND b.END_TIME_ &lt;=#{zEndDate}
+						</if>
+						) as a
+							inner join ACT_HI_ACTINST b on a.processInstanceId=b.PROC_INST_ID_
+							where 1=1 AND b.ACT_NAME_ = '出纳'  
+							<if test="cBeginDate != null and cBeginDate != '' and cEndDate != null and cEndDate != ''">
+								AND b.END_TIME_ &gt;= #{cBeginDate} AND b.END_TIME_ &lt;=#{cEndDate}
+								</if>
+							order by a.zjlEndTime) b group by b.id
+		) as a
+	</select>
+	<select id="findFinPayByStatis" resultMap="finPayResult">
+		SELECT
+			attach.id,
+			pay.PROJECT_MANAGE_ID,
+			pay.reimburse_type,
+			CASE WHEN pay.apply__money is NULL then attach.pay_bill else pay.apply__money end as ACTUAL_PAY_MONEY
+		FROM
+			fin_pay_attach AS attach
+		JOIN fin_pay AS pay ON attach.PAY_ID = pay.id
+		JOIN sys_user AS sysuser ON pay.USER_ID = sysuser.id 
+		WHERE 1 = 1
+		<choose>
+			<when test="status == '' or status == null">
+				AND pay.status='6'
+			</when>
+			<when test="status == 6">
+				AND pay.status='6'
+			</when>
+			<when test="status != null and status != '' ">
+				AND pay.status &gt; #{status}
+				AND  pay.status &lt; 7
+			</when>
+		</choose>
+		<if test="userName !=null and userName !='' and userName != 'null'">
+			AND sysuser.name = #{userName}
+		</if>
+		<if test="deptId !=null and deptId !=''">
+			AND pay.dept_id = #{deptId}
+		</if>
+		<if test="projectId !=null and projectId != ''">
+			AND pay.PROJECT_MANAGE_ID = #{projectId}
+		</if>
+		<if test="payCompany !=null and payCompany !=''">
+			AND (pay.title = #{payCompany} OR pay.title='0')
+		</if>
+		<if test="beginDate != null and beginDate!=''">
+			AND attach.pay_date &gt;= #{beginDate}
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			AND attach.pay_date &lt;= #{endDate}
+		</if>
+	</select>
+</mapper>

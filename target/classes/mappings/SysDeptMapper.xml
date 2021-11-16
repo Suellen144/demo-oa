@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysDeptDao">
+	
+	<resultMap id="sysDeptResult" type="sysDept">
+		<id property="id" column="id" />
+		<result property="parentId" column="parent_id" />
+		<result property="nodeLinks" column="node_links" />
+		<result property="name" column="name" />
+		<result property="code" column="code" />
+		<result property="sort" column="sort" />
+		<result property="userId" column="user_id" />
+		<result property="assistantId" column="assistant_id" />
+		<result property="level" column="level" />
+		<result property="alias" column="alias" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="generateKpi" column="generate_kpi" />
+		<result property="isAccording" column="is_according" />
+		<result property="deptPerson" column="dept_person" />
+		<result property="deptPhone" column="dept_phone" />
+		<result property="deptAddress" column="dept_address" />
+		<result property="deptRevokeDate" column="dept_revokeDate" />
+		<result property="isCompany" column="is_company" />
+		<association property="principal" column="user_id" javaType="sysUser" select="findUserByUserid" />
+		<association property="assistant" column="assistant_id" javaType="sysUser" select="findUserByUserid" />  
+		<collection property="children" column="id" select="getChildrenById" />
+		<collection property="responsibility" column="id" select="getResponsibility" />
+		<collection property="childrenPosition" column="id" select="getChildrenPositionById" />
+	</resultMap>
+
+	<resultMap id="sysDeptResult2" type="sysDept">
+		<id property="id" column="id" />
+		<result property="parentId" column="parent_id" />
+		<result property="nodeLinks" column="node_links" />
+		<result property="name" column="name" />
+		<result property="code" column="code" />
+		<result property="sort" column="sort" />
+		<result property="userId" column="user_id" />
+		<result property="assistantId" column="assistant_id" />
+		<result property="level" column="level" />
+		<result property="alias" column="alias" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="generateKpi" column="generate_kpi" />
+		<result property="isAccording" column="is_according" />
+		<result property="deptPerson" column="dept_person" />
+		<result property="deptPhone" column="dept_phone" />
+		<result property="deptAddress" column="dept_address" />
+		<result property="deptRevokeDate" column="dept_revokeDate" />
+		<result property="isCompany" column="is_company" />
+		<association property="principal" column="user_id" javaType="sysUser" select="findUserByUserid" />
+		<association property="assistant" column="assistant_id" javaType="sysUser" select="findUserByUserid" />
+		<collection property="children" column="id" select="getChildrenById2" />
+		<collection property="responsibility" column="id" select="getResponsibility" />
+	</resultMap>
+
+	<select id="findByParentidAndCompany" resultMap="sysDeptResult">
+		select * from sys_dept where parent_id = #{parentId} and is_company = #{isCompany} AND (is_deleted is null OR is_deleted = '0') order by SORT desc;
+	</select>
+
+	<select id="getChildrenPositionById" resultMap="sysDeptResult">
+		select * from sys_role where dept_id = #{id} and (is_deleted is null OR is_deleted = '0' or IS_DELETED=1);
+	</select>
+
+	<select id="findProjectTeam" resultMap="sysDeptResult">
+		select * from sys_dept where parent_id = #{parentId} and (is_company is null OR is_company = '0') AND (is_deleted is null OR is_deleted = '0') order by SORT desc;
+	</select>
+
+	<select id="findByParentidAndIsCompany" resultMap="sysDeptResult">
+		select * from sys_dept where parent_id = #{parentId} and is_according = 2 and generate_kpi = 1
+		 and (is_company is null OR is_company = '0') AND (is_deleted is null OR is_deleted = '0') order by SORT desc;
+	</select>
+
+	<select id="findByOrganization" resultMap="sysDeptResult">
+		select id,PARENT_ID,name,node_links,IS_DELETED,generate_kpi from t_organization where parent_id = #{companyId} and
+		(is_deleted = '0' or is_deleted is null or is_deleted = #{isDelete}) order by create_date desc
+	</select>
+
+	<insert id="saveDept" parameterType="java.util.Map">
+		INSERT INTO sys_dept(parent_id, NAME,CREATE_BY, CREATE_DATE,dept_revokeDate,dept_person,dept_phone,dept_address,   generate_kpi,is_according,is_company)
+		VALUES(#{parentId}, #{name},#{createBy}, now(),#{deptRevokeDate},#{deptPerson} ,#{deptPhone},#{deptAddress}, #{generateKpi},#{isAccording},#{isCompany})
+	</insert>
+	
+	<update id="updateNodeLinksById" parameterType="java.util.Map">
+		update sys_dept set node_links = #{nodeLinks} where id = #{currenId};
+	</update>
+
+	<update id="updateDept" parameterType="java.util.Map">
+		update sys_dept set
+		name = #{name},dept_person = #{deptPerson},dept_phone = #{deptPhone},dept_address = #{deptAddress},
+		dept_revokeDate = #{deptRevokeDate},create_date = #{createDate},update_by = #{updateBy} ,update_date = now()
+		where id = #{id};
+	</update>
+
+	<select id="findDeptByNameAndId" resultMap="sysDeptResult">
+        SELECT * FROM sys_dept WHERE name = #{name} and  id != #{id};
+    </select>
+
+	<select id="selectByDateAndGenerateKpi" resultType="sysDept">
+        select * from sys_dept where 1 = 1 order by CREATE_DATE desc LIMIT 1
+    </select>
+
+	<update id="recoveryOrganizationById">
+        update sys_dept set is_deleted = 0 where id = #{id};
+    </update>
+
+    <update id="updateByDeteleId">
+        update sys_dept set IS_DELETED = 1 where id = #{id};
+    </update>
+
+	<select id="findAll" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE  is_deleted = '0' or is_deleted is null  ORDER BY SORT DESC 
+	</select>
+	
+	<select id="findByGenerateKpi" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE (is_deleted = '0' or is_deleted is null) AND generate_kpi = 1  ORDER BY SORT DESC 
+	</select>
+	
+	<select id="findAllByMetting" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE  (is_deleted = '0' or is_deleted is null) AND  parent_id != -1 AND ID != 32 AND ID != 31
+		ORDER BY SORT DESC 
+	</select>
+	
+	<select id="findById" resultMap="sysDeptResult">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<select id="findByUserId" resultMap="sysDeptResult">
+		SELECT * FROM sys_dept WHERE USER_ID = #{userId} and  ( is_deleted = '0' or is_deleted is null)
+	</select>
+	
+	<select id="findByParentid" resultMap="sysDeptResult">
+		SELECT * FROM sys_dept WHERE PARENT_ID = #{parentId} and  ( is_deleted = '0' or is_deleted is null) ORDER BY SORT DESC
+	</select>
+
+	<select id="findByParentid2" resultMap="sysDeptResult">
+		SELECT * FROM sys_dept WHERE PARENT_ID = #{parentId} and  ( is_deleted = '0' or is_deleted is null) and generate_kpi = 1 ORDER BY SORT DESC
+	</select>
+	
+	<select id="findByCode" resultMap="sysDeptResult">
+		SELECT * FROM sys_dept WHERE CODE = #{code} and  ( is_deleted = '0' or is_deleted is null) ORDER BY SORT DESC
+	</select>
+	
+	<select id="findByIds" resultMap="sysDeptResult">
+		SELECT * FROM sys_dept WHERE ID IN
+		<foreach item="id" index="index" collection="idList" open="(" separator="," close=")">  
+  			#{id}
+  		</foreach>
+  		ORDER BY SORT DESC
+	</select>
+	
+	<select id="getChildrenById" resultMap="sysDeptResult">
+		SELECT * FROM sys_dept WHERE PARENT_ID = #{id}  and (is_company = '0' or is_company is null) and ( is_deleted = '0' or is_deleted is null or IS_DELETED=1) ORDER BY SORT DESC
+	</select>
+
+	<select id="getChildrenById2" resultMap="sysDeptResult">
+		SELECT * FROM sys_dept WHERE PARENT_ID = #{id}  and is_company = 1 and ( is_deleted = '0' or is_deleted is null) ORDER BY SORT DESC
+	</select>
+	
+	<select id="getResponsibility" resultType="responsibility">
+		SELECT * FROM t_responsibility WHERE dept_id = #{id}
+	</select>
+	
+	
+	<select id="findChilrenByNodelinksLike" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE NODE_LINKS LIKE CONCAT('%,',#{id},',%') and  ( is_deleted = '0' or is_deleted is null)
+	</select>
+	
+	<select id="findByLevel" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE LEVEL = #{level}
+	</select>
+	
+	<select id="findUserByUserid" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findByName" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE NAME = #{name} and id != #{id}
+	</select>
+	
+	<select id="findByNameByisDeleted" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE NAME = #{name} and (is_deleted is null or is_deleted = 0)
+	</select>
+	
+	<select id="getDeptAndPosition" resultMap="sysDeptResult">
+		select * from sys_dept  where (is_according=2 or is_according=3 ) and parent_id=#{id}
+		and (IS_DELETED = 0 or IS_DELETED is null or IS_DELETED=#{isDeleted}) and (is_company = 0 or is_company is null)
+	</select>
+
+	<select id="getDeptAndPosition2" resultMap="sysDeptResult2">
+		select * from sys_dept  where (is_according=2 or is_according=3 ) and parent_id=#{id} and (IS_DELETED = 0 or IS_DELETED is null or IS_DELETED=#{isDeleted})
+		and is_company = 1
+	</select>
+	
+	<select id="findByDeleteAndId" resultMap="sysDeptResult">
+		select * from sys_dept  where (id = #{companyId}) and (is_according=1 or is_according=3) and (IS_DELETED =0 or IS_DELETED is null or IS_DELETED=#{isDeleted}) order by id
+	</select>
+	
+	
+	<select id="checkCode" resultType="int">
+		SELECT COUNT(1) FROM sys_dept WHERE 1 = 1
+		<if test="id != null">
+			AND ID != #{id}
+		</if>
+		<if test="code != null">
+			AND CODE = #{code}
+		</if>
+	</select>
+	
+	<select id="getMaxCode" resultType="java.util.Map">
+		SELECT MAX(`code`) AS `code` FROM sys_dept
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sys_dept( PARENT_ID, NODE_LINKS, NAME, CODE, SORT, USER_ID, ASSISTANT_ID, LEVEL, ALIAS, CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE,IS_DELETED,generate_kpi,is_according) 
+			VALUES(
+				#{parentId}, #{nodeLinks}, #{name}, #{code}, #{sort}, #{userId}, #{assistantId}, #{level}, #{alias},
+				#{createBy}, #{createDate}, #{updateBy}, #{updateDate},#{isDeleted},#{generateKpi},#{isAccording}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_dept 
+			SET PARENT_ID=#{parentId}, NODE_LINKS=#{nodeLinks}, NAME=#{name}, CODE=#{code}, SORT=#{sort},  USER_ID=#{userId}, 
+				ASSISTANT_ID=#{assistantId}, LEVEL=#{level}, ALIAS=#{alias}, UPDATE_BY=#{updateBy}, UPDATE_DATE=#{updateDate},IS_DELETED= #{isDeleted},generate_kpi = #{generateKpi}
+				,is_according = #{isAccording}
+			WHERE ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM sys_dept WHERE ID = #{id}
+	</delete>
+	
+	
+	<update id="revokeByDeptList">
+		<foreach item="dept" index="index" collection="list" open="" separator=";" close="">  
+  			UPDATE sys_dept 
+				SET 
+					UPDATE_BY=#{dept.updateBy}, 
+					UPDATE_DATE=#{dept.updateDate},
+					IS_DELETED= #{dept.isDeleted}
+			WHERE id = #{dept.id}
+  		</foreach>
+	</update>
+	
+	<delete id="deletetrueByDeptList">
+	
+		<foreach item="dept" index="index" collection="list" open="" separator=";" close="">  
+  			DELETE  FROM sys_dept 
+			WHERE id = #{dept.id}
+  		</foreach>
+	</delete>
+	
+	
+	<update id="setNullByUserid">
+		UPDATE sys_dept 
+				SET USER_ID = null WHERE USER_ID = #{userId}
+	</update>
+
+	<select id="checkLevelIsOne" resultType="int">
+		SELECT count(1) FROM sys_dept WHERE id = #{id} AND LEVEL='1'
+	</select>
+
+	<select id="findNameByID" resultType="String">
+		SELECT name FROM sys_dept WHERE id=(SELECT parent_id FROM sys_dept WHERE id = #{id})
+	</select>
+</mapper>

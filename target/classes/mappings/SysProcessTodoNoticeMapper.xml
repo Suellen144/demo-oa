@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysProcessTodoNoticeDao">
+	
+	<resultMap id="sysProcessTodoNoticeResult" type="sysProcessTodoNotice">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="taskId" column="task_id" />
+		<result property="sendDate" column="send_date" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="sysProcessTodoNoticeResult">
+		SELECT * FROM sys_process_todo_notice
+	</select>
+	
+	<select id="findById" resultMap="sysProcessTodoNoticeResult">
+		SELECT * FROM sys_process_todo_notice WHERE ID = #{id}
+	</select> 
+	
+	<select id="countByTaskIdAndUserId" resultType="int">
+		SELECT COUNT(1) FROM sys_process_todo_notice WHERE TASK_ID = #{taskId} AND USER_ID = #{userId}
+	</select>
+	
+	<select id="countBySendDate" resultType="int">
+		SELECT COUNT(1) FROM sys_process_todo_notice WHERE SEND_DATE = #{sendDate}
+	</select>
+	
+	<update id="update">
+		UPDATE sys_process_todo_notice 
+			SET
+			  	USER_ID=#{userId},
+			  	TASK_ID=#{taskId},
+			  	SEND_DATE=#{sendDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sys_process_todo_notice(
+			  	USER_ID,
+			  	TASK_ID,
+			  	SEND_DATE
+			) 
+			VALUES (
+			  	#{userId},
+			  	#{taskId},
+			  	#{sendDate}
+			)
+	</insert>
+	
+	<insert id="batchSave">
+		INSERT INTO sys_process_todo_notice(
+			  	USER_ID,
+			  	TASK_ID,
+			  	SEND_DATE
+			) 
+			VALUES
+			<foreach collection="processTodoNoticeList" item="processTodoNotice" index="index" separator=",">
+				(
+				  	#{processTodoNotice.userId},
+				  	#{processTodoNotice.taskId},
+				  	#{processTodoNotice.sendDate}
+				)
+			</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM sys_process_todo_notice WHERE ID = #{id}
+	</delete>
+	
+</mapper>

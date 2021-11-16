@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdWorkReportAttachDao">
+	
+	<resultMap id="adWorkReportAttachResult" type="adWorkReportAttach">
+		<id property="id" column="id" />
+		<result property="workReportId" column="work_report_id" />
+		<result property="projectId" column="project_id" />
+		<result property="workDate" column="work_date" />
+		<result property="workTime" column="work_time" />
+		<result property="description" column="description" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		
+		<association property="project" column="project_id" javaType="saleProjectManage" select="findProjectByProjectId" /> 
+	</resultMap>
+	
+	<select id="findAll" resultMap="adWorkReportAttachResult">
+		SELECT * FROM ad_work_report_attach
+	</select>
+	
+	<select id="findById" resultMap="adWorkReportAttachResult">
+		SELECT * FROM ad_work_report_attach WHERE ID = #{id}
+	</select> 
+	
+	<!-- 关联查询 Begin -->
+	<select id="findProjectByProjectId" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id}
+	</select>
+	<!-- 关联查询 End -->
+	
+	<update id="update">
+		UPDATE ad_work_report_attach 
+			SET
+			  	WORK_REPORT_ID=#{workReportId},
+			  	PROJECT_ID=#{projectId},
+			  	WORK_DATE=#{workDate},
+			  	WORK_TIME=#{workTime},
+			  	DESCRIPTION=#{description},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="batchUpdate">
+		<foreach collection="workReportAttachList" item="workReportAttach" index="index" open="" close="" separator=";">
+			UPDATE ad_work_report_attach 
+				SET
+				  	WORK_REPORT_ID=#{workReportAttach.workReportId},
+				  	PROJECT_ID=#{workReportAttach.projectId},
+				  	WORK_DATE=#{workReportAttach.workDate},
+				  	WORK_TIME=#{workReportAttach.workTime},
+				  	DESCRIPTION=#{workReportAttach.description},
+				  	CREATE_BY=#{workReportAttach.createBy},
+				  	CREATE_DATE=#{workReportAttach.createDate},
+				  	UPDATE_BY=#{workReportAttach.updateBy},
+				  	UPDATE_DATE=#{workReportAttach.updateDate}
+			WHERE ID = #{workReportAttach.id}
+		</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_work_report_attach(
+			  	WORK_REPORT_ID,
+			  	PROJECT_ID,
+			  	WORK_DATE,
+			  	WORK_TIME,
+			  	DESCRIPTION,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{workReportId},
+			  	#{projectId},
+			  	#{workDate},
+			  	#{workTime},
+			  	#{description},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO ad_work_report_attach(
+			  	WORK_REPORT_ID,
+			  	PROJECT_ID,
+			  	WORK_DATE,
+			  	WORK_TIME,
+			  	DESCRIPTION,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES 
+		<foreach item="workReportAttach" index="index" collection="list" separator=",">  
+			 (
+			  	#{workReportAttach.workReportId},
+			  	#{workReportAttach.projectId},
+			  	#{workReportAttach.workDate},
+			  	#{workReportAttach.workTime},
+			  	#{workReportAttach.description},
+			  	#{workReportAttach.createBy},
+			  	#{workReportAttach.createDate},
+			  	#{workReportAttach.updateBy},
+			  	#{workReportAttach.updateDate}
+			) 
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_work_report_attach WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_work_report_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

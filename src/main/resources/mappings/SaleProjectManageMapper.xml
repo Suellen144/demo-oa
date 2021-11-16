@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISaleProjectManageDao">
+	
+	<resultMap id="saleProjectManageResult" type="saleProjectManage">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="type" column="type" />
+		<result property="location" column="location" />
+		<result property="describe" column="describe" />
+		<result property="userId" column="user_id" />
+		<result property="deptIds" column="dept_ids" />
+		<result property="status" column="status" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<!-- 项目管理模块新增字段 20190409 -->
+		<result property="applicant" column="applicant" />
+		<result property="submitDate" column="submit_date" />
+		<result property="size" column="size" />
+		<result property="projectDate" column="projectdate" />
+		<result property="projectEndDate" column="project_end_date" />
+		<result property="researchCostLines" column="research_cost_lines" />
+		<result property="applicationType" column="application_type" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="statusNew" column="status_new" />
+		<result property="applyDeptId" column="apply_dept_id" />
+		<result property="dutyDeptId" column="duty_dept_id" />
+		<result property="isNewProject" column="is_new_project" />
+		<result property="title" column="title" />
+		<result property="attachName" column="ATTACH_NAME" />
+		<result property="attachments" column="ATTACHMENTS" />
+		<result property="totalMoney" column="TOTAL_MONEY" />
+		<result property="confirmAmount" column="confirmAmount" />
+		<result property="actReimburse" column="actReimburse" />
+		<result property="actReimburse2" column="actReimburse2" />
+		<result property="reason" column="reason" />
+			 
+		<association property="applicantP" column="applicant" javaType="sysUser" select="findUserByUserId" />
+		<association property="principal" column="user_id" javaType="sysUser" select="findUserByUserId" /> 
+		<association property="deptA" column="apply_dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="deptD" column="duty_dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<collection property="saleBarginManageList" column="id" select="findSaleBarginManageList" />
+		<collection property="projectMemberList" column="id" select="findProjectMemberList" />
+	</resultMap>
+	
+	<resultMap id="saleBarginManageResult" type="saleBarginManage">
+		<id property="id" column="id" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="status" column="status" />
+		<result property="barginName" column="bargin_name" />
+		<result property="barginCode" column="bargin_code" />
+		<result property="barginUserId" column="bargin_user_id" />
+		<result property="userId" column="user_id" />
+		<result property="barginUserName" column="bargin_user_name" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+	</resultMap>
+
+	<resultMap id="saleProjectMemberResult" type="saleProjectMember">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="resultsProportion" column="results_proportion" />
+		<result property="commissionProportion" column="commission_proportion" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		
+		<association property="principal" column="user_id" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<select id="findSaleBarginManageList" resultMap="saleBarginManageResult">
+		SELECT * FROM sale_bargin_manage WHERE project_manage_id = #{id} and (IS_DELETED = '0' or IS_DELETED is null) 
+	</select>
+	
+	<select id="findProjectMemberList" resultMap="saleProjectMemberResult">
+		SELECT * FROM sale_project_member WHERE project_manage_id = #{id} and IS_DELETED = '0'
+	</select>
+	
+	<select id="findByProjectName" resultMap="saleProjectManageResult">
+		SELECT * FROM sale_project_manage WHERE NAME = #{name} and IS_DELETED = '0'
+		<if test="id != null and id != '' ">
+			and id != #{id}
+		</if>
+	</select>
+	
+	<select id="findProjectManageByBarginId" resultMap="saleProjectManageResult">
+		SELECT project.* from sale_project_manage project 
+		INNER JOIN sale_bargin_manage bargin on project.id = bargin.project_manage_id
+		WHERE bargin.id = #{barginId}
+	</select>
+	
+	<select id="findByPage" resultMap="saleProjectManageResult">
+		SELECT * FROM sale_project_manage
+		WHERE  (IS_DELETED IS NULL OR IS_DELETED = '0')
+		<if test="!seeall">
+			AND (
+				CONCAT(',', `DEPT_IDS`, ',') REGEXP CONCAT(',(',REPLACE(#{deptIdList},',','|'),'),')
+				OR (DEPT_IDS = '' OR DEPT_IDS IS NULL)
+			)
+		</if>
+		<if test="applicationType != null and applicationType != ''">
+			AND application_type = #{applicationType}
+		</if>
+		<if test="startTime != null and startTime != ''.toString()">
+			AND submit_date &gt;= #{startTime} 
+		</if>
+		<if test="endTime != null and endTime != ''.toString()">
+			AND submit_date &lt;= #{endTime} 
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( name LIKE CONCAT('%',#{fuzzyContent},'%'))
+		</if>
+		<if test="name != null and name != ''.toString()">
+			AND ( name LIKE CONCAT('%',#{name},'%'))
+		</if>
+		<if test="status != null and status != ''">
+			AND STATUS = #{status}
+		</if> 
+		<if test="statusNew != null and statusNew != ''">
+			AND ( is_new_project = 1 and STATUS_NEW = #{statusNew}) or is_new_project = 0 or is_new_project is null
+		</if> 
+		ORDER by create_date DESC
+	</select>
+	
+	<select id="findByPage2" resultMap="saleProjectManageResult">
+		SELECT * FROM sale_project_manage
+		WHERE STATUS != -1
+		<if test="!seeall">
+			AND (
+				CONCAT(',', `DEPT_IDS`, ',') REGEXP CONCAT(',(',REPLACE(#{deptIdList},',','|'),'),')
+				OR (DEPT_IDS = '' OR DEPT_IDS IS NULL)
+			)
+		</if>
+		<if test="type != null and type != ''">
+			AND TYPE = #{type}
+		</if>
+		<if test="name != null and name != ''">
+			AND NAME LIKE CONCAT('%',#{name},'%')
+		</if>
+	</select>
+	
+	<select id="findByPage3" resultMap="saleProjectManageResult">
+	SELECT * from (
+		SELECT NAME,USER_ID,SIZE,APPLICANT,SUBMIT_DATE,APPLICATION_TYPE,STATUS_NEW,create_date,id,PROCESS_INSTANCE_ID,is_new_project FROM sale_project_manage
+		WHERE (status_new != 5 or status_new is null)
+		union all
+		SELECT NAME,USER_ID,SIZE,APPLICANT,SUBMIT_DATE,APPLICATION_TYPE,STATUS_NEW,create_date,id,PROCESS_INSTANCE_ID,1 as is_new_project FROM sale_project_manage_history ) as  a
+		where 1=1
+		<if test="userIdCurrent !=null and userIdCurrent !=''">
+		AND (a.applicant = #{userIdCurrent} or a.user_id = #{userIdCurrent})
+		</if>
+		<if test="idStr != null and idStr !=''">
+			AND ( a.applicant in
+			<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+			  #{item}
+			</foreach>
+			 or a.user_id in
+			<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+			  #{item}
+			</foreach>
+			)
+		</if>
+		<if test="applicationType != null and applicationType != ''">
+			AND a.application_type = #{applicationType}
+		</if>
+		<if test="startTime != null and startTime != ''.toString()">
+			AND a.submit_date &gt;= #{startTime} 
+		</if>
+		<if test="endTime != null and endTime != ''.toString()">
+			AND a.submit_date &lt;= #{endTime} 
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( a.name LIKE CONCAT('%',#{fuzzyContent},'%'))
+		</if>
+		<if test="status != null and status != ''">
+			AND a.STATUS = #{status}
+		</if> 
+		ORDER by a.create_date DESC
+	</select>
+	
+	<select id="findList" resultMap="saleProjectManageResult">
+		select * from (select project.*,(select SUM(TOTAL_MONEY) from sale_bargin_manage b where project.id = b.project_manage_id and b.status = 5) as TOTAL_MONEY,
+		(select SUM(confirm_amount) from sale_bargin_manage a inner join 
+		(select confirm_amount,results_amount,sale_bargin_manage_id from fin_results_recognition
+		union all
+ 		select confirm_amount,results_contribution as results_amount,sale_bargin_manage_id from fin_revenue_recognition
+		union all
+		select a.collection_bill confirm_amount,0 as results_amount,b.bargin_id as sale_bargin_manage_id
+		from fin_colletcion_attach a inner join fin_collection b on a.COLLECTION_ID=b.id where  b.status = '5' and b.is_new_process = 0
+		union all
+		select c.collection_bill confirm_amount,0 as results_amount,d.bargin_id as sale_bargin_manage_id
+		from fin_colletcion_attach c inner join fin_collection d on c.COLLECTION_ID=d.id where  d.status = '3' and d.is_new_process = 1) b
+ 		 on a.id=b.sale_bargin_manage_id where project_manage_id = project.id) as confirmAmount,
+		(select SUM(actReimburse) from (
+		select b.ACT_REIMBURSE as actReimburse,b.PROJECT_ID
+		from fin_travelreimburse a inner join fin_travelreimburse_attach b on a.id=b.TRAVELREIMBURSE_ID where a.status = 6 GROUP BY b.id
+		union all
+		select b.ACT_REIMBURSE as actReimburse,b.PROJECT_ID
+	    from fin_reimburse a inner join fin_reimburse_attach b on a.id=b.REIMBURSE_ID where a.status = 6 GROUP BY b.id
+		union all
+		select a.pay_bill actReimburse ,b.PROJECT_MANAGE_ID AS PROJECT_ID
+		from fin_pay_attach a inner join fin_pay b on a.PAY_ID=b.id where b.`STATUS` = 5 GROUP BY a.id ) a
+		where a.PROJECT_ID=project.id
+		) as actReimburse2,(select SUM(b.ACT_REIMBURSE) as actReimburse
+	    from fin_reimburse a inner join fin_reimburse_attach b on a.id=b.REIMBURSE_ID where b.PROJECT_ID=project.id and a.status = 6 and b.type=37) as actReimburse
+ 		from sale_project_manage as project 
+ 		 WHERE  (project.IS_DELETED IS NULL OR project.IS_DELETED = '0')
+		<if test="userIdCurrent !=null and userIdCurrent !=''">
+			AND (project.applicant = #{userIdCurrent} or project.user_id = #{userIdCurrent})
+		</if>
+		<if test="idStr != null and idStr !=''">
+			AND ( project.applicant in
+			<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+			  #{item}
+			</foreach>
+			 or project.user_id in
+			<foreach collection="idStr" item="item" index="index" open="(" close=")" separator=",">
+			  #{item}
+			</foreach>
+			)
+		</if>
+		<if test="applicationType != null and applicationType != ''">
+			AND project.application_type = #{applicationType}
+		</if>
+		<if test="startTime != null and startTime != ''.toString()">
+			AND (project.project_Date &gt;= #{startTime} or project.create_Date &gt;= #{startTime})
+		</if>
+		<if test="endTime != null and endTime != ''.toString()">
+			AND (project.project_date &lt;= #{endTime} or project.create_Date &lt;= #{endTime})
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( project.name LIKE CONCAT('%',#{fuzzyContent},'%') 
+			OR (select name from sys_user where id= project.user_Id) LIKE CONCAT('%',#{fuzzyContent},'%') )
+			<!-- or (select bargin_name from sale_bargin_manage where PROJECT_MANAGE_ID=project.id) LIKE CONCAT('%',#{fuzzyContent},'%')
+			or (select company from sale_bargin_manage where PROJECT_MANAGE_ID=project.id) LIKE CONCAT('%',#{fuzzyContent},'%') -->
+		</if>
+		<if test="status != null and status != ''">
+			AND project.STATUS = #{status}
+		</if> 
+		<if test="statusNew != null and statusNew != '' and statusNew == 1">
+			AND ((project.status_New != 5 and project.status_New != 6) or (project.status_New is null and project.user_id = #{userId}))
+		</if> 
+		<if test="statusNew != null and statusNew != '' and statusNew == 2">
+			AND project.status_New = 5
+		</if>
+		group by project.id ORDER by project.create_date DESC) project
+		union all
+		select * from (select project.*,(select SUM(TOTAL_MONEY) from sale_bargin_manage b where project.id = b.project_manage_id and b.status = 5) as TOTAL_MONEY,
+		(select SUM(confirm_amount) from sale_bargin_manage a inner join
+		(select confirm_amount,results_amount,sale_bargin_manage_id from fin_results_recognition
+		union all
+		select confirm_amount,results_contribution as results_amount,sale_bargin_manage_id from fin_revenue_recognition
+		union all
+		select a.collection_bill confirm_amount,0 as results_amount,b.bargin_id as sale_bargin_manage_id
+		from fin_colletcion_attach a inner join fin_collection b on a.COLLECTION_ID=b.id where  b.status = '5' and b.is_new_process = 0
+		union all
+		select c.collection_bill confirm_amount,0 as results_amount,d.bargin_id as sale_bargin_manage_id
+		from fin_colletcion_attach c inner join fin_collection d on c.COLLECTION_ID=d.id where  d.status = '3' and d.is_new_process = 1) b
+		on a.id=b.sale_bargin_manage_id where project_manage_id = project.id) as confirmAmount,
+		(select SUM(actReimburse) from (
+		select b.ACT_REIMBURSE as actReimburse,b.PROJECT_ID
+		from fin_travelreimburse a inner join fin_travelreimburse_attach b on a.id=b.TRAVELREIMBURSE_ID where a.status = 6 GROUP BY b.id
+		union all
+		select b.ACT_REIMBURSE as actReimburse,b.PROJECT_ID
+		from fin_reimburse a inner join fin_reimburse_attach b on a.id=b.REIMBURSE_ID where a.status = 6 GROUP BY b.id
+		union all
+		select a.pay_bill actReimburse ,b.PROJECT_MANAGE_ID AS PROJECT_ID
+		from fin_pay_attach a inner join fin_pay b on a.PAY_ID=b.id where b.`STATUS` = 5 GROUP BY a.id ) a
+		where a.PROJECT_ID=project.id
+		) as actReimburse2,(select SUM(b.ACT_REIMBURSE) as actReimburse
+		from fin_reimburse a inner join fin_reimburse_attach b on a.id=b.REIMBURSE_ID where b.PROJECT_ID=project.id and a.status = 6 and b.type=37) as actReimburse
+		from sale_project_manage as project
+		WHERE  (project.IS_DELETED IS NULL OR project.IS_DELETED = '0')
+		<if test="startTime != null and startTime != ''.toString()">
+			AND (project.project_Date &gt;= #{startTime} or project.create_Date &gt;= #{startTime})
+		</if>
+		<if test="endTime != null and endTime != ''.toString()">
+			AND (project.project_date &lt;= #{endTime} or project.create_Date &lt;= #{endTime})
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( project.name LIKE CONCAT('%',#{fuzzyContent},'%')
+			OR (select name from sys_user where id= project.user_Id) LIKE CONCAT('%',#{fuzzyContent},'%') )
+		</if>
+		<if test="status != null and status != ''">
+			AND project.STATUS = #{status}
+		</if>
+		<if test="statusNew != null and statusNew != '' and statusNew == 1">
+			AND ((project.status_New != 5 and project.status_New != 6) or (project.status_New is null and project.user_id = #{userId}))
+		</if>
+		<if test="statusNew != null and statusNew != '' and statusNew == 2">
+			AND project.status_New = 5
+		</if>
+		<if test="deptId == 3 or userDeptId == 3">
+			AND project.id = 54
+		</if>
+		<if test="deptId != 3 and userDeptId != 3">
+			AND project.id = null
+		</if>
+		group by project.id ORDER by project.create_date DESC) projects
+	</select>
+	
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findById" resultMap="saleProjectManageResult">
+		select ID,`NAME`,TYPE,LOCATION,USER_ID,DEPT_IDS,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE,IS_DELETED,`STATUS`,`DESCRIBE`,APPLICANT,
+		SUBMIT_DATE,SIZE,case  when PROJECT_DATE is null  then CREATE_DATE else PROJECT_DATE end as PROJECT_DATE,PROJECT_END_DATE,RESEARCH_COST_LINES,APPLICATION_TYPE,PROCESS_INSTANCE_ID,STATUS_NEW,APPLY_DEPT_ID,
+		DUTY_DEPT_ID,is_new_project,title,ATTACH_NAME,ATTACHMENTS,REASON
+		from sale_project_manage
+		WHERE ID = #{id}
+	</select>
+	
+	<select id="findByIdByCreateDate" resultMap="saleProjectManageResult">
+		select ID,`NAME`,TYPE,LOCATION,USER_ID,DEPT_IDS,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE,IS_DELETED,`STATUS`,`DESCRIBE`,APPLICANT,
+		SUBMIT_DATE,SIZE,case  when PROJECT_DATE is null  then CREATE_DATE else PROJECT_DATE end as PROJECT_DATE,PROJECT_END_DATE,RESEARCH_COST_LINES,APPLICATION_TYPE,PROCESS_INSTANCE_ID,STATUS_NEW,APPLY_DEPT_ID,
+		DUTY_DEPT_ID,is_new_project,title,ATTACH_NAME,ATTACHMENTS,REASON
+		from sale_project_manage
+		WHERE ID = #{id} and CREATE_DATE &gt;= '2019-01-01 00:00:00'
+	</select>
+	
+	<select id="ajaxName" resultMap="saleProjectManageResult">
+		SELECT * FROM sale_project_manage
+		WHERE name = #{name}
+		<if test="id != null and id != ''">
+				AND ID != #{id}
+		</if>
+	</select>
+	
+	<select id="findByName" resultMap="saleProjectManageResult">
+		SELECT * FROM sale_project_manage
+		WHERE name = #{name} and status ='1'
+	</select>
+	
+	
+	
+	<select id="findAll" resultMap="saleProjectManageResult">
+		SELECT * FROM sale_project_manage where (IS_DELETED IS NULL OR IS_DELETED = '0')
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_project_manage (
+		  `NAME`,
+		  `TYPE`,
+		  `LOCATION`,
+		  `USER_ID`,
+		  `DESCRIBE`,
+		  `DEPT_IDS`,
+		  `CREATE_BY`,
+		  `CREATE_DATE`,
+		  `UPDATE_BY`,
+		  `UPDATE_DATE`,
+		  `STATUS`,
+		  APPLICANT,
+		  SUBMIT_DATE,
+		  SIZE,
+		  PROJECT_DATE,
+		  PROJECT_END_DATE,
+		  research_cost_lines,
+		  application_type,
+		  PROCESS_INSTANCE_ID,
+		  STATUS_NEW,
+		  is_new_project,
+		  duty_dept_id,
+		  apply_dept_id,
+		  title,
+		  ATTACH_NAME,
+		  ATTACHMENTS,
+		  REASON
+		) 
+		VALUES (
+			#{name}, #{type},#{location}, #{userId},#{describe},#{deptIds},#{createBy}, #{createDate},
+			#{updateBy}, #{updateDate},#{status},#{applicant},#{submitDate},#{size},#{projectDate},
+			#{projectEndDate},#{researchCostLines},#{applicationType},#{processInstanceId},#{statusNew},
+			#{isNewProject},#{dutyDeptId},#{applyDeptId},#{title},#{attachName},#{attachments},#{reason}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE 
+			sale_project_manage 
+		SET
+		  `NAME` = #{name},
+		  `TYPE` = #{type},
+		  `LOCATION` = #{location},
+		  `USER_ID` = #{userId},
+		  `DESCRIBE`= #{describe},
+		  `DEPT_IDS` = #{deptIds},
+		  `CREATE_BY` = #{createBy},
+		  `CREATE_DATE` = #{createDate},
+		  `UPDATE_BY` = #{updateBy},
+		  `UPDATE_DATE` = #{updateDate},
+		  <if test="isDeleted != null and isDeleted != ''" >
+		  	`IS_DELETED`= #{isDeleted},
+		  </if>
+		  `STATUS`=#{status},
+		  `APPLICANT` = #{applicant},
+		  `SUBMIT_DATE` = #{submitDate},
+		  `SIZE` = #{size},
+		  `PROJECT_DATE` = #{projectDate},
+		  `PROJECT_END_DATE` = #{projectEndDate},
+		  `research_cost_lines` = #{researchCostLines},
+		  `application_type` = #{applicationType},
+		  `PROCESS_INSTANCE_ID` = #{processInstanceId},
+		  `STATUS_NEW` = #{statusNew},
+		  `is_new_project` = #{isNewProject},
+		  `duty_dept_id` = #{dutyDeptId},
+		  `apply_dept_id` = #{applyDeptId},
+		  `title` = #{title},
+		  `ATTACH_NAME` = #{attachName},
+		  `ATTACHMENTS` = #{attachments},
+		`REASON` = #{reason}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="setStatus">
+		UPDATE 
+			sale_project_manage 
+		SET
+		  `UPDATE_BY` = #{updateBy},
+		  `UPDATE_DATE` = #{updateDate},
+		  `STATUS`= #{status}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="updateCost">
+		UPDATE 
+			sale_project_manage 
+		SET
+		  `UPDATE_BY` = #{updateBy},
+		  `UPDATE_DATE` = #{updateDate},
+		  `RESEARCH_COST_LINES`= #{researchCostLines}
+		WHERE ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM sale_project_manage
+		WHERE ID = #{id}
+	</delete>
+
+	<select id="findByIdList" resultMap="saleProjectManageResult">
+		SELECT id,name FROM sale_project_manage WHERE id IN
+			<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<resultMap type="com.reyzar.oa.common.dto.ProjectDTO" id="projectDTOResult">
+		<result property="name" column="name" />
+		<result property="type" column="type" />
+		<result property="location" column="location" />
+		<result property="describe" column="describe" />
+		<result property="userName" column="user_Name" />
+	</resultMap>
+	
+	<select id="getExcelData" resultMap="projectDTOResult">
+		select spm.name name,spm.type type,spm.location location,spm.describe ,su.name user_name from sale_project_manage spm left join  sys_user su on spm.USER_ID=su.ID
+		WHERE 1 = 1 
+		<!-- <if test="!seeall">
+			AND (
+				CONCAT(',', `DEPT_IDS`, ',') REGEXP CONCAT(',(',REPLACE(#{deptIdList},',','|'),'),')
+				OR (DEPT_IDS = '' OR DEPT_IDS IS NULL)
+			)
+		</if> -->
+		<if test="type != null and type != ''">
+			AND spm.TYPE = #{type}
+		</if>
+		<if test="name != null and name != ''">
+			AND spm.NAME LIKE CONCAT('%',#{name},'%')
+		</if>
+		<if test="status != null and status != ''">
+			AND spm.STATUS = #{status}
+		</if> 
+	</select>
+	
+	<select id="getExcelDataList" resultMap="saleProjectManageResult">
+		SELECT name,
+		CASE application_type 
+         WHEN 1 THEN '新增申请' 
+         WHEN 2 THEN '变更申请' 
+		ELSE '' END as applicationTypes,
+		(select name from sys_user where id=sale_project_manage.user_id limit 1) as principalName,size,applicant,DATE_FORMAT(submit_date,'%Y/%m/%d %H:%m:%s') as submitDates,
+		CASE WHEN  status_new = 0 and  status_new = 7 and status_new = 8 and status_new = 9 and status_new = 10 THEN '提交申请' 
+         WHEN status_new = 1 THEN '项目负责人审批' 
+         WHEN status_new = 2 THEN '部门经理审批' 
+         WHEN status_new = 3 THEN '财务审批' 
+         WHEN status_new = 4 THEN '总经理审批' 
+         WHEN status_new = 5 THEN '已归档' 
+         WHEN status_new = 7 THEN '取消申请' 
+		ELSE '未提交' END as statusNews,
+		(select name from sys_user where id = sale_project_manage.applicant) as applicantName
+		FROM sale_project_manage
+		WHERE 1 = 1 
+		<if test="applicationType != null and applicationType != ''">
+			AND application_type = #{applicationType}
+		</if>
+		<if test="startTime != null and startTime != ''.toString()">
+			AND submit_date &gt;= #{startTime} 
+		</if>
+		<if test="endTime != null and endTime != ''.toString()">
+			AND submit_date &lt;= #{endTime} 
+		</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( name LIKE CONCAT('%',#{fuzzyContent},'%'))
+		</if>
+	</select>
+	
+	<resultMap type="com.reyzar.oa.domain.SysDictData" id="projectTypeResult">
+		<id property="id" column="id" />
+		<result property="typeid" column="type_id" />
+		<result property="name" column="name" />
+		<result property="value" column="value" />
+		<result property="remark" column="remark" />
+		<result property="isdeleted" column="is_deleted" />
+		<result property="sort" column="sort" />
+	</resultMap>
+	
+	<select id="getProjectTyoe" resultMap="projectTypeResult">
+		select * from sys_dictdata where type_id=64
+	</select>
+</mapper>

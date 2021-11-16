@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+	<!-- 加载配置属性文件 -->
+	<!-- <context:property-placeholder ignore-unresolvable="true" location="classpath:oa.properties" /> -->
+	<bean class="com.reyzar.oa.common.encrypt.CustomPropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:oa.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 使用Annotation自动注册Bean,只扫描@Controller -->
+	<context:component-scan base-package="com.reyzar.oa" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+	</context:component-scan>
+
+	<mvc:annotation-driven validator="validator">
+		<mvc:message-converters register-defaults="true">
+			<!-- 将StringHttpMessageConverter的默认编码设为UTF-8 -->
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<constructor-arg value="UTF-8" />
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	<!-- Hibernate 验证器 -->	
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">  
+        <property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>  
+        <!-- 如果不加默认到 使用classpath下的 ValidationMessages.properties -->  
+        <property name="validationMessageSource" ref="messageSource"/>  
+    </bean>  
+    <!-- 国际化的消息资源文件（系统中主要用于显示/错误消息定制） -->  
+    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">  
+        <property name="basenames">  
+            <list>  
+                <value>classpath:messages</value>  
+                <value>classpath:org/hibernate/validator/ValidationMessages</value>  
+            </list>  
+        </property>  
+        <property name="useCodeAsDefaultMessage" value="false"/>  
+        <property name="defaultEncoding" value="UTF-8"/>  
+        <property name="cacheSeconds" value="60"/>  
+    </bean>
+	
+	<mvc:default-servlet-handler />
+	
+	<!-- 拦截器，预留配置 -->
+	<!--<mvc:interceptors>
+	&lt;!&ndash;	日志拦截器&ndash;&gt;
+		<mvc:interceptor> 
+			<mvc:mapping path="/manage/**" />
+			<mvc:exclude-mapping path="/login"/> 
+			<mvc:exclude-mapping path="/logout"/> 
+			<mvc:exclude-mapping path="/static/**"/> 
+			<mvc:exclude-mapping path="/css/**"/> 
+			<mvc:exclude-mapping path="/style/**"/> 
+			<mvc:exclude-mapping path="/js/**"/> 
+			<mvc:exclude-mapping path="/images/**"/> 
+			<mvc:exclude-mapping path="/upload/**"/> 
+			<bean class="com.reyzar.oa.common.interceptor.LogInterceptor" /> 
+		</mvc:interceptor> 
+	</mvc:interceptors>-->
+
+	<!-- 上传文件拦截 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="${web.maxUploadSize}" />
+	</bean>
+
+	<!--配置Freemarker -->
+	<!-- <bean id="freemarkerConfigurer" class="com.reyzar.oa.common.freemarker.ShiroTagFreeMarkerConfigurer">
+		<property name="templateLoaderPath" value="/views/" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="template_update_delay">0</prop>
+				<prop key="defaultEncoding">UTF-8</prop>
+			</props>
+		</property>
+	</bean> -->
+	<!-- freemarker视图解析器 -->
+	<!-- <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="prefix" value="/" />
+		<property name="suffix" value=".html" />
+		<property name="contentType" value="text/html;charset=UTF-8" />
+		<property name="viewClass" value="org.springframework.web.servlet.view.freemarker.FreeMarkerView" />
+		<property name="requestContextAttribute" value="request" />
+	</bean> -->
+	
+	<!-- 定义JSP视图文件解析 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="${web.view.prefix}" />
+		<property name="suffix" value="${web.view.suffix}" />
+	</bean>
+	
+	<!-- 支持Shiro对Controller的方法级AOP安全控制  SpringMVC特有，是神坑，妈蛋！-->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor">
+		<property name="proxyTargetClass" value="true" />
+	</bean>
+	
+	<!-- <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.apache.shiro.authz.UnauthorizedException">manage/error/unauthorized</prop>
+				<prop key="org.apache.shiro.session.InvalidSessionException">manage/error/invalidSession</prop>
+			</props>
+		</property>
+	</bean> -->
+
+	<bean class="com.reyzar.oa.common.exception.CustomExceptionHandler">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.apache.shiro.authz.UnauthorizedException">manage/error/unauthorized</prop>
+				<prop key="org.apache.shiro.session.InvalidSessionException">manage/error/invalidSession</prop>
+				<prop key="com.reyzar.oa.common.exception.BusinessException">manage/error/errorpage</prop>  
+          		<prop key="java.lang.exception">manage/error/500</prop>
+			</props>
+		</property>
+	</bean>
+	
+</beans>

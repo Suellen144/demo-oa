@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinInvoicedAttachDao">
+	
+	<resultMap id="finInvoicedAttachResult" type="finInvoicedAttach">
+		<id property="id" column="id" />
+		<result property="invoicedId" column="invoiced_id" />
+		<result property="name" column="name" />
+		<result property="model" column="model" />
+		<result property="unit" column="unit" />
+		<result property="number" column="number" />
+		<result property="price" column="price" />
+		<result property="money" column="money" />
+		<result property="excise" column="excise" />
+		<result property="exciseMoney" column="excise_money" />
+		<result property="totalMoney" column="total_money" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="levied" column="ldvied" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="finInvoicedAttachResult">
+		SELECT * FROM fin_invoiced_attach
+	</select>
+	
+	<select id="findById" resultMap="finInvoicedAttachResult">
+		SELECT * FROM fin_invoiced_attach WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByInvoicedId" resultMap="finInvoicedAttachResult">
+		SELECT * FROM fin_invoiced_attach WHERE invoiced_id = #{id}
+	</select> 
+	
+	<update id="update">
+		UPDATE fin_invoiced_attach 
+			SET
+			  	INVOICED_ID=#{invoicedId},
+			  	NAME=#{name},
+			  	MODEL=#{model},
+			  	UNIT=#{unit},
+			  	NUMBER=#{number},
+			  	PRICE=#{price},
+			  	MONEY=#{money},
+			  	EXCISE=#{excise},
+			  	EXCISE_MONEY=#{exciseMoney},
+			  	TOTAL_MONEY=#{totalMoney},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	LDVIED=#{levied}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="invoicedAttachList" item="invoicedAttach" index="index" open="" close="" separator=";">
+			UPDATE fin_invoiced_attach 
+				SET
+					INVOICED_ID=#{invoicedAttach.invoicedId},
+				  	NAME=#{invoicedAttach.name},
+				  	MODEL=#{invoicedAttach.model},
+				  	UNIT=#{invoicedAttach.unit},
+				  	NUMBER=#{invoicedAttach.number},
+				  	PRICE=#{invoicedAttach.price},
+				  	MONEY=#{invoicedAttach.money},
+				  	EXCISE=#{invoicedAttach.excise},
+				  	EXCISE_MONEY=#{invoicedAttach.exciseMoney},
+				  	TOTAL_MONEY=#{invoicedAttach.totalMoney},
+				  	CREATE_BY=#{invoicedAttach.createBy},
+				  	CREATE_DATE=#{invoicedAttach.createDate},
+				  	UPDATE_BY=#{invoicedAttach.updateBy},
+				  	UPDATE_DATE=#{invoicedAttach.updateDate},
+				  	LDVIED=#{invoicedAttach.levied}
+			WHERE ID = #{invoicedAttach.id}
+		</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_invoiced_attach(
+			  	INVOICED_ID,
+			  	NAME,
+			  	MODEL,
+			  	UNIT,
+			  	NUMBER,
+			  	PRICE,
+			  	MONEY,
+			  	EXCISE,
+			  	EXCISE_MONEY,
+			  	TOTAL_MONEY,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	LDVIED
+			) 
+			VALUES (
+			  	#{invoicedId},
+			  	#{name},
+			  	#{model},
+			  	#{unit},
+			  	#{number},
+			  	#{price},
+			  	#{money},
+			  	#{excise},
+			  	#{exciseMoney},
+			  	#{totalMoney},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{levied}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO fin_invoiced_attach(
+			  	INVOICED_ID,
+			  	NAME,
+			  	MODEL,
+			  	UNIT,
+			  	NUMBER,
+			  	PRICE,
+			  	MONEY,
+			  	EXCISE,
+			  	EXCISE_MONEY,
+			  	TOTAL_MONEY,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	LDVIED
+			) 
+			VALUES
+		<foreach item="invoicedAttach" index="index" collection="list" separator=",">  
+			 (
+			  	#{invoicedAttach.invoicedId},
+			  	#{invoicedAttach.name},
+			  	#{invoicedAttach.model},
+			  	#{invoicedAttach.unit},
+			  	#{invoicedAttach.number},
+			  	#{invoicedAttach.price},
+			  	#{invoicedAttach.money},
+			  	#{invoicedAttach.excise},
+			  	#{invoicedAttach.exciseMoney},
+			  	#{invoicedAttach.totalMoney},
+			  	#{invoicedAttach.createBy},
+			  	#{invoicedAttach.createDate},
+			  	#{invoicedAttach.updateBy},
+			  	#{invoicedAttach.updateDate},
+			  	#{invoicedAttach.levied}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_invoiced_attach WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByInvoicedId">
+		DELETE FROM fin_invoiced_attach WHERE invoiced_id = #{invoicedId}
+	</delete>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM fin_invoiced_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISaleProjectManageHistoryDao">
+	
+	<resultMap id="saleProjectManageHistoryResult" type="saleProjectManageHistory">
+		<id property="id" column="id" />
+		<result property="projectId" column="project_id" />
+		<result property="name" column="name" />
+		<result property="describe" column="describe" />
+		<result property="userId" column="user_id" />
+		<result property="status" column="status" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="applicant" column="applicant" />
+		<result property="submitDate" column="submit_date" />
+		<result property="size" column="size" />
+		<result property="barginMoney" column="bargin_money" />
+		<result property="income" column="income" />
+		<result property="pay" column="pay" />
+		<result property="ggMoney" column="ggmoney" />
+		<result property="projectDate" column="projectdate" />
+		<result property="projectEndDate" column="project_end_date" />
+		<result property="researchCostLines" column="research_cost_lines" />
+		<result property="qdMoney" column="qdmoney" />
+		<result property="qdMoneyUsed" column="qdmoney_used" />
+		<result property="qdMoneyResidue" column="qdmoney_residue" />
+		<result property="performanceContribution" column="performance_contribution" />
+		<result property="royaltyQuota" column="royalty_quota" />
+		<result property="applicationType" column="application_type" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="statusNew" column="status_new" />
+		<result property="applyDeptId" column="apply_dept_id" />
+		<result property="dutyDeptId" column="duty_dept_id" />
+		<result property="title" column="title" />
+		<result property="createUserId" column="create_user_id" />
+		
+		<association property="alteredPerson" column="create_user_id" javaType="sysUser" select="findUserByUserId" />
+		<association property="applicantP" column="applicant" javaType="sysUser" select="findUserByUserId" />
+		<association property="principal" column="user_id" javaType="sysUser" select="findUserByUserId" /> 
+		<association property="deptA" column="apply_dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<association property="deptD" column="duty_dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+		<collection property="projectMemberHistoryList" column="id" select="findProjectMemberHistoryList" />
+	</resultMap>
+
+	<resultMap id="saleProjectMemberResult" type="saleProjectMember">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="resultsProportion" column="results_proportion" />
+		<result property="commissionProportion" column="commission_proportion" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		
+		<association property="principal" column="user_id" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	<resultMap id="saleProjectMemberHistoryResult" type="saleProjectMemberHistory">
+		<result property="userId" column="user_id" />
+		<result property="resultsProportion" column="results_proportion" />
+		<result property="commissionProportion" column="commission_proportion" />
+		<result property="projectManageId" column="project_manage_id" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isDeleted" column="is_deleted" />
+		
+		<association property="principal" column="user_id" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE ID = #{id}
+	</select>
+	
+	<select id="findProjectMemberList" resultMap="saleProjectMemberResult">
+		SELECT * FROM sale_project_member WHERE project_manage_id = #{id} and IS_DELETED = '0'
+	</select>
+	
+	<select id="findProjectMemberHistoryList" resultMap="saleProjectMemberHistoryResult">
+		SELECT * FROM sale_project_member_history WHERE project_manage_id = #{id} AND (IS_DELETED =0 OR IS_DELETED IS NULL)
+		order by sorting asc
+	</select>
+	
+	<select id="findUserByUserId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findById" resultMap="saleProjectManageHistoryResult">
+		SELECT * FROM sale_project_manage_history
+		WHERE ID = #{id}
+	</select>
+	
+	<select id="findByProjectId" resultMap="saleProjectManageHistoryResult">
+		SELECT * FROM sale_project_manage_history
+		WHERE PROJECT_ID = #{id} AND STATUS_NEW =5
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_project_manage_history (
+		  PROJECT_ID,
+		  NAME,
+		  USER_ID,
+		  `DESCRIBE`,
+		  CREATE_BY,
+		  CREATE_DATE,
+		  STATUS, 
+		  APPLICANT,
+		  SUBMIT_DATE,
+		  SIZE,
+		  BARGIN_MONEY,
+		  INCOME,
+		  PAY,
+		  GGMONEY,
+		  PROJECT_DATE,
+		  PROJECT_END_DATE,
+		  RESEARCH_COST_LINES,
+		  QDMONEY,
+		  QDMONEY_USED,
+		  QDMONEY_RESIDUE,
+		  PERFORMANCE_CONTRIBUTION,
+		  ROYALTY_QUOTA,
+		  application_type,
+		  PROCESS_INSTANCE_ID,
+		  STATUS_NEW,
+		  APPLY_DEPT_ID,
+		  DUTY_DEPT_ID,
+		  title,
+		  CREATE_USER_ID
+		) 
+		VALUES (
+			#{projectId},#{name},#{userId},#{describe},#{createBy}, #{createDate},#{status},#{applicant},
+			#{submitDate},#{size},#{barginMoney},#{income},#{pay},#{ggMoney},#{projectDate},#{projectEndDate},
+			#{researchCostLines},#{qdMoney},#{qdMoneyUsed},#{qdMoneyResidue},#{performanceContribution},
+			#{royaltyQuota},#{applicationType},#{processInstanceId},#{statusNew},#{applyDeptId},#{dutyDeptId},
+			#{title},#{createUserId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE 
+			sale_project_manage_history 
+		SET
+		   PROJECT_ID = #{projectId},
+		  `NAME` = #{name},
+		  `USER_ID` = #{userId},
+		  `DESCRIBE`= #{describe},
+		  `CREATE_BY` = #{createBy},
+		  `CREATE_DATE` = #{createDate},
+		  `STATUS`= #{status},		  
+		  `APPLICANT` = #{applicant},
+		  `SUBMIT_DATE` = #{submitDate},
+		  `SIZE` = #{size},
+		   BARGIN_MONEY = #{barginMoney},
+		   INCOME = #{income},
+		   PAY = #{pay},
+		   GGMONEY = #{ggMoney},
+		  `PROJECT_DATE` = #{projectDate},
+		  `PROJECT_END_DATE` = #{projectEndDate},
+		  `research_cost_lines` = #{researchCostLines},
+		   QDMONEY = #{qdMoney},
+		   QDMONEY_USED = #{qdMoneyUsed},
+		   QDMONEY_RESIDUE = #{qdMoneyResidue},
+		   PERFORMANCE_CONTRIBUTION = #{performanceContribution},
+		   ROYALTY_QUOTA = #{royaltyQuota},
+		  `application_type` = #{applicationType},
+		  `PROCESS_INSTANCE_ID` = #{processInstanceId},
+		  `STATUS_NEW` = #{statusNew},
+		   APPLY_DEPT_ID = #{applyDeptId},
+		   DUTY_DEPT_ID = #{dutyDeptId},
+		   title = #{title},
+		   CREATE_USER_ID = #{createUserId}
+		WHERE ID = #{id}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM sale_project_manage_history
+		WHERE ID = #{id}
+	</delete>
+
+</mapper>

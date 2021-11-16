@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysProcessTodoDao">
+	
+	<resultMap id="sysProcessTodoResult" type="sysProcessTodo">
+		<id property="id" column="id" />
+		<result property="companyId" column="company_id" />
+		<result property="process" column="process" />
+		
+		<collection property="nodeList" column="id" select="selectNode" />
+	</resultMap>
+	
+	<resultMap id="sysProcessTodoNodeResult" type="sysProcessTodoNode">
+		<id property="id" column="id" />
+		<result property="processTodoId" column="process_todo_id" />
+		<result property="node" column="node" />
+		<result property="handlerId" column="handler_id" />
+		
+		<association property="handler" column="handler_id" javaType="sysUser" select="findUserByHandlerId" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="sysProcessTodoResult">
+		SELECT * FROM sys_process_todo
+	</select>
+	
+	<select id="findById" resultMap="sysProcessTodoResult">
+		SELECT * FROM sys_process_todo WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByCompanyIdAndProcess" resultMap="sysProcessTodoResult">
+		SELECT * FROM sys_process_todo WHERE COMPANY_ID = #{companyId} AND PROCESS = #{process}
+	</select> 
+	
+	<!-- 关联查询 Begin -->
+	<select id="findUserByHandlerId" resultType="sysUser">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	<select id="selectNode" resultMap="sysProcessTodoNodeResult">
+		SELECT * FROM sys_process_todo_node WHERE PROCESS_TODO_ID = #{id}
+	</select>
+	<!-- 关联查询 End -->
+	
+	<update id="update">
+		UPDATE sys_process_todo 
+			SET
+			  	COMPANY_ID=#{companyId},
+			  	PROCESS=#{process}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sys_process_todo(
+			  	COMPANY_ID,
+			  	PROCESS
+			) 
+			VALUES (
+			  	#{companyId},
+			  	#{process}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM sys_process_todo WHERE ID = #{id}
+	</delete>
+	
+	<!-- 批量操作流程待办 -->
+	<update id="batchUpdate">
+		<foreach collection="processTodoList" item="processTodo" index="index" open="" close="" separator=";">
+			UPDATE sys_process_todo 
+				SET
+				  	COMPANY_ID=#{processTodo.companyId},
+				  	PROCESS=#{processTodo.process}
+			WHERE ID = #{processTodo.id}
+		</foreach>
+	</update>
+	
+	<insert id="batchSave">
+		INSERT INTO sys_process_todo(
+			  	COMPANY_ID,
+			  	PROCESS
+			) 
+			VALUES 
+			<foreach collection="processTodoList" item="processTodo" index="index" separator=",">
+				(
+				  	#{processTodo.companyId},
+				  	#{processTodo.process}
+				)
+			</foreach>
+	</insert>
+	
+	<!-- 批量操作流程待办节点 -->
+	<update id="batchUpdateNode">
+		<foreach collection="nodeList" item="node" index="index" open="" close="" separator=";">
+			UPDATE sys_process_todo_node 
+				SET
+				  	PROCESS_TODO_ID=#{node.processTodoId},
+				  	NODE=#{node.node},
+				  	HANDLER_ID=#{node.handlerId}
+			WHERE ID = #{node.id}
+		</foreach>
+	</update>
+	
+	<insert id="batchSaveNode">
+		INSERT INTO sys_process_todo_node(
+			  	PROCESS_TODO_ID,
+			  	NODE,
+			  	HANDLER_ID
+			) 
+			VALUES 
+			<foreach collection="nodeList" item="node" index="index" separator=",">
+				(
+				  	#{node.processTodoId},
+				  	#{node.node},
+				  	#{node.handlerId}
+				)
+			</foreach>
+	</insert>
+</mapper>

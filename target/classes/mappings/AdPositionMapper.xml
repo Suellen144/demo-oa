@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdPositionDao">
+	
+	<resultMap id="adPositionResult" type="adPosition">
+		<id property="id" column="id" />
+		<result property="deptId" column="dept_id" />
+		<result property="name" column="name" />
+		<result property="level" column="LEVEL" />
+		<result property="enname" column="enname" />
+		<result property="code" column="code" />
+		<result property="sort" column="sort" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="adPositionResult">
+		SELECT * FROM ad_position ORDER BY SORT DESC
+	</select>
+	
+	<select id="findByPage" resultMap="adPositionResult">
+		SELECT * FROM ad_position
+			WHERE 1 = 1
+			<if test="name != null and name != ''">
+				AND (NAME LIKE CONCAT('%',#{name},'%') OR ENNAME LIKE CONCAT('%',#{name},'%'))
+			</if>
+			<if test="code != null and code != ''">
+				AND CODE LIKE CONCAT('%',#{code},'%')
+			</if>
+	</select>
+	
+	<select id="findById" resultMap="adPositionResult">
+		SELECT * FROM ad_position WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByDeptId" resultMap="adPositionResult">
+		SELECT * FROM ad_position WHERE DEPT_ID= #{deptId}
+	</select> 
+	
+	<select id="findByCode" resultMap="adPositionResult">
+		SELECT * FROM ad_position WHERE CODE= #{code}
+	</select>
+	
+	<select id="getMaxCode" resultType="java.util.Map">
+		SELECT MAX(`code`) AS `code` FROM ad_position
+	</select>
+	
+	<select id="findPositionOfManagerByDeptIdAndLevel" resultMap="adPositionResult">
+		SELECT * FROM ad_position WHERE DEPT_ID = #{deptId} AND LEVEL = #{level}
+	</select>
+	
+	<update id="update">
+		UPDATE ad_position 
+			SET
+			  	NAME=#{name},
+			  	ENNAME=#{enname},
+			  	CODE=#{code},
+			  	LEVEL=#{level},
+			  	SORT=#{sort},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_position(
+				DEPT_ID,
+			  	NAME,
+			  	ENNAME,
+			  	CODE,
+			  	LEVEL,
+			  	SORT,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+				#{deptId},
+			  	#{name},
+			  	#{enname},
+			  	#{code},
+			  	#{level},
+			  	#{sort},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_position WHERE ID = #{id}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAddressBookDao">
+	
+	<resultMap id="addressBookResult" type="addressBook">
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="deptName" column="deptName" />
+		<result property="name" column="name" />
+		<result property="phone" column="phone" />
+		<result property="email" column="email" />
+		<result property="position" column="position" />
+		
+		<result property="gsName" column="gsName" />
+		<result property="code" column="code" />
+		<result property="xzm" column="xzm" />
+	</resultMap>
+	
+	<select id="queryAddressBookList" parameterType="String" resultMap="addressBookResult">
+		SELECT
+			t.user_id AS userId,
+			u.dept_id AS deptId,
+			d.`NAME` AS deptName,
+			t.`name`,
+			t.phone,
+			t.email,
+			t.position
+		FROM
+			ad_record t
+		JOIN sys_user u ON t.user_id = u.ID
+		JOIN sys_dept d ON u.DEPT_ID = d.ID
+		WHERE
+			u.is_deleted IS NULL
+		<if test="queryVal1 !=null and queryVal1 !=''">
+			AND t.`name` LIKE CONCAT('%',#{queryVal1},'%') 
+		</if>
+		<if test="queryVal2 !=null and queryVal2 !=''">
+			AND t.phone = #{queryVal2}
+		</if>
+		<if test="queryVal3 !=null and queryVal3 !=''">
+			AND t.email = #{queryVal3}
+		</if>
+	</select>
+	
+	
+	
+	
+	
+	
+</mapper>

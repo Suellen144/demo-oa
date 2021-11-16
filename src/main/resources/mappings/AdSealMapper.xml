@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdSealDao">
+	
+	<resultMap id="adSealResult" type="adSeal">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="title" column="title" />
+		<result property="sealType" column="seal_type" />
+		<result property="apply" column="apply" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="attachments" column="attachments" />
+		<result property="attachName" column="attach_name" />
+		<result property="reason" column="reason" />
+		<result property="status" column="status" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="applyTime" column="apply_time" />
+		
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+	</resultMap>
+	
+	<select id="findAll" resultMap="adSealResult">
+		SELECT * FROM ad_seal
+	</select>
+	
+	<select id="findById" resultMap="adSealResult">
+		SELECT * FROM ad_seal WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="adSealResult">
+		SELECT `seal`.* FROM ad_seal `seal`
+		JOIN sys_user `user`
+				ON `user`.`ID` = `seal`.USER_ID
+			JOIN sys_dept dept
+				ON dept.`ID` = `user`.`DEPT_ID`
+			WHERE seal.status != 5
+		<if test="deptIdSet == null or deptIdSet.size == 0">
+			AND `seal`.USER_ID = #{userId}
+		</if>
+		<if test="deptIdSet != null and deptIdSet.size > 0">
+			AND (dept.`ID` IN 
+			<foreach item="deptId" index="index" collection="deptIdSet" open="(" separator="," close=")">  
+				#{deptId}
+			</foreach>
+			OR `seal`.USER_ID = #{userId})
+		</if>
+		
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+			AND ( `user`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR `dept`.`NAME` LIKE CONCAT('%',#{fuzzyContent},'%') 
+				OR `seal`.`REASON` LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR (CASE WHEN `seal`.`seal_type` = '0' THEN '公章' 
+						WHEN `seal`.`seal_type` = '1' THEN '合同章' 
+						WHEN `seal`.`seal_type` = '2' THEN '财务章' 
+						ELSE '' END) LIKE CONCAT('%',#{fuzzyContent},'%') )
+		</if>
+		ORDER BY `seal`.ID DESC
+	</select>
+	
+	<update id="update">
+		UPDATE ad_seal 
+			SET
+			  	PROCESS_INSTANCE_ID=#{processInstanceId},
+			  	TITLE=#{title},
+				apply=#{apply},
+			  	SEAL_TYPE=#{sealType},
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	ATTACHMENTS=#{attachments},
+			  	ATTACH_NAME=#{attachName},
+			  	REASON=#{reason},
+			  	STATUS=#{status},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	APPLY_TIME=#{applyTime}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_seal(
+			  	PROCESS_INSTANCE_ID,
+			  	TITLE,
+			 	apply,
+			  	SEAL_TYPE,
+			  	USER_ID,
+			  	DEPT_ID,
+			  	ATTACHMENTS,
+			  	ATTACH_NAME,
+			  	REASON,
+			  	STATUS,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	APPLY_TIME
+			) 
+			VALUES (
+			  	#{processInstanceId},
+			  	#{title},
+			  <!-- 	#{company}, -->
+				#{apply},
+			  	#{sealType},
+			  	#{userId},
+			  	#{deptId},
+			  	#{attachments},
+			  	#{attachName},
+			  	#{reason},
+			  	#{status},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{applyTime}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_seal WHERE ID = #{id}
+	</delete>
+	
+	<select id="findUserByUserId" resultMap="sysUserResult">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE `ID` = #{id}
+	</select>
+	
+</mapper>

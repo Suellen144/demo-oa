@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IRolePermissionDao">
+	
+	<select id="findRolePermission" resultType="Integer">
+		SELECT PERMISSION_ID 
+			FROM sys_role_permission
+		WHERE ROLE_ID = #{roleId}
+	</select>
+	
+	<delete id="delete">
+		DELETE FROM sys_role_permission WHERE ROLE_ID = #{roleId}
+		<if test="permissionidList != null and permissionidList.size > 0">
+			 AND PERMISSION_ID NOT IN 
+			<foreach item="permissionId" index="index" collection="permissionidList" open="(" separator="," close=")">  
+				#{permissionId}
+			</foreach>
+		</if>
+	</delete>
+	
+	<!-- 批量插入 -->
+	<insert id="insertAll">
+		INSERT INTO sys_role_permission(ROLE_ID, PERMISSION_ID) 
+			VALUES
+			<foreach collection="permissionidList" item="permissionId" index="index" separator=",">
+				(
+					#{roleId}, #{permissionId}
+				)
+			</foreach>
+	</insert>
+	
+	<delete id="delByRoleid">
+		DELETE FROM sys_role_permission WHERE ROLE_ID = #{roleId}
+	</delete>
+	
+	<!-- 通过菜单ID删除角色-权限表下的权限 -->
+	<delete id="delByMenuids">
+		DELETE FROM sys_role_permission WHERE PERMISSION_ID IN (
+			SELECT T.ID FROM (
+			    SELECT p.ID FROM sys_permission p
+				    JOIN sys_role_permission rp ON rp.PERMISSION_ID = p.ID
+				    WHERE p.MENU_ID IN 
+					<foreach item="id" index="index" collection="list" open="(" separator="," close=")">  
+		  				#{id}
+		  			</foreach>
+  			) T
+  		)
+	</delete>
+	
+	<delete id="delByPermissionids">
+		DELETE FROM sys_role_permission WHERE PERMISSION_ID IN 
+		<foreach item="id" index="index" collection="list" open="(" separator="," close=")">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

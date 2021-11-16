@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdTravelAttachDao">
+	
+	<resultMap id="adTravelAttachResult" type="adTravelAttach">
+		<id property="id" column="id" />
+		<result property="travelId" column="travel_id" />
+		<result property="beginDate" column="begin_date" />
+		<result property="endDate" column="end_date" />
+		<result property="place" column="place" />
+		<result property="task" column="task" />
+		<result property="vehicle" column="vehicle" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="adTravelAttachResult">
+		SELECT * FROM ad_travel_attach
+	</select>
+	
+	<select id="findById" resultMap="adTravelAttachResult">
+		SELECT * FROM ad_travel_attach WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByTravelId" resultMap="adTravelAttachResult">
+		SELECT * FROM ad_travel_attach WHERE TRAVEL_ID = #{id}
+	</select>
+	
+	<update id="update">
+		UPDATE ad_travel_attach 
+			SET
+			  	TRAVEL_ID=#{travelId},
+			  	BEGIN_DATE=#{beginDate},
+			  	END_DATE=#{endDate},
+			  	PLACE=#{place},
+			  	TASK=#{task},
+			  	VEHICLE=#{vehicle},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="batchUpdate">
+		<foreach collection="travelAttachList" item="travelAttach" index="index" open="" close="" separator=";">
+			UPDATE ad_travel_attach 
+				SET
+				  	TRAVEL_ID=#{travelAttach.travelId},
+				  	BEGIN_DATE=#{travelAttach.beginDate},
+				  	END_DATE=#{travelAttach.endDate},
+				  	PLACE=#{travelAttach.place},
+				  	TASK=#{travelAttach.task},
+				  	VEHICLE=#{travelAttach.vehicle},
+				  	UPDATE_BY=#{travelAttach.updateBy},
+				  	UPDATE_DATE=#{travelAttach.updateDate}
+			WHERE ID = #{travelAttach.id}
+		</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_travel_attach(
+			  	TRAVEL_ID,
+			  	BEGIN_DATE,
+			  	END_DATE,
+			  	PLACE,
+			  	TASK,
+			  	VEHICLE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{travelId},
+			  	#{beginDate},
+			  	#{endDate},
+			  	#{place},
+			  	#{task},
+			  	#{vehicle},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO ad_travel_attach(
+		  	TRAVEL_ID,
+		  	BEGIN_DATE,
+		  	END_DATE,
+		  	PLACE,
+		  	TASK,
+		  	VEHICLE,
+		  	CREATE_BY,
+		  	CREATE_DATE,
+		  	UPDATE_BY,
+		  	UPDATE_DATE
+		) 
+		VALUES 
+		<foreach item="travelAttach" index="index" collection="list" separator=",">
+			(
+			  	#{travelAttach.travelId},
+			  	#{travelAttach.beginDate},
+			  	#{travelAttach.endDate},
+			  	#{travelAttach.place},
+			  	#{travelAttach.task},
+			  	#{travelAttach.vehicle},
+			  	#{travelAttach.createBy},
+			  	#{travelAttach.createDate},
+			  	#{travelAttach.updateBy},
+			  	#{travelAttach.updateDate}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_travel_attach WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_travel_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

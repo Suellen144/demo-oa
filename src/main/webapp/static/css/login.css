@@ -1,0 +1,16 @@
+body{background: url("../images/index/loginbg.png") no-repeat;width:100%; height:100%;  background-size:100% 100%; position:absolute; filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='bg-login.png',sizingMethod='scale'); }
+#mian{width: 400px;margin: auto;position:relative;top:46%;transform:translateY(-50%);}
+#mian .loginBox{width: 100%;}
+#mian .loginBox .loginLogo{text-align: center;padding-bottom: 30px;}
+#mian .loginBox .loginLogo .logo {display: block;width: 239px;height: 100px;background: url("../images/index/OA02_03.png") center no-repeat;background-size: 100% 100%;margin: auto;}
+#mian .loginBox .loginLogo .logoTxt {margin-top: 10px;display: inline-block;font-size: 13px;line-height: 28px;height: 30px;width: 150px;border-radius: 50px;border: 1px solid #fff;color: #fffefe;}
+#mian .loginBox .loginForm{background: #fff;width: 100%;height: 265px;border-radius: 5px;padding: 40px 40px;}
+#mian .loginBox .loginForm input{outline: none;font-size: 15px;color:#333;width:100%;line-height: 40px;height:40px;border: 1px solid #d7d7d7;border-radius: 5px;padding-left: 10px;}
+#mian .loginBox .loginForm input[type=button]{border: 0;padding: 0;text-align: center;color: #fff;background: #4289ff;cursor: pointer;}
+#mian .loginBox .loginForm input::-webkit-input-placeholder { color:#ddd;}
+#mian .loginBox .loginForm inputinput::-moz-placeholder {color:#ddd;}
+#mian .loginBox .loginForm input::-moz-placeholder {color:#ddd;}
+#mian .loginBox .loginForm input:-ms-input-placeholder { color:#ddd;}
+#mian .loginBox .loginForm .inI{padding-bottom: 30px;}
+footer {text-align: center;padding: 40px 0;font-size: 12px;}
+footer.loginf {position: fixed;left: 0;bottom: 0;width: 100%;padding: 30px;color: rgba(255,255,255,0.6);}

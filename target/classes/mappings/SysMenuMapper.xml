@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.ISysMenuDao">
+	
+	<resultMap id="menuResult" type="sysMenu">
+		<id property="id" column="id" />
+		<result property="parentId" column="parent_id" />
+		<result property="parentsId" column="parents_id" />
+		<result property="name" column="name" />
+		<result property="url" column="url" />
+		<result property="enabled" column="enabled" />
+		<result property="icon" column="icon" />
+		<result property="sort" column="sort" />
+		<result property="permission" column="permission" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		
+		<collection property="children" ofType="sysMenu" column="id" select="getChildrenById" />
+		<collection property="permissionList" column="id" select="getPermissionById" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="menuResult">
+		SELECT ID, PARENT_ID, PARENTS_ID, NAME, URL, ENABLED, 
+				ICON, SORT, PERMISSION, CREATE_BY, CREATE_DATE, UPDATE_BY,
+				 UPDATE_DATE, REMARK, IS_DELETED 
+		FROM sys_menu WHERE IS_DELETED = 0 ORDER BY SORT DESC
+	</select>
+	
+	<select id="findById" resultMap="menuResult">
+		SELECT ID, PARENT_ID, PARENTS_ID, NAME, URL, ENABLED, 
+				ICON, SORT, PERMISSION, CREATE_BY, CREATE_DATE, UPDATE_BY,
+				 UPDATE_DATE, REMARK, IS_DELETED 
+		FROM sys_menu WHERE ID = #{id}
+	</select>
+	
+	<select id="findByName" resultMap="menuResult">
+		SELECT ID, PARENT_ID, PARENTS_ID, NAME, URL, ENABLED, 
+				ICON, SORT, PERMISSION, CREATE_BY, CREATE_DATE, UPDATE_BY,
+				 UPDATE_DATE, REMARK, IS_DELETED 
+		FROM sys_menu WHERE NAME = #{name} AND ENABLED = 1
+	</select>
+	
+	<select id="findByParentid" resultMap="menuResult">
+		SELECT ID, PARENT_ID, PARENTS_ID, NAME, URL, ENABLED, 
+				ICON, SORT, PERMISSION, CREATE_BY, CREATE_DATE, UPDATE_BY,
+				 UPDATE_DATE, REMARK, IS_DELETED 
+		FROM sys_menu WHERE PARENT_ID = #{parentId}
+	</select>
+	
+	<select id="findParentById" resultMap="menuResult">
+		SELECT ID, PARENT_ID, PARENTS_ID, NAME, URL, ENABLED, 
+				ICON, SORT, PERMISSION, CREATE_BY, CREATE_DATE, UPDATE_BY,
+				 UPDATE_DATE, REMARK, IS_DELETED 
+		FROM sys_menu WHERE ID = #{parentId}
+	</select>
+	
+	<select id="findByUserid" resultType="sysMenu">
+		SELECT DISTINCT menu.* FROM sys_menu menu
+		    JOIN sys_role_menu rm ON rm.MENU_ID = menu.ID
+		    JOIN sys_role `role` ON `role`.ID = rm.ROLE_ID
+		    JOIN sys_user_role ur ON ur.ROLE_ID = `role`.ID
+		    JOIN sys_user `user` ON `user`.ID = ur.USER_ID  AND `user`.`is_deleted` is null
+		WHERE `role`.ENABLED = '1'
+			AND `user`.ID = #{userId} 
+			AND `menu`.`ENABLED` = '1'
+	</select>
+	
+	<select id="findByUserId" resultType="sysMenu">
+		SELECT DISTINCT menu.* FROM sys_menu menu
+		    JOIN sys_role_menu rm ON rm.MENU_ID = menu.ID
+		    JOIN sys_role `role` ON `role`.ID = rm.ROLE_ID
+		    JOIN sys_user_role ur ON ur.ROLE_ID = `role`.ID
+		    JOIN sys_user `user` ON `user`.ID = ur.USER_ID  AND `user`.`is_deleted` is null
+		WHERE `role`.ENABLED = '1'
+			AND `user`.ID = #{userId} 
+			AND `menu`.`ENABLED` = '1'
+			AND `menu`.PARENTS_ID != '-1'
+			ORDER BY SORT DESC
+	</select>
+	
+	<!-- <select id="getChildrenById" resultType="sysMenu" parameterType="int">
+		SELECT ID, PARENT_ID, PARENTS_ID, NAME, URL, ENABLED, 
+				ICON, SORT, PERMISSION, CREATE_BY, CREATE_DATE, UPDATE_BY,
+				 UPDATE_DATE, REMARK, IS_DELETED 
+		FROM sys_menu WHERE PARENT_ID = #{id}
+	</select> -->
+	
+	<select id="getChildrenById" resultMap="menuResult">
+		SELECT ID, PARENT_ID, PARENTS_ID, NAME, URL, ENABLED, 
+				ICON, SORT, PERMISSION, CREATE_BY, CREATE_DATE, UPDATE_BY,
+				 UPDATE_DATE, REMARK, IS_DELETED 
+		FROM sys_menu WHERE PARENT_ID = #{id} ORDER BY SORT DESC
+	</select>
+	
+	<select id="getPermissionById" resultType="sysPermission">
+		SELECT ID, MENU_ID, CODE, CREATE_BY, CREATE_DATE, 
+				UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED 
+		FROM sys_permission WHERE MENU_ID = #{id}
+	</select>
+	
+	<delete id="deleteById">
+		DELETE FROM sys_menu WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByIds">
+		DELETE FROM sys_menu WHERE ID IN 
+			<foreach item="id" index="index" collection="list" open="(" separator="," close=")">  
+  				#{id}
+  			</foreach>
+	</delete>
+	
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO 
+			sys_menu(PARENT_ID, PARENTS_ID, NAME, URL, ENABLED, ICON, SORT, PERMISSION, 
+						CREATE_BY, CREATE_DATE, UPDATE_BY, UPDATE_DATE, REMARK, IS_DELETED) 
+			VALUES(
+				#{parentId}, #{parentsId}, #{name}, #{url}, #{enabled}, #{icon}, #{sort}, #{permission},
+				#{createBy}, #{createDate}, #{updateBy}, #{updateDate}, #{remark}, #{isDeleted}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_menu 
+			SET PARENT_ID=#{parentId}, PARENTS_ID=#{parentsId}, NAME=#{name}, URL=#{url}, 
+				ENABLED=#{enabled}, ICON=#{icon}, SORT=#{sort}, PERMISSION=#{permission}, 
+				CREATE_BY=#{createBy}, CREATE_DATE=#{createDate}, UPDATE_BY=#{updateBy}, UPDATE_DATE=#{updateDate}, 
+				REMARK=#{remark}, IS_DELETED=#{isDeleted}
+			WHERE ID = #{id}
+	</update>
+	
+</mapper>

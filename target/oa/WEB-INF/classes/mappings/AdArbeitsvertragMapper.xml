@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdArbeitsvertragDao">
+	
+	<resultMap id="adArbeitsvertragResult" type="com.reyzar.oa.domain.AdArbeitsvertrag">
+		<id property="id" column="id" />
+		<result property="recordId" column="record_id" />
+		<result property="company" column="company" />
+		<result property="beginDate" column="begin_date" />
+		<result property="endDate" column="end_Date" />
+		<result property="signDate" column="sign_Date" />
+		<result property="barginType" column="bargin_Type" />
+		<result property="signReason" column="sign_Reason" />
+	</resultMap>
+
+	<select id="findByRecordId" resultMap="adArbeitsvertragResult">
+		SELECT * FROM ad_arbeitsvertrag WHERE record_id = #{recordId} order by id desc
+	</select> 
+	
+	
+	<update id="update">
+		UPDATE ad_arbeitsvertrag 
+			SET
+			  	RECORD_ID=#{recordId},
+			  	COMPANY=#{company},
+			  	BEGIN_DATE=#{beginDate},
+			  	END_DATE=#{endDate},
+			  	BARGIN_TYPE=#{barginType},
+			  	SIGN_REASON=#{signReason},
+			  	SIGN_DATE=#{signDate},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="arbeitsvertragList" item="arbeitsvertrag" index="index" open="" close="" separator=";">
+			UPDATE ad_arbeitsvertrag 
+				SET
+					RECORD_ID=#{arbeitsvertrag.recordId},
+			  		COMPANY=#{arbeitsvertrag.company},
+			  		BEGIN_DATE=#{arbeitsvertrag.beginDate},
+			  		END_DATE=#{arbeitsvertrag.endDate},
+			  		BARGIN_TYPE=#{arbeitsvertrag.barginType},
+			  		SIGN_REASON=#{arbeitsvertrag.signReason},
+			  		SIGN_DATE=#{arbeitsvertrag.signDate},
+			  		CREATE_BY=#{arbeitsvertrag.createBy},
+			  		CREATE_DATE=#{arbeitsvertrag.createDate},
+			  		UPDATE_BY=#{arbeitsvertrag.updateBy},
+			  		UPDATE_DATE=#{arbeitsvertrag.updateDate}
+			WHERE ID = #{arbeitsvertrag.id}
+		</foreach>
+	</update>
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_arbeitsvertrag(
+			  	RECORD_ID,
+			  	COMPANY,
+			  	BEGIN_DATE,
+			  	END_DATE,
+			  	BARGIN_TYPE,
+			  	SIGN_REASON,
+			  	SIGN_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{recordId},
+			  	#{company},
+			  	#{beginDate},
+			  	#{endDate},
+			  	#{barginType},
+			  	#{signReason},
+			  	#{signDate},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO ad_arbeitsvertrag(
+			  	RECORD_ID,
+			  	COMPANY,
+			  	BEGIN_DATE,
+			  	END_DATE,
+			  	BARGIN_TYPE,
+			  	SIGN_REASON,
+			  	SIGN_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES
+		<foreach item="arbeitsvertrag" index="index" collection="list" separator=",">  
+			 (
+			  		#{arbeitsvertrag.recordId},
+			  		#{arbeitsvertrag.company},
+			  		#{arbeitsvertrag.beginDate},
+			  		#{arbeitsvertrag.endDate},
+			  		#{arbeitsvertrag.barginType},
+			  		#{arbeitsvertrag.signReason},
+			  		#{arbeitsvertrag.signDate},
+			  		#{arbeitsvertrag.createBy},
+			  		#{arbeitsvertrag.createDate},
+			  		#{arbeitsvertrag.updateBy},
+			  		#{arbeitsvertrag.updateDate}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_arbeitsvertrag WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinCollectionAttachDao">
+	
+	<resultMap id="finCollectionAttachResult" type="finCollectionAttach">
+		<id property="id" column="id" />
+		<result property="collectionId" column="collection_id" />
+		<result property="collectionBill" column="collection_bill" />
+		<result property="collectionDate" column="collection_date" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isSend" column="is_send" />
+		<association property="projectManage" column="project_id" javaType="saleProjectManage" select="findProjectById" />
+		<collection property="finCollection" column="collection_id" javaType="FinCollection" select="findCollection"/>
+	</resultMap>
+
+	<resultMap id="finCollectionResult" type="finCollection">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="status" column="status" />
+		<result property="title" column="title" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="barginId" column="bargin_id" />
+		<result property="projectId" column="project_id" />
+		<result property="totalPay" column="total_pay" />
+		<result property="applyPay" column="apply_pay" />
+		<result property="applyProportion" column="apply_proportion" />
+		<result property="payCompany" column="pay_company" />
+		<result property="isInvoiced" column="is_invoiced" />
+		<result property="invoicedId" column="invoiced_id" />
+		<result property="bill" column="bill" />
+		<result property="billDate" column="bill_date" />
+		<result property="coollection" column="coollection" />
+		<result property="collectionType" column="collection_type" />
+		<result property="reason" column="reason" />
+		<result property="isSend" column="is_send" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="emailUid" column="email_uid" />
+		<result property="attachName" column="ATTACH_NAME" />
+		<result property="attachments" column="ATTACHMENTS" />
+	</resultMap>
+
+	<resultMap id="singleDetail" type="com.reyzar.oa.domain.SingleDetail">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="processInstanceId"/>
+		<result property="userName" column="name"/>
+		<result property="date" column="create_date"/>
+		<result property="reason" column="PURPOSE"/>
+		<result property="money" column="ACTUAL_PAY_MONEY"/>
+	</resultMap>
+
+	<!--联合查询开始-->
+	<select id="findCollection" resultMap="finCollectionResult">
+		SELECT * FROM fin_collection WHERE ID = #{collection_id}
+	</select>
+	
+	<select id="findProjectById" resultType="saleProjectManage">
+		SELECT * FROM sale_project_manage WHERE ID = #{id} AND (is_deleted is null or is_deleted = '0' )
+	</select>
+	<!--联合查询结束-->
+	
+	<select id="findAll" resultMap="finCollectionAttachResult">
+		SELECT * FROM fin_colletcion_attach
+	</select>
+	
+	<select id="findById" resultMap="finCollectionAttachResult">
+		SELECT * FROM fin_colletcion_attach WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByCollectionId" resultMap="finCollectionAttachResult">
+		SELECT * FROM fin_colletcion_attach WHERE collection_id = #{id}
+	</select> 
+	
+	
+	<update id="update">
+		UPDATE fin_colletcion_attach 
+			SET
+			  	COLLECTION_ID=#{collectionId},
+			  	COLLECTION_BILL=#{collectionBill},
+			  	COLLECTION_DATE=#{collectionDate},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	IS_SEND=#{isSend}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="collectionAttachList" item="collectionAttach" index="index" open="" close="" separator=";">
+			UPDATE fin_colletcion_attach 
+				SET
+					COLLECTION_ID=#{collectionAttach.collectionId},
+				  	COLLECTION_BILL=#{collectionAttach.collectionBill},
+				  	COLLECTION_DATE=#{collectionAttach.collectionDate},
+				  	CREATE_BY=#{collectionAttach.createBy},
+				  	CREATE_DATE=#{collectionAttach.createDate},
+				  	UPDATE_BY=#{collectionAttach.updateBy},
+				  	UPDATE_DATE=#{collectionAttach.updateDate},
+				  	IS_SEND=#{collectionAttach.isSend}
+			WHERE ID = #{collectionAttach.id}
+		</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_colletcion_attach(
+			  	COLLECTION_ID,
+			  	COLLECTION_BILL,
+			  	COLLECTION_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_SEND
+			) 
+			VALUES (
+			  	#{collectionId},
+			  	#{collectionBill},
+			  	#{collectionDate},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isSend}
+			)
+	</insert>
+	
+	<insert id="insertAll">
+		INSERT INTO fin_colletcion_attach(
+			  	COLLECTION_ID,
+			  	COLLECTION_BILL,
+			  	COLLECTION_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_SEND
+			) 
+			VALUES
+		<foreach item="collectionAttach" index="index" collection="list" separator=",">  
+			 (
+			  	#{collectionAttach.collectionId},
+			  	#{collectionAttach.collectionBill},
+			  	#{collectionAttach.collectionDate},
+			  	#{collectionAttach.createBy},
+			  	#{collectionAttach.createDate},
+			  	#{collectionAttach.updateBy},
+			  	#{collectionAttach.updateDate},
+			  	#{collectionAttach.isSend}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_colletcion_attach WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByCollectionId">
+		DELETE FROM fin_colletcion_attach WHERE collection_id = #{id}
+	</delete>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM fin_colletcion_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="findByStatistics" resultMap="finCollectionAttachResult">
+		SELECT 
+			attach.id,
+			attach.collection_id,
+			collection.collection_type,
+			project.name,
+			collection.project_id,
+			attach.collection_bill
+		FROM fin_colletcion_attach AS attach
+		JOIN fin_collection AS collection ON collection.id = attach.collection_id
+		JOIN sale_project_manage AS project ON collection.project_id = project.id
+		<where>
+			collection.status != 6
+			<if test="projectId != null and projectId != ''">
+				AND collection.project_id = #{projectId}
+			</if>
+			<if test="userId !=null and userId != ''">
+				AND collection.user_id = #{userId}
+			</if>
+			<if test="costProperty != null and costProperty != ''">
+				AND collection.collection_type = #{costProperty}
+			</if>
+			<if test="payCompany != null and payCompany != ''">
+				AND collection.title = #{payCompany}
+			</if>
+			<if test="beginDate != null and beginDate != ''">
+				AND attach.collection_date &gt;= #{beginDate}
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND attach.collection_date &lt;= #{endDate}
+			</if>
+		</where>
+	</select>
+
+	<select id="findCollectionByIdList" resultMap="singleDetail">
+		SELECT 
+			sysuser.name AS name,
+			project.NAME AS projectName,
+			attach.collection_date AS date,
+			attach.collection_bill AS ACTUAL_PAY_MONEY,
+			collection.PROCESS_INSTANCE_ID AS processInstanceId,
+			collection.reason AS PURPOSE
+		FROM fin_colletcion_attach AS attach
+		JOIN fin_collection AS collection ON attach.collection_id = collection.id
+		JOIN sys_user AS sysuser ON collection.USER_ID = sysuser.id 
+		JOIN sale_project_manage AS project ON project.ID = collection.project_id
+		WHERE attach.id IN
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+</mapper>

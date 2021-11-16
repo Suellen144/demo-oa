@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdWorkBuinsessAttachDao">
+	
+	<resultMap id="adWorkBuinsessAttachResult" type="adWorkBuinsessAttach">
+		<id property="id" column="id" />
+		<result property="workBusinessId" column="work_business_id" />
+		<result property="responsibleUserId" column="responsible_user_id" />
+		<result property="responsibleUserName" column="responsible_user_name" />
+		<result property="workDate" column="work_date" />
+		<result property="workTime" column="work_time" />
+		<result property="payDate" column="pay_date" />
+		<result property="content" column="content" />
+		<result property="remark" column="remark" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<association property="principal" column="responsible_user_id" javaType="sysUser" select="findUserByUserid" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="adWorkBuinsessAttachResult">
+		SELECT * FROM ad_work_business_attach
+	</select>
+	
+	<select id="findById" resultMap="adWorkBuinsessAttachResult">
+		SELECT * FROM ad_work_business_attach WHERE ID = #{id}
+	</select> 
+	
+	<select id="findUserByUserId" resultType="sysUser">
+			SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	
+	<update id="update">
+		UPDATE ad_work_business_attach 
+			SET
+			  	WORK_BUSINESS_ID=#{workBusinessId},
+			  	RESPONSIBLE_USER_ID=#{responsibleUserId},
+			  	RESPONSIBLE_USER_NAME=#{responsibleUserName},
+			  	WORK_DATE=#{workDate},
+			  	WORK_TIME=#{workTime},
+			  	PAY_DATE=#{payDate},
+			  	CONTENT=#{content},
+			  	REMARK=#{remark},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+ 	
+	<update id="batchUpdate">
+		<foreach collection="buinsessAttachsList" item="buinsessAttach" index="index" open="" close="" separator=";">
+			UPDATE ad_work_business_attach 
+				SET
+				  	WORK_BUSINESS_ID=#{buinsessAttach.workReportId},
+				  	RESPONSIBLE_USER_ID=#{buinsessAttach.responsibleUserId},
+				  	RESPONSIBLE_USER_NAME=#{buinsessAttach.responsibleUserName},
+				  	WORK_DATE=#{buinsessAttach.workDate},
+				  	WORK_TIME=#{buinsessAttach.workTime},
+				  	PAY_DATE=#{buinsessAttach.payDate},
+				  	CONTENT=#{buinsessAttach.content},
+				  	REMARK=#{buinsessAttach.remark},
+				  	CREATE_BY=#{buinsessAttach.createBy},
+				  	CREATE_DATE=#{buinsessAttach.createDate},
+				  	UPDATE_BY=#{buinsessAttach.updateBy},
+				  	UPDATE_DATE=#{buinsessAttach.updateDate}
+			WHERE ID = #{buinsessAttach.id}
+		</foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_work_business_attach(
+			  	WORK_BUSINESS_ID,
+			  	RESPONSIBLE_USER_ID,
+			  	RESPONSIBLE_USER_NAME,
+			  	WORK_DATE,
+			  	WORK_TIME,
+			  	PAY_DATE,
+			  	CONTENT,
+			  	REMARK,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{workBusinessId},
+			  	#{responsibleUserId},
+			  	#{responsibleUserName},
+			  	#{workDate},
+			  	#{workTime},
+			  	#{payDate},
+			  	#{content},
+			  	#{remark},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO ad_work_business_attach(
+			 	WORK_BUSINESS_ID,
+			  	RESPONSIBLE_USER_ID,
+			  	RESPONSIBLE_USER_NAME,
+			  	WORK_DATE,
+			  	WORK_TIME,
+			  	PAY_DATE,
+			  	CONTENT,
+			  	REMARK,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES 
+		<foreach item="buinsessAttach" index="index" collection="list" separator=",">  
+			 (
+			  	#{buinsessAttach.workBusinessId},
+			  	#{buinsessAttach.responsibleUserId},
+			  	#{buinsessAttach.responsibleUserName},
+			  	#{buinsessAttach.workDate},
+			  	#{buinsessAttach.workTime},
+			  	#{buinsessAttach.payDate},
+			  	#{buinsessAttach.content},
+			  	#{buinsessAttach.remark},
+			  	#{buinsessAttach.createBy},
+			  	#{buinsessAttach.createDate},
+			  	#{buinsessAttach.updateBy},
+			 	#{buinsessAttach.updateDate}
+			) 
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_work_business_attach WHERE ID = #{id}
+	</delete>
+	
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_work_business_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

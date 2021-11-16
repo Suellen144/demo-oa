@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinTravelReimbursHistoryDao">
+	
+	<resultMap id="finTravelReimbursHistoryResult" type="finTravelReimbursHistory">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="type" column="type" />
+		<result property="value" column="value" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<select id="findAll" resultMap="finTravelReimbursHistoryResult">
+		SELECT * FROM fin_travelreimburs_history
+	</select>
+	
+	<select id="findById" resultMap="finTravelReimbursHistoryResult">
+		SELECT * FROM fin_travelreimburs_history WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByUserId" resultMap="finTravelReimbursHistoryResult">
+		SELECT * FROM fin_travelreimburs_history WHERE USER_ID = #{userId}
+	</select>
+	
+	
+	<select id="findByUserIdAndType" resultMap="finTravelReimbursHistoryResult">
+	SELECT history.*
+		FROM fin_travelreimburs_history history
+		<!-- WHERE NOT EXISTS(SELECT 1
+		                 FROM fin_travelreimburs_history 
+		                 WHERE TYPE = history.TYPE AND USER_ID = history.USER_ID
+		                       AND history.update_date &lt; update_date) 
+		            	 -->
+		     WHERE history.user_id = #{userId} AND history.TYPE=#{type}
+		ORDER BY create_date DESC;
+	</select>
+	
+	<select id="findByCondition" resultMap="finTravelReimbursHistoryResult">
+		SELECT * FROM fin_travelreimburs_history 
+			WHERE USER_ID = #{userId}
+			AND `TYPE` = #{type}
+			AND `VALUE` = #{value}
+			ORDER BY update_date DESC
+	</select>
+	
+	<update id="update">
+		UPDATE fin_travelreimburs_history 
+			SET
+			  	USER_ID=#{userId},
+			  	TYPE=#{type},
+			  	VALUE=#{value},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_travelreimburs_history(
+			  	USER_ID,
+			  	TYPE,
+			  	VALUE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE
+			) 
+			VALUES (
+			  	#{userId},
+			  	#{type},
+			  	#{value},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_travelreimburs_history WHERE ID = #{id}
+	</delete>
+	
+</mapper>

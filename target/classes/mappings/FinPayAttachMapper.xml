@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IFinPayAttachDao">
+	
+	<resultMap id="finPayAttachResult" type="finPayAttach">
+		<id property="id" column="id" />
+		<result property="payId" column="pay_id" />
+		<result property="payBill" column="pay_bill" />
+		<result property="payDate" column="pay_date" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="isSend" column="is_send" />
+		<association property="projectManage" column="project_id" javaType="saleProjectManage" select="findProjectById" />
+		<collection property="finPay" column="pay_id" javaType="FinPay" select="findPay"/>
+	</resultMap>
+
+	<resultMap id="finPayResult" type="finPay">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="process_instance_id" />
+		<result property="status" column="status" />
+		<result property="title" column="title" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="applyTime" column="apply_time" />
+		<result property="barginId" column="bargin_id" />
+		<result property="projectId" column="project_id" />
+		<result property="totalPay" column="total_pay" />
+		<result property="applyPay" column="apply_pay" />
+		<result property="applyProportion" column="apply_proportion" />
+		<result property="payCompany" column="pay_company" />
+		<result property="isInvoiced" column="is_invoiced" />
+		<result property="invoicedId" column="invoiced_id" />
+		<result property="bill" column="bill" />
+		<result property="billDate" column="bill_date" />
+		<result property="coollection" column="coollection" />
+		<result property="payType" column="pay_type" />
+		<result property="reason" column="reason" />
+		<result property="isSend" column="is_send" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="emailUid" column="email_uid" />
+		<result property="attachName" column="ATTACH_NAME" />
+		<result property="attachments" column="ATTACHMENTS" />
+	</resultMap>
+	
+	<resultMap id="singleDetail" type="com.reyzar.oa.domain.SingleDetail">
+		<id property="id" column="id" />
+		<result property="processInstanceId" column="processInstanceId"/>
+		<result property="userName" column="name"/>
+		<result property="date" column="ACTUAL_PAY_DATE"/>
+		<result property="projectName" column="projectName"/>
+		<result property="reason" column="PURPOSE"/>
+		<result property="money" column="ACTUAL_PAY_MONEY"/>
+		<result property="payMoney" column="PAY_MONEY"/>
+		<result property="payDate" column="PAY_DATE"/>
+	</resultMap>
+
+	<!--联合查询开始-->
+		<select id="findPay" resultMap="finPayResult">
+			SELECT * FROM fin_pay WHERE ID =#{pay_id}
+		</select>
+		<select id="findProjectById" resultType="saleProjectManage">
+			SELECT * FROM sale_project_manage WHERE ID = #{id} AND (is_deleted is null or is_deleted = '0' )
+		</select>
+	<!--联合查询结束-->
+	<select id="findAll" resultMap="finPayAttachResult">
+		SELECT * FROM fin_pay_attach
+	</select>
+	
+	<select id="findById" resultMap="finPayAttachResult">
+		SELECT * FROM fin_pay_attach WHERE ID = #{id}
+	</select> 
+	
+	<select id="findByPayId" resultMap="finPayAttachResult">
+		SELECT * FROM fin_pay_attach WHERE pay_id = #{id}
+	</select> 
+	
+	
+	<update id="update">
+		UPDATE fin_pay_attach 
+			SET
+			  	PAY_ID=#{payId},
+			  	PAY_BILL=#{payBill},
+			  	PAY_DATE=#{payDate},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	IS_SEND=#{isSend}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="payAttachList" item="payAttach" index="index" open="" close="" separator=";">
+			UPDATE fin_pay_attach 
+				SET
+					PAY_ID=#{payAttach.payId},
+				  	PAY_BILL=#{payAttach.payBill},
+				  	PAY_DATE=#{payAttach.payDate},
+				  	CREATE_BY=#{payAttach.createBy},
+				  	CREATE_DATE=#{payAttach.createDate},
+				  	UPDATE_BY=#{payAttach.updateBy},
+				  	UPDATE_DATE=#{payAttach.updateDate},
+				  	IS_SEND=#{payAttach.isSend}
+			WHERE ID = #{payAttach.id}
+		</foreach>
+	</update>
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO fin_pay_attach(
+			  	PAY_ID,
+			  	PAY_BILL,
+			  	PAY_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_SEND
+			) 
+			VALUES (
+			  	#{payId},
+			  	#{payBill},
+			  	#{payDate},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{isSend}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO fin_pay_attach(
+			  	PAY_ID,
+			  	PAY_BILL,
+			  	PAY_DATE,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	IS_SEND
+			) 
+			VALUES
+		<foreach item="payAttach" index="index" collection="list" separator=",">  
+			 (
+			  	#{payAttach.payId},
+			  	#{payAttach.payBill},
+			  	#{payAttach.payDate},
+			  	#{payAttach.createBy},
+			  	#{payAttach.createDate},
+			  	#{payAttach.updateBy},
+			  	#{payAttach.updateDate},
+			  	#{payAttach.isSend}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById">
+		DELETE FROM fin_pay_attach WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByPayId">
+		DELETE FROM fin_pay_attach WHERE pay_id = #{id}
+	</delete>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM fin_pay_attach WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="findByStatistics" resultMap="finPayAttachResult">
+		SELECT attach.id,attach.pay_id,pay.pay_type,project.name,pay.project_id,
+		attach.pay_bill
+		FROM fin_pay_attach AS attach
+		JOIN fin_pay AS pay ON pay.id = attach.pay_id
+		JOIN sale_project_manage AS project ON pay.project_id = project.id
+		<where>
+			pay.status=5
+			<if test="projectId != null and projectId != ''">
+				AND pay.project_id = #{projectId}
+			</if>
+			<if test="userId !=null and userId != ''">
+				AND pay.user_id = #{userId}
+			</if>
+			<if test="costProperty != null and costProperty != ''">
+				AND pay.pay_type = #{costProperty}
+			</if>
+			<if test="payCompany != null and payCompany != ''">
+				AND pay.title = #{payCompany}
+			</if>
+			<if test="beginDate != null and beginDate != ''">
+				AND attach.pay_date &gt;= #{beginDate}
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND attach.pay_date &lt;= #{endDate}
+			</if>
+		</where>
+	</select>
+
+	<select id="findPayByIdList" resultMap="singleDetail">
+		SELECT sysuser.name AS name,attach.pay_date AS date,attach.pay_bill AS ACTUAL_PAY_MONEY,pay.reason AS PURPOSE
+		FROM fin_pay_attach AS attach
+		JOIN fin_pay AS pay ON attach.pay_id = pay.id
+		JOIN sys_user AS sysuser ON pay.USER_ID=sysuser.id WHERE attach.id IN
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="findPayByProjectId" resultMap="singleDetail">
+		SELECT pay.PROCESS_INSTANCE_ID AS processInstanceId ,project.NAME AS projectName,sysuser.name AS name,pay.create_date AS create_date,
+			pay.PURPOSE AS PURPOSE,pay.ACTUAL_PAY_MONEY AS ACTUAL_PAY_MONEY,pay.ACTUAL_PAY_DATE AS ACTUAL_PAY_DATE,payAttach.pay_Bill AS PAY_MONEY,payAttach.pay_Date AS PAY_DATE FROM fin_pay AS pay
+			JOIN sys_user AS sysuser ON pay.USER_ID=sysuser.id 
+			JOIN sale_project_manage AS project ON pay.PROJECT_MANAGE_ID = project.ID
+			LEFT JOIN fin_pay_attach as payAttach ON pay.id = payAttach.pay_id
+			WHERE pay.id IN 
+			(SELECT pay.ID FROM fin_pay pay 
+			LEFT JOIN fin_pay_attach as payAttach ON pay.id = payAttach.pay_id
+			WHERE pay.STATUS = '5' AND pay.REIMBURSE_TYPE != '32' AND PROJECT_MANAGE_ID = #{projectId});
+	</select>
+</mapper>

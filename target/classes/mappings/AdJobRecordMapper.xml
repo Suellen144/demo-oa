@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdJobRecordDao">
+	
+	<resultMap id="adJobRecordResult" type="com.reyzar.oa.domain.AdJobRecord">
+		<id property="id" column="id" />
+		<result property="recordId" column="record_id" />
+		<result property="beginDate" column="begin_date" />
+		<result property="endDate" column="end_Date" />
+		<result property="company" column="school" />
+		<result property="station" column="department" />
+		<result property="duty" column="major" />
+	</resultMap>
+
+	<select id="findByRecordId" resultMap="adJobRecordResult">
+		SELECT * FROM ad_job_record WHERE record_id = #{recordId} order by begin_date desc
+	</select> 
+	
+	
+	<update id="update">
+		UPDATE ad_job_record 
+			SET
+			  	RECORD_ID=#{recordId},
+			  	BEGIN_DATE=#{beginDate},
+			  	END_DATE=#{endDate},
+			  	COMPANY=#{company},
+			  	STATION=#{station},
+			  	DUTY=#{duty},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate}
+		WHERE ID = #{id}
+	</update>
+	
+	
+	<update id="batchUpdate">
+		<foreach collection="jobRecordList" item="jobRecord" index="index" open="" close="" separator=";">
+			UPDATE ad_job_record 
+				SET
+					RECORD_ID=#{jobRecord.recordId},
+			  		BEGIN_DATE=#{jobRecord.beginDate},
+			  		END_DATE=#{jobRecord.endDate},
+			  		COMPANY=#{jobRecord.company},
+			  		STATION=#{jobRecord.station},
+			  		DUTY=#{jobRecord.duty},
+			  		CREATE_BY=#{jobRecord.createBy},
+			  		CREATE_DATE=#{jobRecord.createDate},
+			  		UPDATE_BY=#{jobRecord.updateBy},
+			  		UPDATE_DATE=#{jobRecord.updateDate}
+			WHERE ID = #{jobRecord.id}
+		</foreach>
+	</update>
+	
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_job_record(
+			  		RECORD_ID,
+			  		BEGIN_DATE,
+			  		END_DATE,
+			  		COMPANY,
+			  		STATION,
+			  		DUTY,
+			  		CREATE_BY,
+			  		CREATE_DATE,
+			  		UPDATE_BY,
+			  		UPDATE_DATE
+			) 
+			VALUES (
+			  	#{recordId},
+			  	#{beginDate},
+			  	#{endDate},
+			  	#{company},
+			  	#{station},
+			  	#{duty},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate}
+			)
+	</insert>
+	
+	
+	<insert id="insertAll">
+		INSERT INTO ad_job_record(
+			  		RECORD_ID,
+			  		BEGIN_DATE,
+			  		END_DATE,
+			  		COMPANY,
+			  		STATION,
+			  		DUTY,
+			  		CREATE_BY,
+			  		CREATE_DATE,
+			  		UPDATE_BY,
+			  		UPDATE_DATE
+			) 
+			VALUES
+		<foreach item="jobRecord" index="index" collection="list" separator=",">  
+			 (
+			  		#{jobRecord.recordId},
+			  		#{jobRecord.beginDate},
+			  		#{jobRecord.endDate},
+			  		#{jobRecord.company},
+			  		#{jobRecord.station},
+			  		#{jobRecord.duty},
+			  		#{jobRecord.createBy},
+			  		#{jobRecord.createDate},
+			  		#{jobRecord.updateBy},
+			  		#{jobRecord.updateDate}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByIdList">
+		DELETE FROM ad_job_record WHERE ID in
+		<foreach item="id" index="index" collection="list" open="(" close=")"  separator=",">  
+			#{id}
+		</foreach>
+	</delete>
+	
+</mapper>

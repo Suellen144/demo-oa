@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.dao.IAdMeetingDao">
+	
+	<resultMap id="adMeetingResult" type="adMeeting">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="deptId" column="dept_id" />
+		<result property="number" column="number" />
+		<result property="applyTime" column="apply_time" />
+		<result property="presenters" column="presenters" />
+		<result property="participant" column="participant" />
+		<result property="theme" column="theme" />
+		<result property="comment" column="comment" />
+		<result property="userids" column="userids" />
+		<result property="status" column="status" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		
+		<association property="applicant" column="user_id" javaType="sysUser" select="findUserByUserId" />
+	</resultMap>
+	
+	<resultMap id="sysUserResult" type="sysUser">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="nickname" column="nickname" />
+		<result property="account" column="account" />
+		<result property="password" column="password" />
+		<result property="deptId" column="dept_id" />
+		<result property="telphone" column="telphone" />
+		<result property="mobilephone" column="mobilephone" />
+		<result property="email" column="email" />
+		<result property="qq" column="qq" />
+		<result property="photo" column="photo" />
+		<result property="inJob" column="in_job" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="remark" column="remark" />
+		<result property="isDeleted" column="is_deleted" />
+		<result property="readNoticeDate" column="READ_NOTICE_DATE" />
+		
+		<association property="dept" column="dept_id" javaType="sysDept" select="findDeptByDeptId" /> 
+	</resultMap>
+	
+	<select id="findAll" resultMap="adMeetingResult">
+		SELECT * FROM ad_meeting
+	</select>
+	
+	<select id="findById" resultMap="adMeetingResult">
+		SELECT * FROM ad_meeting WHERE ID = #{id}
+	</select>
+
+	<select id="findByDeptId" resultMap="adMeetingResult">
+		SELECT * FROM ad_meeting WHERE DEPT_ID=#{id}
+	</select>
+	
+	<select id="findByPage" parameterType="java.util.Map" resultMap="adMeetingResult">
+		SELECT `meeting`.* FROM ad_meeting `meeting`
+		WHERE 1 = 1 
+			<if test="!seeall">
+			AND (
+				CONCAT(',', `userids`, ',') REGEXP CONCAT(',(',REPLACE(#{userIdList},',','|'),'),')
+				AND `meeting`.STATUS = 1
+<!-- 				OR (userids = '' OR userids IS NULL) -->
+				OR `meeting`.USER_ID = #{userId}
+			)
+			</if>
+			<if test="seeall">
+				AND `meeting`.STATUS = 1
+				OR `meeting`.USER_ID = #{userId}
+			</if>
+		<if test="fuzzyContent != null and fuzzyContent != ''.toString()">
+				AND `meeting`.`number` LIKE CONCAT('%',#{fuzzyContent},'%')
+				OR `meeting`.`theme` LIKE CONCAT('%',#{fuzzyContent},'%')
+		</if>
+		ORDER BY `meeting`.ID DESC
+	</select>
+	
+	<update id="update">
+		UPDATE ad_meeting 
+			SET
+			  	USER_ID=#{userId},
+			  	DEPT_ID=#{deptId},
+			  	number=#{number},
+			  	APPLY_TIME=#{applyTime},
+			  	PRESENTERS=#{presenters},
+			  	PARTICIPANT=#{participant},
+			  	THEME=#{theme},
+			  	COMMENT=#{comment},
+			  	USERIDS=#{userids},
+			  	CREATE_BY=#{createBy},
+			  	CREATE_DATE=#{createDate},
+			  	UPDATE_BY=#{updateBy},
+			  	UPDATE_DATE=#{updateDate},
+			  	STATUS=#{status}
+		WHERE ID = #{id}
+	</update>
+
+	<update id="updateList">
+	  <foreach collection="list" item="adMeet" index="index" open="" close="" separator=";">
+		  UPDATE ad_meeting
+		  SET
+		  USER_ID=#{adMeet.userId},
+		  DEPT_ID=#{adMeet.deptId},
+		  number=#{adMeet.number},
+		  APPLY_TIME=#{adMeet.applyTime},
+		  PRESENTERS=#{adMeet.presenters},
+		  PARTICIPANT=#{adMeet.participant},
+		  THEME=#{adMeet.theme},
+		  COMMENT=#{adMeet.comment},
+		  USERIDS=#{adMeet.userids},
+		  CREATE_BY=#{adMeet.createBy},
+		  CREATE_DATE=#{adMeet.createDate},
+		  UPDATE_BY=#{adMeet.updateBy},
+		  UPDATE_DATE=#{adMeet.updateDate},
+		  STATUS=#{adMeet.status}
+		  WHERE ID = #{adMeet.id}
+	  </foreach>
+	</update>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ad_meeting(
+			  	USER_ID,
+			  	DEPT_ID,
+			  	NUMBER,
+			  	APPLY_TIME,
+			  	PRESENTERS,
+			  	PARTICIPANT,
+			  	THEME,
+			  	COMMENT,
+			  	USERIDS,
+			  	CREATE_BY,
+			  	CREATE_DATE,
+			  	UPDATE_BY,
+			  	UPDATE_DATE,
+			  	STATUS
+			) 
+			VALUES (
+			  	#{userId},
+			  	#{deptId},
+			  	#{number},
+			  	#{applyTime},
+			  	#{presenters},
+			  	#{participant},
+			  	#{theme},
+			  	#{comment},
+			  	#{userids},
+			  	#{createBy},
+			  	#{createDate},
+			  	#{updateBy},
+			  	#{updateDate},
+			  	#{status}
+			)
+	</insert>
+	<!-- 关联搜索START -->
+	<select id="findUserByUserId" resultMap="sysUserResult">
+		SELECT * FROM sys_user WHERE ID = #{id}
+	</select>
+	<select id="findDeptByDeptId" resultType="sysDept">
+		SELECT * FROM sys_dept WHERE `ID` = #{id}
+	</select>
+	<!-- 关联搜索END -->
+	
+	
+	<select id="getMaxnumber" resultType="java.lang.String">
+		SELECT MAX(NUMBER) FROM ad_meeting
+	</select>
+	
+	<delete id="deleteById">
+		DELETE FROM ad_meeting WHERE ID = #{id}
+	</delete>
+	
+</mapper>

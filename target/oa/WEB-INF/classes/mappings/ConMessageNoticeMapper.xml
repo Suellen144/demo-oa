@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reyzar.oa.common.msgsys.dao.IConMessageNoticeDao">
+	
+	<resultMap id="conMessageNoticeResult" type="conMessageNoticeEntity">
+		<id property="id" column="id" />
+		<result property="initiator" column="initiator" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="pushCount" column="push_count" />
+		<result property="pushTarget" column="push_target" />
+		<result property="users" column="users" />
+		<result property="depts" column="depts" />
+		<result property="pushType" column="push_type" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="forwardUrl" column="forward_url" />
+		<result property="isEnd" column="is_end" />
+		<result property="relId" column="rel_id" />
+		<result property="noticeType" column="notice_type" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+	
+	<select id="findNotEnd" resultMap="conMessageNoticeResult">
+		<![CDATA[
+			SELECT * FROM common_message_notice cmn
+				WHERE cmn.`IS_END` = '0' 
+					AND NOW() >= cmn.`START_TIME`
+					AND NOW() <= cmn.`END_TIME`
+					AND cmn.`PUSH_COUNT` != 0
+		]]>
+	</select>
+	
+	<select id="findByRelId" resultMap="conMessageNoticeResult">
+		SELECT * FROM common_message_notice WHERE `REL_ID` = #{relId}
+	</select>
+	
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `common_message_notice` (
+			`ID`, `INITIATOR`, `START_TIME`, `END_TIME`, `PUSH_COUNT`, `PUSH_TARGET`, 
+			`USERS`, `DEPTS`, `PUSH_TYPE`, `TITLE`, `CONTENT`, `FORWARD_URL`, `IS_END`, 
+			`REL_ID`, `NOTICE_TYPE`, `CREATE_BY`, `CREATE_DATE`, `UPDATE_BY`, `UPDATE_DATE`
+		) VALUES (
+			#{id}, #{initiator}, #{startTime}, #{endTime}, #{pushCount}, #{pushTarget}, 
+			#{users}, #{depts}, #{pushType}, #{title}, #{content}, #{forwardUrl}, 
+			#{isEnd}, #{relId}, #{noticeType}, #{createBy}, #{createDate}, #{updateBy}, #{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE `common_message_notice` 
+		SET
+		  `INITIATOR` = #{initiator},
+		  `START_TIME` = #{startTime},
+		  `END_TIME` = #{endTime},
+		  `PUSH_COUNT` = #{pushCount},
+		  `PUSH_TARGET` = #{pushTarget},
+		  `USERS` = #{users},
+		  `DEPTS` = #{depts},
+		  `PUSH_TYPE` = #{pushType},
+		  `TITLE` = #{title},
+		  `CONTENT` = #{content},
+		  `FORWARD_URL` = #{forwardUrl},
+		  `IS_END` = #{isEnd},
+		  `REL_ID` = #{relId},
+		  `NOTICE_TYPE` = #{noticeType},
+		  `CREATE_BY` = #{createBy},
+		  `CREATE_DATE` = #{createDate},
+		  `UPDATE_BY` = #{updateBy},
+		  `UPDATE_DATE` = #{updateDate} 
+		WHERE `ID` = #{id}
+	</update>
+</mapper>
